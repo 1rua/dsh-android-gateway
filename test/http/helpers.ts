@@ -205,6 +205,10 @@ export type CoreOperation =
   | "negotiate"
   | "passwordLogin"
   | "refresh"
+  | "inviteChallenge"
+  | "inviteExchange"
+  | "deviceChallenge"
+  | "deviceLogin"
   | "logout"
   | "handle"
   | "uploadAttachmentContent";
@@ -241,6 +245,22 @@ export class FakeCore implements GatewayCore {
 
   async refresh(request: RawGatewayRequest): Promise<GatewayResult> {
     return this.run("refresh", request);
+  }
+
+  async inviteChallenge(request: RawGatewayRequest): Promise<GatewayResult> {
+    return this.run("inviteChallenge", request);
+  }
+
+  async inviteExchange(request: RawGatewayRequest): Promise<GatewayResult> {
+    return this.run("inviteExchange", request);
+  }
+
+  async deviceChallenge(request: RawGatewayRequest): Promise<GatewayResult> {
+    return this.run("deviceChallenge", request);
+  }
+
+  async deviceLogin(request: RawGatewayRequest): Promise<GatewayResult> {
+    return this.run("deviceLogin", request);
   }
 
   async logout(request: VerifiedRequest): Promise<GatewayResult> {

@@ -374,7 +374,15 @@ const handlePreAuth = async (
       ? await context.core.negotiate(rawRequest)
       : route.operation === "password"
         ? await context.core.passwordLogin(rawRequest)
-        : await context.core.refresh(rawRequest);
+        : route.operation === "refresh"
+          ? await context.core.refresh(rawRequest)
+          : route.operation === "invite-challenge"
+            ? await context.core.inviteChallenge(rawRequest)
+            : route.operation === "invite-exchange"
+              ? await context.core.inviteExchange(rawRequest)
+              : route.operation === "device-challenge"
+                ? await context.core.deviceChallenge(rawRequest)
+                : await context.core.deviceLogin(rawRequest);
   // 预认证没有签名 requestId：保留启动时生成的 req_<随机 wire id>，
   // core 若给出 correlationId 则由信封逻辑覆盖 correlationId。
   sendSuccessResult(res, result, state.identity);

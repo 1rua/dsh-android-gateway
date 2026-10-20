@@ -5,7 +5,14 @@ import {
 } from "./headers.js";
 
 /** 认证前端点：这些路由永远不进入验签器（契约 §4/§5）。 */
-export type PreAuthOperation = "negotiate" | "password" | "refresh";
+export type PreAuthOperation =
+  | "negotiate"
+  | "password"
+  | "refresh"
+  | "invite-challenge"
+  | "invite-exchange"
+  | "device-challenge"
+  | "device-login";
 
 export type GatewayRoute =
   | { readonly kind: "pre-auth"; readonly operation: PreAuthOperation }
@@ -30,6 +37,12 @@ const PRE_AUTH_ROUTES: ReadonlyMap<string, PreAuthOperation> = new Map([
   ["POST /negotiate", "negotiate"],
   ["POST /sessions/password", "password"],
   ["POST /sessions/refresh", "refresh"],
+  ["POST /sessions/invite/challenge", "invite-challenge"],
+  ["POST /pairings/exchange", "invite-exchange"],
+  // 参考实现同时暴露的别名；App 当前使用 /pairings/exchange。
+  ["POST /sessions/invite/exchange", "invite-exchange"],
+  ["POST /sessions/device/challenge", "device-challenge"],
+  ["POST /sessions/device", "device-login"],
 ]);
 
 /** mountPath 只做首尾规范化；非法输入属于插件装配错误，直接抛出。 */

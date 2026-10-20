@@ -178,15 +178,15 @@ App POST .../generations/{id}/cancel → sessionController.cancel({ sessionId })
 | `messages: chat-v1` | 是 | 文本 + 附件消息 |
 | `attachments: staged-sha256-v1` | 是 | 三段式上传 |
 | `events: sse-cursor-v1` | 是 | SSE + 游标续传 |
-| `deviceRequests: risk-queue-v1` | 否（暂） | 设备请求队列后续实现 |
-| `agent-command-catalog-v1` | 是 | DSH 命令目录 |
+| `deviceRequests: risk-queue-v1` | 是 | 能力发布 + 请求队列 + claim/result + 两个工具 |
+| `agent-command-catalog-v1` | 是 | DSH 命令目录；`/permission` 等命令可执行 |
 | `generation-cancel-v1` | 是 | 停止生成 |
 | `newline-v1` | 是 | 文本换行语义 |
 | `conversation-management-v1` | 是（归档/重命名/删除墓碑） | 删除为网关墓碑 + 宿主归档，见 §11 |
-| `message-batches-v1` | 否 | App 自动降级为逐条发送 |
-| `conversation-mirror-v1` | 否 | |
-| `agent-approval-cards-v1` | 否 | |
-| `agent-command-new-v1` | 否 | App「新建对话」走基础端点 |
+| `message-batches-v1` | 是 | 1–20 成员，`newline-v1`，共享 generation |
+| `conversation-mirror-v1` | 否 | App 自动降级 |
+| `agent-approval-cards-v1` | 是 | once/deny + `POST /approvals/{id}/decisions` |
+| `agent-command-new-v1` | 是 | `/new` 新建 DSH 会话并回发命令结果 |
 
 ## 10. 错误与重试
 
@@ -199,13 +199,14 @@ App POST .../generations/{id}/cancel → sessionController.cancel({ sessionId })
 
 1. **会话删除**：DSH 没有公开的 Session 删除 API。v0.1 的删除 = 停止生成 + 宿主归档
    （尽力）+ 网关墓碑；DSH Web UI 仍可能在归档区看到该会话。后续可评估接入宿主删除能力。
-2. **历史媒体端点**：`metadata / cache-grant / content` 未实现，App 对历史附件会退化为
-   仅显示元数据；新发送的附件正常。
-3. **设备能力**：通知/短信/通话记录尚未接入，Agent 看不到 `open_android_*` 工具；
-   后续版本增加 DSH 工具与设备请求队列。
-4. **审批卡片**：未声明，危险命令只能在 DSH Web UI 审批。
-5. **WebSocket**：仅实现 SSE；App 会优先尝试 WS 并自动降级（契约允许）。
-6. **热重载**：插件热重载会丢失进程内的生成状态与旧 SSE 订阅；进行中的流式回复
+2. **会话镜像**：`conversation-mirror-v1` 未声明；App 自动降级为本地记账，不影响主流程。
+3. **设备能力参数校验**：Gateway 只复核发布 Schema 的 JCS 摘要与 JSON 形状；App 在
+   执行前仍按发布 Schema 再校验，双层校验避免把 App 的开放 Schema 塞进 DSH 工具子集。
+4. **审批档位**：DSH `approval/request` 只支持一次性决定，因此网关只下发
+   `once`/`deny`；`session`/`always` 在契约层拒绝（`APPROVAL_DECISION_INVALID`）。
+5. **WebSocket 与会话**：WS 与 SSE 共用账号事件日志与游标；游标过期时 HTTP 410，
+   App 重建基线。平台生命周期流仍走 SSE，会话主事件流优先 WS。
+6. **热重载**：插件热重载会丢失进程内的生成状态与旧事件订阅；进行中的流式回复
    不会继续推送，App 重启后从 DSH 历史恢复。
 
 ## 12. 验证计划
@@ -218,3 +219,14 @@ App POST .../generations/{id}/cancel → sessionController.cancel({ sessionId })
 4. DSH 实机：安装 Bundle → 用真实 core hash 协商 → 登录 → 发送一条消息并观察 DSH
    Agent 真实回复 → SSE 收到增量与完成；
 5. Android：如环境有模拟器/真机，安装现有 APK 连接本机 DSH 验证；否则如实记录未验证。
+
+v0.2 补充验证（2026-10-21）：
+
+- 协商：7 项会话 UI 能力、4 种认证、`maxBatchMembers/maxBatchBytes` 全部出现在响应；
+- 消息批次：App 以单成员批次发送，`2026-10-21` 实机确认收到 `accepted` 与 Agent 回复；
+- `/new`：App 发送后切换到新会话，旧会话保留命令消息；
+- 斜杠命令：`/permission read-only` 由宿主执行，App 时间线出现 `preset read-only`；
+- 审批卡片：只读沙箱写文件触发提权，App 显示卡片与倒计时；决策端点由自动化覆盖；
+- WebSocket：宿主机探测 101 升级；App 日志 `viaWs=true` 且状态「已连接」；
+- 设备工具：模型调用 `open_android_capabilities` 并渲染 `available=false`；
+- 邀请/设备密钥：真实 HTTP challenge/exchange 均成功（见审查报告）。

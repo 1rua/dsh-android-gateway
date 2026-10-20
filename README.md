@@ -26,7 +26,16 @@ Hermes / OpenClaw 同级的「又一个 Agent 宿主」。
 | 附件三段式上传（加密暂存、Digest 校验、TTL） | ✅ |
 | 会话组织（文件夹 / 排序 / 分配，`conversation-management-v1`） | ✅ |
 | 基线快照 `GET /sync/snapshot` | ✅ |
-| 消息批次、会话镜像、审批卡片、设备能力（通知/短信/通话） | ❌ 未声明，App 自动降级 |
+| 消息批次（1–20 条、`newline-v1`、聚合输入） | ✅ |
+| `/new` 命令（新建会话 + `conversation.command.result`） | ✅ |
+| 斜杠命令执行（`/permission`、`/compact` 等宿主人机命令） | ✅ |
+| 审批卡片（`agent-approval-cards-v1`，一次/拒绝） | ✅ |
+| WebSocket 事件传输（`/events/ws`，先重放后实时） | ✅ |
+| 邀请配对（一次性短码 + `oai://pair` 深链） | ✅ |
+| 设备密钥登录（已配对设备免密换会话） | ✅ |
+| 设备能力请求（发布 / claim / result + 两个模型工具） | ✅ |
+| 历史媒体原件（`cache-grant` + `content`） | ✅ |
+| 会话镜像（`session-mirror-v1`） | ❌ 未声明，App 自动降级 |
 
 能力位只在真正实现时声明（契约 §4）。未声明的能力不会出现在协商结果里，App 会
 隐藏或降级对应 UI，而不是给用户一个点了没反应的按钮。
@@ -34,13 +43,14 @@ Hermes / OpenClaw 同级的「又一个 Agent 宿主」。
 ## 架构
 
 ```
-Android App ── HTTP/SSE ──▶ DSH Web 服务器（ctx.webServer，同一端口）
+Android App ── HTTP/SSE/WS ──▶ DSH Web 服务器（ctx.webServer，同一端口）
                               └─ /open-android-intelligence/v2/*
                                    └─ dsh-android-gateway
-                                        ├─ http/         路由、原始 header/body、信封、SSE
+                                        ├─ http/         路由、原始 header/body、信封、SSE、WebSocket
                                         ├─ auth/         签名验证、nonce、幂等
-                                        ├─ core/         协商/账号/会话/消息/附件/组织
-                                        ├─ dsh/          sessionController / commands / uploads
+                                        ├─ core/         协商/账号/会话/消息/批次/审批/附件/组织
+                                        ├─ devices/      能力发布、请求队列、claim/result、模型工具
+                                        ├─ dsh/          sessionController / commands / uploads / attachments
                                         └─ store/        每账号 SQLite（node:sqlite）
 ```
 
@@ -109,6 +119,13 @@ $DSH_HOME/dsh-android-gateway/setup-account.json   （权限 0600）
    显示未加密警告，这是契约允许的显式 HTTP 模式）。
 2. 用户名 / 密码填写 `setup-account.json` 或配置中的账号。
 3. 设备公钥由 App 生成并随登录注册；之后所有请求都用 Ed25519 签名。
+4. 已配对设备可使用「设备密钥登录」免密换新会话；新手机可用一次性邀请短码配对：
+
+   ```bash
+   node tools/admin.mjs invite create --account android --url http://127.0.0.1:43535
+   ```
+
+   把输出的短码或 `oai://pair?...` 深链交给 App（默认 300 秒、一次性）。
 
 DSH Web GUI 默认监听 `127.0.0.1`。若手机需要从局域网连接，请显式配置 DSH 的
 监听地址（DSH 侧配置，不在本仓库范围）。生产环境建议配置 HTTPS；本插件在协商中

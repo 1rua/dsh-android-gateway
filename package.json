@@ -1,6 +1,6 @@
 {
   "name": "dsh-android-gateway",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Open Android Intelligence Gateway Protocol v2.1 host plugin for DeepSeek Harness",
@@ -19,7 +19,9 @@
     "README.md",
     "LICENSE",
     "CHANGELOG.md",
-    "docs/"
+    "docs/",
+    "tools/admin.mjs",
+    "tools/smoke-client.mjs"
   ],
   "dsh": {
     "bundle": {

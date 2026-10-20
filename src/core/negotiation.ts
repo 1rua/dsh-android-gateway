@@ -12,14 +12,16 @@ export const SUPPORTED_DEVICE_REQUESTS = "risk-queue-v1";
 /** 本实现真实提供的对话面能力；未列出的能力绝不声明。 */
 export const SUPPORTED_CONVERSATION_UI = [
   "agent-command-catalog-v1",
+  "agent-command-new-v1",
+  "agent-approval-cards-v1",
+  "message-batches-v1",
   "newline-v1",
   "generation-cancel-v1",
-  "attachment-status-v1",
   "conversation-management-v1",
 ] as const;
 
-/** auth 方法：v0.1 只实现密码登录与刷新轮换。 */
-export const SUPPORTED_AUTH = ["password", "refresh"] as const;
+/** auth 方法：密码、刷新、邀请配对、设备密钥会话。 */
+export const SUPPORTED_AUTH = ["password", "refresh", "account-invitation", "device-key"] as const;
 
 const CONVERSATION_UI_CLOSED_SET = new Set([
   "agent-command-catalog-v1",
@@ -181,6 +183,9 @@ export class NegotiationManager {
         attachmentTtlSeconds: this.#options.limits.attachmentTtlSeconds,
         eventRetentionSeconds: this.#options.limits.eventRetentionSeconds,
         maxClockSkewSeconds: this.#options.limits.maxClockSkewSeconds,
+        // message-batches-v1：契约限定成员数与聚合字节上限。
+        maxBatchMembers: 20,
+        maxBatchBytes: 65_536,
       },
       gatewayIdentity: {
         deploymentId: this.#options.deploymentId(),

@@ -7,11 +7,13 @@ import canonicalize from "canonicalize";
 import { GatewayError } from "../shared/errors.js";
 import type { JsonObject, JsonValue, VerifiedRequest } from "../shared/types.js";
 import type { AccountManager } from "./accounts.js";
+import type { CapabilityInventoryEntry, CapabilityPublication, DeviceCapabilityServiceApi, PublishedCapabilityBinding } from "../devices/contract.js";
 import type { GatewayEventHub } from "./event-hub.js";
 
 export interface PairingServiceOptions {
   readonly accounts: AccountManager;
   readonly events: GatewayEventHub;
+  readonly devices?: DeviceCapabilityServiceApi;
   readonly logger?: { warn(message: string): void };
 }
 
@@ -101,10 +103,24 @@ export class PairingService {
     }
     const grantRevision = state.grantRevision + 1;
     this.#diagnostics(`accept revision=${grantRevision} digest=${grantDigest.slice(0, 20)}`);
+    const publication: CapabilityPublication = {
+      bindings: bindings as unknown as PublishedCapabilityBinding[],
+      inventory: (Array.isArray(inventory) ? inventory : []) as unknown as CapabilityInventoryEntry[],
+      grantRevision,
+      updatedAt: new Date().toISOString(),
+    };
+    // 先交给设备子系统做 Schema 摘要复核；失败则整个发布不生效。
+    this.#options.devices?.publish(verified.accountId, publication);
     this.#options.accounts.writePairingState(verified.accountId, {
       grantRevision,
       grantDigest,
       capabilityPublicationVersion: state.capabilityPublicationVersion,
+      capabilities: {
+        bindings: bindings as unknown[],
+        inventory: (Array.isArray(inventory) ? inventory : []) as unknown[],
+        updatedAt: publication.updatedAt,
+        deviceId: verified.deviceId,
+      },
     });
     try {
       await this.#options.events.publish(verified.accountId, {

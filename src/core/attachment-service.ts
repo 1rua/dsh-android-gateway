@@ -1,8 +1,10 @@
+import { randomBytes } from "node:crypto";
+
 import { GatewayError } from "../shared/errors.js";
 import { createWireId, nowIso } from "../shared/ids.js";
 import type { AttachmentRecord, AttachmentStatus, JsonObject, VerifiedRequest } from "../shared/types.js";
 import type { AttachmentUploadFile } from "../http/contract.js";
-import type { DshPromptPart } from "../dsh/types.js";
+import type { DshFileRef, DshImageRef, DshPromptPart } from "../dsh/types.js";
 import { validateGatewayValue } from "../protocol/index.js";
 import type { AccountStore } from "../store/contract.js";
 import type { AccountManager } from "./accounts.js";
@@ -38,9 +40,35 @@ interface CreateAttachmentBody {
  * 附件暂存：创建 → 上传字节 → 提交，以及发送消息时的宿主转交。
  * 公开状态只有 staged/uploaded/failed/expired（契约 §8）。
  */
+/** DSH 附件引用以 JSON 存在 `dsh_attachment_id` 列：图片/文件的完整引用都能回读。 */
+type StoredDshRef =
+  | { readonly kind: "image"; readonly ref: DshImageRef }
+  | { readonly kind: "file"; readonly ref: DshFileRef };
+
+const encodeDshRef = (value: StoredDshRef): string => JSON.stringify(value);
+
+const decodeDshRef = (value: string | null): StoredDshRef | undefined => {
+  if (value === null) return undefined;
+  try {
+    const parsed = JSON.parse(value) as StoredDshRef;
+    if (parsed.kind === "image" || parsed.kind === "file") return parsed;
+  } catch {
+    // 旧版本可能存过纯 attachmentId；无法回读时按不可用处理。
+  }
+  return undefined;
+};
+
+interface MediaGrant {
+  readonly accountId: string;
+  readonly conversationId: string;
+  readonly attachmentId: string;
+  readonly expiresAt: number;
+}
+
 export class AttachmentService {
   readonly #options: AttachmentServiceOptions;
   readonly #storages = new Map<string, AttachmentStorage>();
+  readonly #grants = new Map<string, MediaGrant>();
   readonly #now: () => number;
 
   constructor(options: AttachmentServiceOptions) {
@@ -204,8 +232,8 @@ export class AttachmentService {
         mediaType: record.mediaType,
         sizeBytes: record.sizeBytes,
         sha256: record.sha256,
-        remoteAvailable: false,
-        status: "expired",
+        remoteAvailable: decodeDshRef(record.dshAttachmentId) !== undefined,
+        status: decodeDshRef(record.dshAttachmentId) === undefined ? "expired" : "uploaded",
         estimatedLocalBytes: 0,
       },
     };
@@ -231,6 +259,18 @@ export class AttachmentService {
         throw new GatewayError("ATTACHMENT_DIGEST_MISMATCH", "Stored attachment bytes are corrupted");
       }
       if (IMAGE_TYPES.has(record.mediaType.toLowerCase())) {
+        // 先落到宿主附件库，历史媒体才能按引用回读。
+        const imageRef = await this.#options.bridge.saveImage(
+          bytes,
+          record.mediaType,
+          record.filename,
+        );
+        if (imageRef === undefined) {
+          throw new GatewayError("AGENT_MEDIA_REJECTED", "Host image storage is unavailable");
+        }
+        store.updateAttachment(attachmentId, {
+          dshAttachmentId: encodeDshRef({ kind: "image", ref: imageRef }),
+        });
         parts.push({
           type: "image",
           mediaType: record.mediaType,
@@ -248,12 +288,89 @@ export class AttachmentService {
         if (uploaded === undefined) {
           throw new GatewayError("ATTACHMENT_STORAGE_UNAVAILABLE", "Host file upload is unavailable");
         }
-        store.updateAttachment(attachmentId, { dshAttachmentId: uploaded.attachmentId });
+        store.updateAttachment(attachmentId, {
+          dshAttachmentId: encodeDshRef({
+            kind: "file",
+            ref: { attachmentId: uploaded.attachmentId, name: record.filename, bytes: record.sizeBytes },
+          }),
+        });
         parts.push({ type: "file", receiptId: uploaded.receiptId });
       }
       deliveredIds.push(attachmentId);
     }
     return { parts, deliveredIds };
+  }
+
+  /** 历史媒体短期授权（契约 §7 历史媒体节）。 */
+  cacheGrant(
+    verified: VerifiedRequest,
+    conversationId: string,
+    attachmentId: string,
+  ): JsonObject {
+    const store = this.#store(verified.accountId);
+    const conversation = store.getConversation(conversationId);
+    if (conversation === undefined || conversation.deleted) {
+      throw new GatewayError("CONVERSATION_NOT_FOUND", "Unknown conversation");
+    }
+    const record = store.getAttachment(attachmentId);
+    if (record === undefined || decodeDshRef(record.dshAttachmentId) === undefined) {
+      throw new GatewayError("ATTACHMENT_EXPIRED", "Attachment original is unavailable");
+    }
+    const grantId = randomBytes(32).toString("base64url");
+    const expiresAt = this.#now() + 60_000;
+    this.#grants.set(grantId, {
+      accountId: verified.accountId,
+      conversationId,
+      attachmentId,
+      expiresAt,
+    });
+    return { grantId, expiresAt: nowIso(new Date(expiresAt)) };
+  }
+
+  /** 历史媒体内容（JSON/Base64 旧外壳；App 兼容路径）。 */
+  async mediaContent(
+    verified: VerifiedRequest,
+    conversationId: string,
+    attachmentId: string,
+    grantId: string | null,
+  ): Promise<JsonObject> {
+    if (grantId === null) throw new GatewayError("SCHEMA_INVALID", "grantId is required");
+    const grant = this.#grants.get(grantId);
+    if (
+      grant === undefined ||
+      grant.expiresAt <= this.#now() ||
+      grant.accountId !== verified.accountId ||
+      grant.conversationId !== conversationId ||
+      grant.attachmentId !== attachmentId
+    ) {
+      throw new GatewayError("ATTACHMENT_EXPIRED", "Media grant is invalid or expired");
+    }
+    const store = this.#store(verified.accountId);
+    const record = store.getAttachment(attachmentId);
+    const stored = record === undefined ? undefined : decodeDshRef(record.dshAttachmentId);
+    if (record === undefined || stored === undefined) {
+      throw new GatewayError("ATTACHMENT_EXPIRED", "Attachment original is unavailable");
+    }
+    let bytes: Uint8Array;
+    if (stored.kind === "image") {
+      const data = await this.#options.bridge.readImage(stored.ref);
+      if (data === undefined) throw new GatewayError("ATTACHMENT_EXPIRED", "Attachment original is unavailable");
+      bytes = data;
+    } else {
+      const chunks: Buffer[] = [];
+      try {
+        for await (const chunk of this.#options.bridge.readFile(stored.ref)) {
+          chunks.push(Buffer.from(chunk));
+        }
+      } catch {
+        throw new GatewayError("ATTACHMENT_EXPIRED", "Attachment original is unavailable");
+      }
+      bytes = Buffer.concat(chunks);
+    }
+    return {
+      contentBase64: Buffer.from(bytes).toString("base64"),
+      mediaType: record.mediaType,
+    };
   }
 
   /** 宿主确认接收后删除暂存字节（契约 §8：保留无正文终态）。 */

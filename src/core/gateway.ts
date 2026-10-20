@@ -14,6 +14,8 @@ import type { ConversationService } from "./conversation-service.js";
 import type { GatewayEventHub } from "./event-hub.js";
 import type { NegotiationManager } from "./negotiation.js";
 import type { PairingService } from "./pairing-service.js";
+import type { ApprovalService } from "./approval-service.js";
+import type { DeviceCapabilityServiceApi } from "../devices/contract.js";
 
 const MOUNT_PATH = "/open-android-intelligence/v2";
 const WIRE_ID = /^[A-Za-z0-9._~-]{1,128}$/;
@@ -25,6 +27,8 @@ export interface AndroidGatewayOptions {
   readonly conversations: ConversationService;
   readonly attachments: AttachmentService;
   readonly pairing: PairingService;
+  readonly approval: ApprovalService;
+  readonly devices: DeviceCapabilityServiceApi;
   readonly events: GatewayEventHub;
   readonly logger?: {
     info(message: string): void;
@@ -80,6 +84,26 @@ export class AndroidGatewayCore implements GatewayCore {
 
   async refresh(request: RawGatewayRequest): Promise<GatewayResult> {
     const result = this.#options.auth.refresh(request.json);
+    return { status: 200, data: result.data, correlationId: negotiationOf(request) };
+  }
+
+  async inviteChallenge(request: RawGatewayRequest): Promise<GatewayResult> {
+    const result = await this.#options.auth.inviteChallenge(request.json);
+    return { status: 200, data: result.data, correlationId: negotiationOf(request) };
+  }
+
+  async inviteExchange(request: RawGatewayRequest): Promise<GatewayResult> {
+    const result = await this.#options.auth.loginWithInvite(request.json);
+    return { status: 200, data: result.data, correlationId: negotiationOf(request) };
+  }
+
+  async deviceChallenge(request: RawGatewayRequest): Promise<GatewayResult> {
+    const result = this.#options.auth.deviceChallenge(request.json);
+    return { status: 200, data: result.data, correlationId: negotiationOf(request) };
+  }
+
+  async deviceLogin(request: RawGatewayRequest): Promise<GatewayResult> {
+    const result = await this.#options.auth.loginWithDeviceKey(request.json);
     return { status: 200, data: result.data, correlationId: negotiationOf(request) };
   }
 
@@ -205,23 +229,51 @@ export class AndroidGatewayCore implements GatewayCore {
           ),
         };
       }
-      // /conversations/{id}/message-batches（未声明能力）
-      if (third === "message-batches") {
-        throw new GatewayError("CAPABILITY_UNAVAILABLE", "Message batches are not implemented", {
-          httpStatus: 501,
-        });
-      }
-      // /conversations/{id}/attachments/{attachmentId}/metadata
-      if (third === "attachments" && fourth !== undefined && fifth === "metadata" && method === "GET") {
+      // /conversations/{id}/message-batches
+      if (third === "message-batches" && fourth === undefined) {
+        if (method !== "POST") {
+          throw new GatewayError("SCHEMA_INVALID", "Method not allowed", { httpStatus: 405 });
+        }
         return {
           status: 200,
-          data: this.#options.attachments.historyMetadata(request, conversationId, fourth),
+          data: await this.#options.conversations.sendMessageBatch(
+            request,
+            conversationId,
+            request.json,
+          ),
         };
       }
-      if (third === "attachments") {
-        throw new GatewayError("CAPABILITY_UNAVAILABLE", "History media content is not implemented", {
-          httpStatus: 501,
-        });
+      // /conversations/{id}/attachments/{attachmentId}/{metadata|cache-grant|content}
+      if (third === "attachments" && fourth !== undefined) {
+        if (!WIRE_ID.test(fourth)) throw new GatewayError("SCHEMA_INVALID", "Invalid attachment id");
+        if (fifth === "metadata" && method === "GET") {
+          return {
+            status: 200,
+            data: this.#options.attachments.historyMetadata(request, conversationId, fourth),
+          };
+        }
+        if (fifth === "cache-grant" && method === "POST") {
+          return {
+            status: 200,
+            data: this.#options.attachments.cacheGrant(request, conversationId, fourth),
+          };
+        }
+        if (fifth === "content" && method === "GET") {
+          const format = request.query.get("format");
+          if (format !== null && format !== "stream-v1") {
+            throw new GatewayError("SCHEMA_INVALID", "Unknown media format");
+          }
+          return {
+            status: 200,
+            data: await this.#options.attachments.mediaContent(
+              request,
+              conversationId,
+              fourth,
+              request.query.get("grantId"),
+            ),
+          };
+        }
+        throw new GatewayError("SCHEMA_INVALID", "Method not allowed", { httpStatus: 405 });
       }
       throw new GatewayError("SCHEMA_INVALID", "Unknown route", { httpStatus: 404 });
     }
@@ -247,6 +299,9 @@ export class AndroidGatewayCore implements GatewayCore {
       const data = await this.#options.conversations.syncSnapshot(request);
       const pairing = this.#options.pairing.get(request);
       data.grantRevision = pairing.grantRevision as JsonObject[string];
+      data.pendingDeviceRequests = [
+        ...this.#options.devices.pendingForDevice(request.accountId, request.deviceId),
+      ] as unknown as JsonObject[string];
       return { status: 200, data };
     }
 
@@ -264,6 +319,61 @@ export class AndroidGatewayCore implements GatewayCore {
       }
       if (third === "commit" && method === "POST") {
         return { status: 200, data: this.#options.attachments.commit(request, second) };
+      }
+      throw new GatewayError("SCHEMA_INVALID", "Method not allowed", { httpStatus: 405 });
+    }
+
+    // /approvals/{approvalId}/decisions
+    if (head === "approvals" && second !== undefined && third === "decisions") {
+      if (method !== "POST") throw new GatewayError("SCHEMA_INVALID", "Method not allowed", { httpStatus: 405 });
+      if (!WIRE_ID.test(second)) throw new GatewayError("SCHEMA_INVALID", "Invalid approval id");
+      return {
+        status: 200,
+        data: await this.#options.approval.decide(request, second, request.json),
+      };
+    }
+
+    // /device-requests/{id}[/claim|/result]
+    if (head === "device-requests" && second !== undefined) {
+      if (!WIRE_ID.test(second)) throw new GatewayError("SCHEMA_INVALID", "Invalid device request id");
+      if (third === undefined && method === "GET") {
+        return { status: 200, data: this.#options.devices.detail(request, second) };
+      }
+      if (third === "claim" && method === "POST") {
+        const grantRevision = Number(request.json?.grantRevision);
+        if (!Number.isSafeInteger(grantRevision) || grantRevision < 0) {
+          throw new GatewayError("SCHEMA_INVALID", "grantRevision must be a non-negative integer");
+        }
+        return {
+          status: 200,
+          data: { ...this.#options.devices.claim(request, second, grantRevision) },
+        };
+      }
+      if (third === "result" && method === "POST") {
+        const body = request.json;
+        if (
+          body === null ||
+          typeof body.claimId !== "string" ||
+          !WIRE_ID.test(body.claimId) ||
+          !Number.isSafeInteger(Number(body.grantRevision)) ||
+          typeof body.result !== "object" ||
+          body.result === null
+        ) {
+          throw new GatewayError("SCHEMA_INVALID", "Result body must carry claimId, grantRevision and result");
+        }
+        const record = this.#options.devices.submitResult(request, second, {
+          claimId: body.claimId,
+          grantRevision: Number(body.grantRevision),
+          result: body.result as JsonObject,
+        });
+        return {
+          status: 200,
+          data: {
+            requestId: record.requestId,
+            state: record.state,
+            outcome: (record.result as { outcome?: string } | null)?.outcome ?? null,
+          },
+        };
       }
       throw new GatewayError("SCHEMA_INVALID", "Method not allowed", { httpStatus: 405 });
     }
@@ -346,6 +456,17 @@ export class AndroidGatewayCore implements GatewayCore {
       } catch (error) {
         this.#options.logger?.warn(
           `[dsh-android-gateway] attachment expiry failed for ${account.accountId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+    }
+    for (const account of this.#options.accounts.registry.list()) {
+      try {
+        this.#options.devices.expireDue(account.accountId);
+      } catch (error) {
+        this.#options.logger?.warn(
+          `[dsh-android-gateway] device request expiry failed for ${account.accountId}: ${
             error instanceof Error ? error.message : String(error)
           }`,
         );

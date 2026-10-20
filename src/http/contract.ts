@@ -59,6 +59,10 @@ export interface GatewayCore {
   negotiate(request: RawGatewayRequest): Promise<GatewayResult>;
   passwordLogin(request: RawGatewayRequest): Promise<GatewayResult>;
   refresh(request: RawGatewayRequest): Promise<GatewayResult>;
+  inviteChallenge(request: RawGatewayRequest): Promise<GatewayResult>;
+  inviteExchange(request: RawGatewayRequest): Promise<GatewayResult>;
+  deviceChallenge(request: RawGatewayRequest): Promise<GatewayResult>;
+  deviceLogin(request: RawGatewayRequest): Promise<GatewayResult>;
   logout(request: VerifiedRequest): Promise<GatewayResult>;
   /** 其余已认证 JSON 路由：由 core 按 method + path 分派。 */
   handle(request: VerifiedRequest): Promise<GatewayResult>;

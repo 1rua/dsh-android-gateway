@@ -143,8 +143,8 @@ describe("错误码 → HTTP 状态映射", () => {
     ["CAPABILITY_UNAVAILABLE", 501],
     ["RATE_LIMITED", 429],
     ["INTERNAL_ERROR", 500],
-    ["ATTACHMENT_EXPIRED", 400],
-    ["IDEMPOTENCY_CONFLICT", 400],
+    ["ATTACHMENT_EXPIRED", 404],
+    ["IDEMPOTENCY_CONFLICT", 409],
   ];
 
   it("逐码映射，且失败信封字段始终完整", async () => {

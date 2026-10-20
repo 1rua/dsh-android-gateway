@@ -1,4 +1,7 @@
 import type {
+  DshAttachments,
+  DshFileRef,
+  DshImageRef,
   DshAssistantStreamFrame,
   DshCommandDescriptor,
   DshCommands,
@@ -119,6 +122,40 @@ export class DshBridge {
     return this.#service<DshWorkspaceRegistry>("workspaceRegistry");
   }
 
+  get attachments(): DshAttachments | undefined {
+    return this.#service<DshAttachments>("attachments");
+  }
+
+  /** 先把图片落到宿主附件库，取得可回读的持久引用（历史媒体用）。 */
+  async saveImage(
+    bytes: Uint8Array,
+    mediaType: string,
+    name?: string,
+  ): Promise<DshImageRef | undefined> {
+    const store = this.attachments;
+    if (store === undefined) return undefined;
+    const refs = await store.saveImages([
+      { data: bytes, mediaType, ...(name === undefined ? {} : { name }) },
+    ]);
+    return refs[0];
+  }
+
+  async readImage(ref: DshImageRef): Promise<Uint8Array | undefined> {
+    const store = this.attachments;
+    if (store === undefined) return undefined;
+    try {
+      return (await store.readImage(ref)).data;
+    } catch {
+      return undefined;
+    }
+  }
+
+  async *readFile(ref: DshFileRef, signal?: AbortSignal): AsyncGenerator<Uint8Array> {
+    const store = this.attachments;
+    if (store === undefined) return;
+    for await (const chunk of store.readFileStream(ref, signal)) yield chunk;
+  }
+
   get availability(): { readonly available: boolean; readonly missing: readonly string[] } {
     const missing: string[] = [];
     if (this.sessionController === undefined) missing.push("sessionController");
@@ -228,6 +265,50 @@ export class DshBridge {
       const title = await query.readTitle(sessionId);
       return title?.title;
     } catch {
+      return undefined;
+    }
+  }
+
+  /** 解析/恢复会话对应的 Agent；失败返回 undefined（命令与工具作用域用）。 */
+  async resolveAgent(sessionId: string): Promise<{ readonly agent?: unknown } | undefined> {
+    const controller = this.sessionController;
+    if (controller === undefined) return undefined;
+    try {
+      return (await controller.resolveAgent(sessionId)) as { readonly agent?: unknown };
+    } catch (error) {
+      this.#logger?.warn?.(
+        `[dsh-android-gateway] resolveAgent failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      return undefined;
+    }
+  }
+
+  /** 执行一条宿主人类命令；未知命令返回 undefined，由调用方按普通文本处理。 */
+  async executeCommand(
+    sessionId: string,
+    line: string,
+  ): Promise<{ readonly result: { readonly kind: "success" | "error"; readonly text?: string } } | undefined> {
+    const commands = this.commands;
+    const controller = this.sessionController;
+    if (commands === undefined || controller === undefined) return undefined;
+    try {
+      const resolved = await controller.resolveAgent(sessionId);
+      if (resolved.agent === undefined) return undefined;
+      const execution = await commands.execute(
+        resolved.agent,
+        line,
+        [],
+        new AbortController().signal,
+      );
+      return execution === undefined ? undefined : { result: execution.result };
+    } catch (error) {
+      this.#logger?.warn?.(
+        `[dsh-android-gateway] command execution failed for ${line.slice(0, 40)}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       return undefined;
     }
   }

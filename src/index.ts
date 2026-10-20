@@ -1,8 +1,17 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { join } from "node:path";
+import { appendFileSync, chmodSync } from "node:fs";
 
 import { resolveConfig, type AndroidGatewayConfig } from "./config.js";
 import { AccountManager } from "./core/accounts.js";
 import { AttachmentService } from "./core/attachment-service.js";
+import { BatchStore } from "./core/batch-store.js";
+import {
+  createDeviceTools,
+  DeviceCapabilityService,
+  openDeviceRequestStore,
+} from "./devices/index.js";
+import { ApprovalService } from "./core/approval-service.js";
 import { AuthService } from "./core/auth-service.js";
 import { ConversationService } from "./core/conversation-service.js";
 import { GatewayEventHub } from "./core/event-hub.js";
@@ -13,6 +22,7 @@ import { DshBridge } from "./dsh/bridge.js";
 import type { DshContext, DshLogger, DshWebServer } from "./dsh/types.js";
 import { RequestAuthenticator } from "./auth/authenticator.js";
 import { createGatewayHttpHandler } from "./http/index.js";
+import { createGatewayWebSocketHandler } from "./http/websocket.js";
 import type { GatewayHttpHandler } from "./http/contract.js";
 
 export const name = "dsh-android-gateway";
@@ -113,16 +123,150 @@ export function apply(ctx: DshContext, rawConfig: unknown): void {
       maxBytes: config.maxAttachmentBytes,
       logger,
     });
-    const pairing = new PairingService({ accounts, events, logger });
+    const devices = new DeviceCapabilityService({
+      storeFor: (accountId) =>
+        openDeviceRequestStore(join(accounts.accountDir(accountId), "device-requests.db")),
+      emit: async (accountId, type, payload) => {
+        await events.publish(accountId, {
+          type,
+          payload,
+          correlationId: String(payload.requestId ?? "device-request"),
+        });
+      },
+      logger,
+    });
+    const pairing = new PairingService({ accounts, events, devices, logger });
+    const batchStore = new BatchStore(accounts);
+    let ensureDeviceTools: (sessionId: string) => Promise<void> = async () => undefined;
     const conversations = new ConversationService({
       accounts,
       events,
       bridge,
       attachments,
+      batchStore,
+      // 工具必须在该 Agent 构建本轮 prompt 前注册，否则模型清单里看不到。
+      beforePrompt: (sessionId) => ensureDeviceTools(sessionId),
       ...(config.workspace === undefined ? {} : { workspace: config.workspace }),
       logger,
     });
     conversations.start();
+
+    const resolveDeviceForAccount = (accountId: string) => {
+      const store = accounts.openStore(accountId);
+      if (store === undefined) return undefined;
+      const state = accounts.readPairingState(accountId);
+      const active = [...store.listDevices()]
+        .filter((device) => device.revokedAt === null)
+        .sort((left, right) => right.pairedAt.localeCompare(left.pairedAt));
+      const preferred =
+        state.capabilities?.deviceId === undefined
+          ? active[0]
+          : (active.find((device) => device.deviceId === state.capabilities?.deviceId) ?? active[0]);
+      if (preferred === undefined) return undefined;
+      return {
+        deviceId: preferred.deviceId,
+        pairingGeneration: preferred.pairingGeneration,
+        grantRevision: state.grantRevision,
+      };
+    };
+    const deviceTools = createDeviceTools({
+      service: devices,
+      resolveContext: (sessionId) => conversations.conversationForSession(sessionId) ?? undefined,
+      resolveDevice: (accountId) => resolveDeviceForAccount(accountId),
+    });
+    const diagnostic = (message: string): void => {
+      try {
+        const file = join(config.dataDir, "diagnostics.log");
+        appendFileSync(file, `${new Date().toISOString()}\ttools\t${message}\n`, { mode: 0o600 });
+        chmodSync(file, 0o600);
+      } catch {
+        // 诊断失败不影响业务。
+      }
+    };
+    interface AgentWithTools {
+      readonly session?: { readonly id?: unknown };
+      readonly ctx?: { readonly tools?: { register(def: unknown): unknown } };
+    }
+    interface RegisteredToolState {
+      agent: AgentWithTools;
+      capabilities: boolean;
+      device: boolean;
+    }
+    const registeredTools = new Map<string, RegisteredToolState>();
+    const alreadyRegistered = (error: unknown): boolean =>
+      error instanceof Error && error.message.includes("already registered");
+    ensureDeviceTools = async (sessionId: string): Promise<void> => {
+      try {
+        const resolved = (await bridge.resolveAgent(sessionId)) as
+          | { readonly agent?: AgentWithTools }
+          | undefined;
+        const agent = resolved?.agent;
+        if (agent === undefined) {
+          diagnostic(`no agent for session=${sessionId}`);
+          return;
+        }
+        const tools = agent.ctx?.tools;
+        if (tools === undefined) {
+          diagnostic(`agent has no tools registry session=${sessionId}`);
+          return;
+        }
+        let state = registeredTools.get(sessionId);
+        if (state === undefined || state.agent !== agent) {
+          state = { agent, capabilities: false, device: false };
+          registeredTools.set(sessionId, state);
+        }
+        // 逐个注册：上一次可能只成功了一个，补齐另一个即可；重复注册视为已成功。
+        const ensureOne = (key: "capabilities" | "device", definition: unknown): void => {
+          if (state![key]) return;
+          try {
+            tools.register(definition);
+            state![key] = true;
+          } catch (error) {
+            if (alreadyRegistered(error)) {
+              state![key] = true;
+              return;
+            }
+            throw error;
+          }
+        };
+        ensureOne("capabilities", deviceTools.capabilities);
+        ensureOne("device", deviceTools.device);
+        diagnostic(`registered session=${sessionId} capabilities=${state.capabilities} device=${state.device}`);
+      } catch (error) {
+        diagnostic(
+          `register failed session=${sessionId}: ${error instanceof Error ? error.message : String(error)}`,
+        );
+        logger.warn(
+          `[dsh-android-gateway] 设备工具注册失败: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+    };
+    const disposeAgentTools = ctx.on("agent/created", (...args) => {
+      const agent = (args[0] as { agent?: AgentWithTools })?.agent;
+      const sessionId = agent?.session?.id;
+      if (sessionId === undefined) return;
+      if (conversations.conversationForSession(String(sessionId)) === undefined) return;
+      void ensureDeviceTools(String(sessionId));
+    });
+
+    const approval = new ApprovalService({
+      accounts,
+      events,
+      findConversation: (sessionId) => conversations.conversationForSession(sessionId),
+      logger,
+    });
+    // 网关会话的审批卡要先于 Web UI answerer 命中，避免手机端永远收不到卡片。
+    const disposeApprovalAnswerer = ctx.on(
+      "approval/request",
+      (request, next) =>
+        approval.handle(
+          request as import("./core/approval-service.js").DshApprovalRequest,
+          next as () => Promise<"allowed-once" | "rejected" | "cancelled" | "unavailable">,
+        ),
+      { prepend: true },
+    );
 
     const core = new AndroidGatewayCore({
       accounts,
@@ -131,6 +275,8 @@ export function apply(ctx: DshContext, rawConfig: unknown): void {
       conversations,
       attachments,
       pairing,
+      approval,
+      devices,
       events,
       logger,
     });
@@ -142,6 +288,17 @@ export function apply(ctx: DshContext, rawConfig: unknown): void {
       maxAttachmentBytes: config.maxAttachmentBytes,
       heartbeatMs: config.heartbeatMs,
       logger,
+    });
+    const disposeUpgrade = webServer.registerUpgrade({
+      path: `${MOUNT_PATH}/events/ws`,
+      handler: createGatewayWebSocketHandler({
+        mountPath: MOUNT_PATH,
+        verifier: authenticator,
+        events,
+        heartbeatMs: config.heartbeatMs,
+        diagnosticsDir: config.dataDir,
+        logger,
+      }),
     });
 
     const timer = setInterval(() => {
@@ -160,6 +317,11 @@ export function apply(ctx: DshContext, rawConfig: unknown): void {
     ctx.effect(
       () => () => {
         clearInterval(timer);
+        disposeUpgrade();
+        disposeApprovalAnswerer();
+        disposeAgentTools();
+        approval.dispose();
+        devices.close();
         conversations.stop();
         bridge.dispose();
         accounts.close();

@@ -14,12 +14,20 @@ export interface DshLogger {
 }
 
 export interface DshEventApi {
-  on(event: string, listener: (...args: unknown[]) => void): () => void;
+  on(
+    event: string,
+    listener: (...args: unknown[]) => void,
+    options?: boolean | { readonly prepend?: boolean },
+  ): () => void;
 }
 
 export interface DshContext {
   get(name: string): unknown;
-  on(event: string, listener: (...args: unknown[]) => void): () => void;
+  on(
+    event: string,
+    listener: (...args: unknown[]) => void,
+    options?: boolean | { readonly prepend?: boolean },
+  ): () => void;
   effect(setup: () => (() => void | Promise<void>) | void, name?: string): void;
   logger?: DshLogger;
 }
@@ -152,8 +160,19 @@ export interface DshCommandDescriptor {
   readonly input?: { readonly hint: string; readonly attachments?: boolean };
 }
 
+export interface DshCommandResult {
+  readonly kind: "success" | "error";
+  readonly text?: string;
+}
+
 export interface DshCommands {
   list(agent: unknown): readonly DshCommandDescriptor[];
+  execute(
+    agent: unknown,
+    line: string,
+    submittedAttachments: readonly never[],
+    signal: AbortSignal,
+  ): Promise<{ readonly commandId: string; readonly result: DshCommandResult } | undefined>;
 }
 
 export interface DshFileUploads {
@@ -163,6 +182,31 @@ export interface DshFileUploads {
     readonly signal?: AbortSignal;
     readonly name?: string;
   }): Promise<{ readonly receiptId: string; readonly file: { readonly attachmentId: string } }>;
+}
+
+export interface DshImageRef {
+  readonly attachmentId: string;
+  readonly mediaType: string;
+  readonly bytes: number;
+  readonly width: number;
+  readonly height: number;
+  readonly name?: string;
+}
+
+export interface DshFileRef {
+  readonly attachmentId: string;
+  readonly name: string;
+  readonly bytes: number;
+}
+
+export interface DshAttachments {
+  saveImages(inputs: readonly {
+    readonly data: Uint8Array;
+    readonly mediaType: string;
+    readonly name?: string;
+  }[]): Promise<readonly DshImageRef[]>;
+  readImage(ref: DshImageRef): Promise<{ readonly ref: DshImageRef; readonly data: Uint8Array }>;
+  readFileStream(ref: DshFileRef, signal?: AbortSignal): AsyncIterable<Uint8Array>;
 }
 
 export interface DshWorkspaceRegistry {
@@ -181,7 +225,13 @@ export interface DshWebRoute {
   readonly handler: (req: import("node:http").IncomingMessage, res: import("node:http").ServerResponse) => void | Promise<void>;
 }
 
+export interface DshWebUpgradeRoute {
+  readonly path: string;
+  readonly handler: (req: import("node:http").IncomingMessage, socket: import("node:stream").Duplex, head: Buffer) => void | Promise<void>;
+}
+
 export interface DshWebServer {
   register(route: DshWebRoute): () => void;
+  registerUpgrade(route: DshWebUpgradeRoute): () => void;
   getOrigin(): string;
 }

@@ -23,6 +23,13 @@ export interface PairingState {
   readonly grantRevision: number;
   readonly grantDigest: string | null;
   readonly capabilityPublicationVersion: number;
+  /** 手机最近一次发布的能力绑定与清单（供设备请求子系统使用）。 */
+  readonly capabilities?: {
+    readonly bindings: readonly unknown[];
+    readonly inventory: readonly unknown[];
+    readonly updatedAt: string;
+    readonly deviceId?: string;
+  };
 }
 
 export interface ConfiguredAccount {
@@ -204,6 +211,25 @@ export class AccountManager {
           typeof parsed.capabilityPublicationVersion === "number"
             ? parsed.capabilityPublicationVersion
             : 2,
+        ...(parsed.capabilities === undefined
+          ? {}
+          : {
+              capabilities: {
+                bindings: Array.isArray(parsed.capabilities.bindings)
+                  ? parsed.capabilities.bindings
+                  : [],
+                inventory: Array.isArray(parsed.capabilities.inventory)
+                  ? parsed.capabilities.inventory
+                  : [],
+                updatedAt:
+                  typeof parsed.capabilities.updatedAt === "string"
+                    ? parsed.capabilities.updatedAt
+                    : new Date().toISOString(),
+                ...(typeof parsed.capabilities.deviceId === "string"
+                  ? { deviceId: parsed.capabilities.deviceId }
+                  : {}),
+              },
+            }),
       };
     } catch {
       return { grantRevision: 1, grantDigest: null, capabilityPublicationVersion: 2 };

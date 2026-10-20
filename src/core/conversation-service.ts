@@ -19,8 +19,9 @@ import type {
   OrganizationRecord,
   VerifiedRequest,
 } from "../shared/types.js";
-import { validateGatewayValue } from "../protocol/index.js";
+import { joinMessageBatch, validateGatewayValue } from "../protocol/index.js";
 import type { AccountStore } from "../store/contract.js";
+import type { BatchRecord, BatchStore } from "./batch-store.js";
 import type { AccountManager } from "./accounts.js";
 import type { AttachmentService } from "./attachment-service.js";
 import type { GatewayEventHub } from "./event-hub.js";
@@ -38,6 +39,9 @@ interface PendingSend {
   readonly text: string;
   readonly attachmentIds: readonly string[];
   readonly timestamp: number;
+  /** 批次的全部成员消息（含 leader）；单条消息时缺省。 */
+  readonly memberMessageIds?: readonly string[];
+  readonly batchId?: string;
 }
 
 interface Draft {
@@ -71,6 +75,9 @@ export interface ConversationServiceOptions {
   readonly events: GatewayEventHub;
   readonly bridge: DshBridge;
   readonly attachments: AttachmentService;
+  readonly batchStore: BatchStore;
+  /** 每次向宿主发 prompt 前调用；用于给当前 Agent 补注册网关专属工具。 */
+  readonly beforePrompt?: (sessionId: string) => Promise<void> | void;
   readonly workspace?: string;
   readonly logger?: { info(message: string): void; warn(message: string): void; error(message: string): void };
   readonly now?: () => number;
@@ -332,6 +339,14 @@ export class ConversationService {
     if (conversation.archived) {
       throw new GatewayError("CONVERSATION_ARCHIVED", "Conversation is archived", { httpStatus: 409 });
     }
+    // `/new` 是宿主命令入口：不同步给 Agent，原子创建新会话并回命令结果（契约 §7.1）。
+    if (text.trim() === "/new" && attachmentIds.length === 0) {
+      return this.#handleNewCommand(request, conversation, clientMessageId);
+    }
+    if (attachmentIds.length === 0 && text.trimStart().startsWith("/")) {
+      const handled = await this.#handleSlashCommand(request, conversation, clientMessageId, text.trim());
+      if (handled !== undefined) return handled;
+    }
     const existing = store.findMessageByClientId(conversationId, clientMessageId);
     if (existing !== undefined) {
       if (existing.text !== text) {
@@ -422,6 +437,7 @@ export class ConversationService {
     // 异步派发：接受响应只代表 Gateway 已持久接收（契约 §7）。
     void (async () => {
       try {
+        await this.#options.beforePrompt?.(conversation.dshSessionId!);
         await this.#options.bridge.prompt({
           sessionId: conversation.dshSessionId!,
           requestId: messageId,
@@ -484,6 +500,359 @@ export class ConversationService {
       // 诊断失败不得影响失败状态写入。
     }
     this.#options.logger?.warn(`[dsh-android-gateway] 消息派发失败: ${line.trim()}`);
+  }
+
+  // ───────────────────────────── /new 与消息批次 ─────────────────────────────
+
+  /**
+   * 契约 §7.1：`/new` 由命令入口独占处理，不同步给 Agent。
+   * 源会话保留命令消息，新会话从空上下文开始，结果通过
+   * `conversation.command.result` 下发。
+   */
+  async #handleNewCommand(
+    request: VerifiedRequest,
+    source: ConversationRecord,
+    clientMessageId: string,
+  ): Promise<JsonObject> {
+    const store = this.#store(request.accountId);
+    const existing = store.findMessageByClientId(source.conversationId, clientMessageId);
+    if (existing !== undefined) {
+      return { message: { status: "accepted", messageId: existing.messageId, conversationId: source.conversationId } };
+    }
+    const now = this.#now();
+    const conversationId = createWireId("conv_");
+    const sessionId = await this.#options.bridge.createSession({
+      sessionId: conversationId,
+      ...(this.#options.workspace === undefined ? {} : { cwd: this.#options.workspace }),
+    });
+    const created = store.insertConversation({
+      conversationId,
+      clientConversationId: createWireId("cconv_"),
+      dshSessionId: sessionId,
+      title: null,
+      createdAt: nowIso(new Date(now)),
+      updatedAt: nowIso(new Date(now)),
+    });
+    this.#sessionToConversation.set(sessionId, created.conversationId);
+    const sourceMessage = store.insertMessage({
+      messageId: createWireId("msg_"),
+      conversationId: source.conversationId,
+      clientMessageId,
+      sender: "user",
+      text: "/new",
+      parts: [{ type: "text", text: "/new" }],
+      status: "completed",
+      revision: 0,
+      errorCode: null,
+      generationId: null,
+      dshSeq: null,
+      createdAt: nowIso(new Date(now)),
+    });
+    await this.#emit(request.accountId, "conversation.command.result", {
+      command: "new",
+      commandId: "new",
+      outcome: "created-conversation",
+      sourceConversationId: source.conversationId,
+      sourceMessageId: sourceMessage.messageId,
+      conversationId: created.conversationId,
+    }, request.requestId);
+    return {
+      message: {
+        status: "accepted",
+        messageId: sourceMessage.messageId,
+        conversationId: source.conversationId,
+      },
+    };
+  }
+
+  /**
+   * 执行宿主的斜杠命令（`/permission`、`/compact` 等）。
+   *
+   * 未知命令返回 undefined，调用方按普通文本交给模型（契约 §7：未列出的命令
+   * 仍可原样发送）。命令输出以一条 assistant 消息回到时间线，不开启生成。
+   */
+  async #handleSlashCommand(
+    request: VerifiedRequest,
+    conversation: ConversationRecord,
+    clientMessageId: string,
+    line: string,
+  ): Promise<JsonObject | undefined> {
+    if (conversation.dshSessionId === null) return undefined;
+    const store = this.#store(request.accountId);
+    const existing = store.findMessageByClientId(conversation.conversationId, clientMessageId);
+    if (existing !== undefined) {
+      return { message: { status: "accepted", messageId: existing.messageId, conversationId: conversation.conversationId } };
+    }
+    const execution = await this.#options.bridge.executeCommand(conversation.dshSessionId, line);
+    if (execution === undefined) return undefined;
+    const now = this.#now();
+    const userMessage = store.insertMessage({
+      messageId: createWireId("msg_"),
+      conversationId: conversation.conversationId,
+      clientMessageId,
+      sender: "user",
+      text: line,
+      parts: [{ type: "text", text: line }],
+      status: "completed",
+      revision: 1,
+      errorCode: execution.result.kind === "error" ? "MODEL_REQUEST_REJECTED" : null,
+      generationId: null,
+      dshSeq: null,
+      createdAt: nowIso(new Date(now)),
+    });
+    await this.#emit(request.accountId, "conversation.message.status", {
+      conversationId: conversation.conversationId,
+      messageId: userMessage.messageId,
+      clientMessageId,
+      status: execution.result.kind === "error" ? "failed" : "completed",
+      revision: 1,
+      errorCode: execution.result.kind === "error" ? "MODEL_REQUEST_REJECTED" : null,
+    }, request.requestId);
+    const output = execution.result.text ?? (execution.result.kind === "success" ? "命令已执行" : "命令执行失败");
+    const assistantMessage = store.insertMessage({
+      messageId: createWireId("msg_"),
+      conversationId: conversation.conversationId,
+      clientMessageId: null,
+      sender: "assistant",
+      text: output,
+      parts: [{ type: "text", text: output }],
+      status: "completed",
+      revision: 0,
+      errorCode: null,
+      generationId: null,
+      dshSeq: null,
+      createdAt: nowIso(new Date(now + 1)),
+    });
+    await this.#emit(request.accountId, "conversation.message.completed", {
+      conversationId: conversation.conversationId,
+      messageId: assistantMessage.messageId,
+      sender: "assistant",
+      parts: [{ type: "text", text: output }],
+      text: output,
+      timestamp: now + 1,
+      revision: 0,
+    }, request.requestId);
+    store.updateConversation(conversation.conversationId, {
+      lastMessageAt: nowIso(new Date(now + 1)),
+      updatedAt: nowIso(new Date(now + 1)),
+    });
+    return {
+      message: {
+        status: "accepted",
+        messageId: userMessage.messageId,
+        conversationId: conversation.conversationId,
+      },
+    };
+  }
+
+  /** 契约 §7 消息批次：成员各自保留身份，Agent 收到一条聚合输入。 */
+  async sendMessageBatch(
+    request: VerifiedRequest,
+    conversationId: string,
+    body: JsonObject | null,
+  ): Promise<JsonObject> {
+    if (body === null) throw new GatewayError("SCHEMA_INVALID", "Missing batch body");
+    const store = this.#store(request.accountId);
+    const conversation = store.getConversation(conversationId);
+    if (conversation === undefined || conversation.deleted) {
+      throw new GatewayError("CONVERSATION_NOT_FOUND", "Unknown conversation");
+    }
+    if (conversation.archived) {
+      throw new GatewayError("CONVERSATION_ARCHIVED", "Conversation is archived", { httpStatus: 409 });
+    }
+    if (conversation.dshSessionId === null) throw new GatewayError("AGENT_UNAVAILABLE", "Conversation has no host session");
+
+    const clientBatchId = body.clientBatchId;
+    if (typeof clientBatchId !== "string" || !WIRE_ID.test(clientBatchId)) {
+      throw new GatewayError("SCHEMA_INVALID", "clientBatchId must be a wire id");
+    }
+    // App 在批次里携带的是服务端 conversationId（与参考实现一致），不是创建时的
+    // clientConversationId；两者只做「若出现必须指向当前会话」的校验。
+    if (
+      body.clientConversationId !== undefined &&
+      body.clientConversationId !== conversationId
+    ) {
+      throw new GatewayError("SCHEMA_INVALID", "clientConversationId does not match the route");
+    }
+    if (body.joinMode !== "newline-v1") {
+      throw new GatewayError("SCHEMA_INVALID", "joinMode must be newline-v1");
+    }
+    if (!Array.isArray(body.members) || body.members.length === 0 || body.members.length > 20) {
+      throw new GatewayError("SCHEMA_INVALID", "Batch must contain 1..20 members");
+    }
+    const members = body.members.map((entry) => {
+      if (typeof entry !== "object" || entry === null) throw new GatewayError("SCHEMA_INVALID", "Invalid batch member");
+      const member = entry as JsonObject;
+      if (typeof member.clientMessageId !== "string" || !WIRE_ID.test(member.clientMessageId)) {
+        throw new GatewayError("SCHEMA_INVALID", "Invalid member clientMessageId");
+      }
+      if (typeof member.text !== "string" || member.text.trim().length === 0) {
+        throw new GatewayError("SCHEMA_INVALID", "Batch member text must not be empty");
+      }
+      if (member.text.trimStart().startsWith("/")) {
+        throw new GatewayError("SCHEMA_INVALID", "Slash commands cannot enter a batch");
+      }
+      const attachments = Array.isArray(member.attachments)
+        ? member.attachments.map((raw) => {
+            const attachment = raw as JsonObject;
+            if (typeof attachment.attachmentId !== "string" || !WIRE_ID.test(attachment.attachmentId)) {
+              throw new GatewayError("SCHEMA_INVALID", "Invalid member attachment id");
+            }
+            return attachment.attachmentId;
+          })
+        : [];
+      return { clientMessageId: member.clientMessageId, text: member.text, attachmentIds: attachments };
+    });
+    if (new Set(members.map((member) => member.clientMessageId)).size !== members.length) {
+      throw new GatewayError("SCHEMA_INVALID", "Batch member ids must be unique");
+    }
+    const aggregatedText = joinMessageBatch(members);
+    if (Buffer.byteLength(aggregatedText, "utf8") > 65_536) {
+      throw new GatewayError("SCHEMA_INVALID", "Batch exceeds the 65536-byte aggregate limit");
+    }
+
+    const existingBatch = this.#options.batchStore.findByClientBatchId(
+      request.accountId,
+      conversationId,
+      clientBatchId,
+    );
+    if (existingBatch !== undefined) return { ...(existingBatch.response as JsonObject) };
+    for (const member of members) {
+      if (store.findMessageByClientId(conversationId, member.clientMessageId) !== undefined) {
+        throw new GatewayError("IDEMPOTENCY_CONFLICT", "A batch member was already accepted");
+      }
+    }
+
+    const attachmentIds = [...new Set(members.flatMap((member) => member.attachmentIds))];
+    const prepared = await this.#options.attachments.prepareForPrompt(
+      request,
+      conversation.dshSessionId,
+      attachmentIds,
+    );
+    const now = this.#now();
+    const batchId = createWireId("batch_");
+    const generationId = createWireId("gen_");
+    const inserted: Array<{ clientMessageId: string; messageId: string }> = [];
+    for (const [index, member] of members.entries()) {
+      const messageId = createWireId("msg_");
+      const parts: MessagePart[] = [{ type: "text", text: member.text }];
+      for (const attachmentId of member.attachmentIds) {
+        const record = store.getAttachment(attachmentId);
+        if (record === undefined) continue;
+        parts.push({
+          type: "attachment",
+          attachmentId,
+          filename: record.filename,
+          mediaType: record.mediaType,
+          sizeBytes: record.sizeBytes,
+          sha256: record.sha256,
+        });
+      }
+      store.insertMessage({
+        messageId,
+        conversationId,
+        clientMessageId: member.clientMessageId,
+        sender: "user",
+        text: member.text,
+        parts,
+        status: "queued",
+        revision: 0,
+        errorCode: null,
+        generationId,
+        dshSeq: null,
+        createdAt: nowIso(new Date(now + index)),
+      });
+      inserted.push({ clientMessageId: member.clientMessageId, messageId });
+    }
+    const leader = inserted[0]!;
+    store.insertGeneration({
+      generationId,
+      conversationId,
+      messageId: leader.messageId,
+      state: "queued",
+      createdAt: nowIso(new Date(now)),
+    });
+    const memberMessageIds = inserted.map((member) => member.messageId);
+    const runtime = this.#runtime(conversationId);
+    runtime.queue.push({
+      messageId: leader.messageId,
+      clientMessageId: leader.clientMessageId,
+      generationId,
+      deviceId: request.deviceId,
+      text: aggregatedText,
+      attachmentIds,
+      timestamp: now,
+      memberMessageIds,
+      batchId,
+    });
+
+    for (const member of inserted) {
+      await this.#emit(request.accountId, "conversation.message.status", {
+        conversationId,
+        messageId: member.messageId,
+        clientMessageId: member.clientMessageId,
+        status: "queued",
+        revision: 0,
+        errorCode: null,
+        generationId,
+      }, request.requestId);
+    }
+
+    const response: JsonObject = {
+      batchId,
+      status: "accepted",
+      members: inserted.map((member) => ({ ...member })) as unknown as JsonValue,
+      generationId,
+    };
+    const record: BatchRecord = {
+      batchId,
+      conversationId,
+      clientBatchId,
+      generationId,
+      members: inserted,
+      response: response as unknown as Readonly<Record<string, unknown>>,
+      createdAt: nowIso(new Date(now)),
+    };
+    this.#options.batchStore.put(request.accountId, record);
+
+    void (async () => {
+      try {
+        await this.#options.beforePrompt?.(conversation.dshSessionId!);
+        await this.#options.bridge.prompt({
+          sessionId: conversation.dshSessionId!,
+          requestId: leader.messageId,
+          content: [
+            { type: "text" as const, text: aggregatedText },
+            ...prepared.parts,
+          ],
+        });
+        this.#options.attachments.finishDelivery(request.accountId, prepared.deliveredIds);
+      } catch (error) {
+        this.#logDispatchFailure(conversationId, leader.messageId, error);
+        const errorCode = dispatchErrorCode(error);
+        for (const member of inserted) {
+          store.updateMessage(member.messageId, {
+            status: "failed",
+            revision: 1,
+            errorCode,
+            updatedAt: nowIso(),
+          });
+          await this.#emit(request.accountId, "conversation.message.status", {
+            conversationId,
+            messageId: member.messageId,
+            clientMessageId: member.clientMessageId,
+            status: "failed",
+            revision: 1,
+            errorCode,
+            generationId,
+          }, request.requestId).catch(() => undefined);
+        }
+        store.updateGeneration(generationId, { state: "failed", endedAt: nowIso() });
+        this.#removeQueued(conversationId, leader.messageId);
+      }
+    })();
+
+    return { ...response };
   }
 
   #removeQueued(conversationId: string, messageId: string): void {
@@ -603,6 +972,7 @@ export class ConversationService {
   ): Promise<JsonObject[]> {
     const projected: JsonObject[] = [];
     const seenDshSeq = new Set<number>();
+    const batchIds = this.#options.batchStore.batchIdsForConversation(accountId, conversation.conversationId);
     if (conversation.dshSessionId !== null) {
       const surface = await this.#options.bridge.readSurface(conversation.dshSessionId);
       for (const event of surface?.events ?? []) {
@@ -613,7 +983,7 @@ export class ConversationService {
         const stored = store.findMessageByDshSeq(conversation.conversationId, event.seq);
         if (stored !== undefined) {
           seenDshSeq.add(event.seq);
-          projected.push(this.#timelineMessage(stored));
+          projected.push(this.#timelineMessage(stored, batchIds.get(stored.messageId)));
           continue;
         }
         const parts = this.#partsOfDshMessage(message);
@@ -635,7 +1005,7 @@ export class ConversationService {
       if (message.dshSeq !== null && seenDshSeq.has(message.dshSeq)) continue;
       if (message.dshSeq !== null) continue;
       if (message.parts.length === 0 && message.text.length === 0) continue;
-      projected.push(this.#timelineMessage(message));
+      projected.push(this.#timelineMessage(message, batchIds.get(message.messageId)));
     }
     projected.sort((left, right) => {
       const leftTime = Number(left.timestamp ?? 0);
@@ -780,6 +1150,16 @@ export class ConversationService {
     await this.#onSessionEvent(event.sessionId, event.event);
   }
 
+  /** 供审批/设备子系统把宿主会话映射回网关会话。 */
+  conversationForSession(
+    sessionId: string,
+  ): { readonly accountId: string; readonly conversationId: string } | undefined {
+    const found = this.#findAccountForSession(sessionId);
+    return found === undefined
+      ? undefined
+      : { accountId: found.accountId, conversationId: found.conversationId };
+  }
+
   #findAccountForSession(sessionId: string): { accountId: string; conversationId: string; store: AccountStore } | undefined {
     const known = this.#sessionToConversation.get(sessionId);
     if (known !== undefined) {
@@ -828,18 +1208,20 @@ export class ConversationService {
           };
           runtime.currentStep = 0;
           store.updateGeneration(pending.generationId, { state: "running" });
-          this.#updateMessageStatus(
-            store,
-            accountId,
-            conversationId,
-            pending.messageId,
-            "delivered",
-            1,
-            null,
-            pending.generationId,
-            null,
-            event.time,
-          );
+          for (const memberMessageId of pending.memberMessageIds ?? [pending.messageId]) {
+            this.#updateMessageStatus(
+              store,
+              accountId,
+              conversationId,
+              memberMessageId,
+              "delivered",
+              1,
+              null,
+              pending.generationId,
+              null,
+              event.time,
+            );
+          }
         }
         break;
       }
@@ -948,21 +1330,23 @@ export class ConversationService {
         if (active !== undefined) {
           const failed = kind === "error";
           const cancelled = kind === "aborted";
-          const message = store.getMessage(active.leader.messageId);
           const nextStatus = failed ? "failed" : "completed";
           const errorCode = failed ? "MODEL_REQUEST_REJECTED" : null;
-          this.#updateMessageStatus(
-            store,
-            accountId,
-            conversationId,
-            active.leader.messageId,
-            nextStatus,
-            (message?.revision ?? 0) + 1,
-            errorCode,
-            active.generationId,
-            null,
-            event.time,
-          );
+          for (const memberMessageId of active.leader.memberMessageIds ?? [active.leader.messageId]) {
+            const message = store.getMessage(memberMessageId);
+            this.#updateMessageStatus(
+              store,
+              accountId,
+              conversationId,
+              memberMessageId,
+              nextStatus,
+              (message?.revision ?? 0) + 1,
+              errorCode,
+              active.generationId,
+              null,
+              event.time,
+            );
+          }
           store.updateGeneration(active.generationId, {
             state: failed ? "failed" : cancelled ? "cancelled" : "completed",
             endedAt: nowIso(new Date(event.time)),
@@ -1055,19 +1439,21 @@ export class ConversationService {
     const runtime = this.#runtimes.get(conversationId);
     const active = runtime?.active;
     if (active === undefined) return;
-    const message = store.getMessage(active.leader.messageId);
-    this.#updateMessageStatus(
-      store,
-      accountId,
-      conversationId,
-      active.leader.messageId,
-      outcome === "failed" ? "failed" : "completed",
-      (message?.revision ?? 0) + 1,
-      outcome === "failed" ? "MODEL_REQUEST_REJECTED" : null,
-      active.generationId,
-      null,
-      this.#now(),
-    );
+    for (const memberMessageId of active.leader.memberMessageIds ?? [active.leader.messageId]) {
+      const message = store.getMessage(memberMessageId);
+      this.#updateMessageStatus(
+        store,
+        accountId,
+        conversationId,
+        memberMessageId,
+        outcome === "failed" ? "failed" : "completed",
+        (message?.revision ?? 0) + 1,
+        outcome === "failed" ? "MODEL_REQUEST_REJECTED" : null,
+        active.generationId,
+        null,
+        this.#now(),
+      );
+    }
     store.updateGeneration(active.generationId, {
       state: outcome === "failed" ? "failed" : "completed",
       endedAt: nowIso(),
@@ -1134,9 +1520,10 @@ export class ConversationService {
     return parts;
   }
 
-  #timelineMessage(message: MessageRecord): JsonObject {
+  #timelineMessage(message: MessageRecord, batchId?: string): JsonObject {
     return {
       messageId: message.messageId,
+      ...(batchId === undefined ? {} : { batchId }),
       sender: message.sender,
       parts: message.parts as unknown as JsonValue,
       text: message.text,

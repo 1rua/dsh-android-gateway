@@ -45,6 +45,7 @@ export const GATEWAY_ERROR_CODES = [
   "CONVERSATION_NOT_FOUND",
   // 消息级失败码（契约 §9 conversation.message.status 的 errorCode 闭集）
   "AGENT_UNAVAILABLE",
+  "AGENT_MEDIA_REJECTED",
   "ORGANIZATION_CONFLICT",
 ] as const;
 
