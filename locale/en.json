@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Android Gateway",
+    "description": "Connects the Open Android Intelligence app to DeepSeek Harness as an agent host, with streaming chat, history, commands, attachments and conversation management."
+  }
+}

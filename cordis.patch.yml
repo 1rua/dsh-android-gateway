@@ -1,0 +1,8 @@
+# 安装本 Bundle 时向当前 profile 插入 Open Android Intelligence 网关宿主插件。
+# 配置项见 src/config.ts；首次启动会自动创建账号并把一次性凭据写入
+# $DSH_HOME/dsh-android-gateway/setup-account.json（0600）。
+- insert:
+    - id: dsh-android-gateway
+      name: dsh-android-gateway
+      config:
+        defaultUsername: android

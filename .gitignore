@@ -1,0 +1,56 @@
+# 依赖与构建产物
+node_modules/
+**/build/
+dist/
+*.apk
+*.aab
+.gradle/
+
+# IDE 与编辑器
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 环境变量与密钥
+.env
+.env.*
+!.env.example
+*.tsnet-toolchain.env
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.log
+/logs/
+/tmp/
+/tmp-artifacts/
+
+# 覆盖率
+*.lcov
+/coverage/
+/test-results/
+
+# 工具链与第三方
+/.toolchains/
+/third_party/
+.superpowers/
+
+# Agent 配置
+/.codex/
+/.claude/
+/.codebuddy/
+/.trae/
+/.agents/
+
+# DSH 本地运行状态
+/.dsh/
+
+# TypeScript 构建产物
+/lib/
+
+# npm 打包产物
+*.tgz
