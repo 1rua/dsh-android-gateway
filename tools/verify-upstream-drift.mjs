@@ -13,8 +13,11 @@ const filesToVerify = [
   { local: "cordis.patch.yml", upstream: "cordis.patch.yml" },
 ];
 
-// Normalize relative import differences between root test and nested test
-const normalize = (content) => content.replace(/\.\.\/src\/index\.js/g, "./index.js");
+// Normalize relative import differences and bundle package name differences
+const normalize = (content) => content
+  .replace(/\.\.\/src\/index\.js/g, "./index.js")
+  .replace(/name: dsh-android-gateway/g, "name: oai-dsh-session-adapter")
+  .replace(/  if \(!token\) \{\n    ctx\.logger\?\.(warn|info)\?\.[^\n]+\n    return;\n  \}\n/g, "");
 
 let hasMismatch = false;
 

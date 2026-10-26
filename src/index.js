@@ -232,6 +232,10 @@ export function createSessionHandler(ctx, config, token) {
 
 export function apply(ctx, config) {
   const token = process.env[config.tokenEnv];
+  if (!token) {
+    ctx.logger?.warn?.("OAI session adapter disabled: %s not set in environment (at least 32 characters required)", config.tokenEnv);
+    return;
+  }
   const handler = createSessionHandler(ctx, config, token);
   ctx.effect(() => {
     const server = createServer(handler);

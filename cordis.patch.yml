@@ -1,6 +1,6 @@
 - insert:
     - id: oai-session-adapter
-      name: oai-dsh-session-adapter
+      name: dsh-android-gateway
       config:
         port: 8791
         tokenEnv: OAI_DSH_ADAPTER_TOKEN
