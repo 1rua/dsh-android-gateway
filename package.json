@@ -1,27 +1,24 @@
 {
   "name": "dsh-android-gateway",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "Open Android Intelligence Gateway Protocol v2.1 host plugin for DeepSeek Harness",
+  "description": "Open Android Intelligence Core 0.2 Native Session Adapter for DeepSeek Harness",
   "license": "MIT",
-  "main": "lib/src/index.js",
+  "main": "src/index.js",
   "exports": {
-    ".": "./lib/src/index.js",
-    "./locale/*.json": "./locale/*.json",
+    ".": "./src/index.js",
     "./icon": "./icon.svg"
   },
   "files": [
-    "lib/",
-    "locale/*.json",
+    "src/",
     "icon.svg",
     "cordis.patch.yml",
     "README.md",
     "LICENSE",
     "CHANGELOG.md",
     "docs/",
-    "tools/admin.mjs",
-    "tools/smoke-client.mjs"
+    "tools/"
   ],
   "dsh": {
     "bundle": {
@@ -29,15 +26,11 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && node tools/copy-contract.mjs",
+    "build": "node -e \"console.log('No compilation needed for native ESM adapter')\"",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
-  },
-  "dependencies": {
-    "ajv": "8.20.0",
-    "ajv-formats": "3.0.1",
-    "canonicalize": "3.0.0"
+    "test:watch": "vitest",
+    "verify:upstream": "node tools/verify-upstream-drift.mjs"
   },
   "devDependencies": {
     "@types/node": "24.13.3",
