@@ -62,9 +62,13 @@ Android App ↔ OAI Core ↔ DSH Native Session Adapter ↔ DSH
 
 ## 安装与部署
 
-### 1. 配置环境变量
+### 1. 配置环境变量（自动 / 手动）
 
-在 Core 与目标 DSH 宿主进程环境中配置同一个至少 32 字符的随机 Token：
+**自动注入（推荐）**：
+运行 OAI Core 的初始化或配置脚本（`./scripts/install.sh` 或 `./scripts/setup.sh`）时，向导会自动生成 32 字符的加密安全随机 Token，并自动同步注入到 Core 凭据目录及 DSH 宿主环境（自动写入 `$DSH_HOME/.env` 与 `$DSH_HOME/.credentials.yaml` 的 `refs.OAI_DSH_ADAPTER_TOKEN`），无需人工干预。
+
+**手动配置**：
+若自行管理 DSH 宿主进程环境，请在 Core 与目标 DSH 宿主进程环境中配置同一个至少 32 字符的随机 Token：
 ```bash
 export OAI_DSH_ADAPTER_TOKEN="your-secure-loopback-token-at-least-32-chars-long"
 ```
