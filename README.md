@@ -57,6 +57,8 @@ Android App ↔ OAI Core ↔ DSH Native Session Adapter ↔ DSH
 - 默认监听：`127.0.0.1:8791`
 - 路径前缀：`/oai/session-adapter/v1`
 - 内部鉴权：通过环境变量（默认 `OAI_DSH_ADAPTER_TOKEN`）配置共享 Token（长度至少 32 字符），请求头 `Authorization: Bearer <TOKEN>`
+- 注册握手：`POST /handshake` 接收 Core 的随机挑战，返回实例标识、`deployment` 会话范围、真实在线状态、能力和 HMAC 签名证明。
+- 实例标识：配置项 `instanceId`，默认读取 `OAI_DSH_INSTANCE_ID`，未设置时为 `dsh`；必须与 Core 候选清单中的 `instanceId` 一致。
 - 请求预算：请求体严格限制小于 1 MiB（1048576 字节），超限返回 413 `PAYLOAD_TOO_LARGE`
 - 响应格式：使用 NDJSON (`application/x-ndjson`) 转发宿主消息流增量及终态事件
 
