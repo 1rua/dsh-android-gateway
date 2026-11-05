@@ -1,6 +1,6 @@
 /** DSH native session adapter. Android auth and all device work stay in Core. */
 import { createServer } from "node:http";
-import { randomUUID, timingSafeEqual } from "node:crypto";
+import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 
 export const name = "oai-session-adapter";
 export const inject = ["sessionQuery"];
@@ -24,9 +24,13 @@ export const Config = {
     version: 1,
     vendor: "oai-session-adapter",
     validate(input = {}) {
-      const value = { port: input.port ?? 8791, tokenEnv: input.tokenEnv ?? "OAI_DSH_ADAPTER_TOKEN", cwd: input.cwd, agentPreset: input.agentPreset };
+      const value = {
+        port: input.port ?? 8791, tokenEnv: input.tokenEnv ?? "OAI_DSH_ADAPTER_TOKEN", cwd: input.cwd, agentPreset: input.agentPreset,
+        instanceId: input.instanceId ?? process.env.OAI_DSH_INSTANCE_ID ?? "dsh",
+      };
       if (!Number.isInteger(value.port) || value.port < 1 || value.port > 65535
           || typeof value.tokenEnv !== "string" || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(value.tokenEnv)
+          || typeof value.instanceId !== "string" || !/^[A-Za-z0-9._~-]{1,128}$/.test(value.instanceId)
           || (value.cwd !== undefined && typeof value.cwd !== "string")
           || (value.agentPreset !== undefined && typeof value.agentPreset !== "string")) {
         return { issues: [{ message: "Invalid OAI session adapter configuration" }] };
@@ -59,6 +63,9 @@ async function bodyOf(req) {
 /** The injected query's corpus is the explicitly installed DSH instance only. */
 export function createSessionHandler(ctx, config, token) {
   if (typeof token !== "string" || token.length < 32) throw fail("ADAPTER_TOKEN_REQUIRED", 500);
+  const validated = Config["~standard"].validate(config);
+  if (validated.issues) throw fail("SCHEMA_INVALID", 500);
+  const settings = validated.value;
   const expected = Buffer.from(`Bearer ${token}`);
   const busy = new Set();
   const services = () => ({ query: ctx.get("sessionQuery"), controller: ctx.get("sessionController"), registry: ctx.get("workspaceRegistry") });
@@ -166,6 +173,20 @@ export function createSessionHandler(ctx, config, token) {
       const url = new URL(req.url, "http://localhost");
       if (url.search) throw fail("SCHEMA_INVALID", 400);
       const path = url.pathname;
+      if (req.method === "POST" && path === PREFIX + "/handshake") {
+        const body = await bodyOf(req);
+        if (Object.keys(body).length !== 1 || typeof body.challenge !== "string"
+            || !/^[a-f0-9]{64}$/.test(body.challenge)) throw fail("SCHEMA_INVALID", 400);
+        const declared = capabilities();
+        // 与状态查询一致，必须确认真实宿主可用后才声明在线。
+        await records();
+        const online = declared.list && declared.history;
+        const sorted = Object.fromEntries(Object.entries(declared).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0));
+        const payload = { capabilities: sorted, challenge: body.challenge, instanceId: settings.instanceId,
+          online, sessionScope: "deployment" };
+        const proof = createHmac("sha256", token).update("oai-agent-handshake-v1\0").update(JSON.stringify(payload)).digest("hex");
+        return json(res, { instanceId: settings.instanceId, sessionScope: "deployment", online, capabilities: declared, proof });
+      }
       if (req.method === "GET" && path === PREFIX + "/status") {
         const caps = capabilities();
         // Call the actual query. An installed plugin with a broken persistence
@@ -181,7 +202,7 @@ export function createSessionHandler(ctx, config, token) {
           if (Object.keys(body).some((key) => key !== "title")) throw fail("SCHEMA_INVALID", 400);
           if (body.title != null && (typeof body.title !== "string" || !body.title.trim())) throw fail("SCHEMA_INVALID", 400);
           if (body.title && !capabilities().rename) throw fail("UNSUPPORTED_CAPABILITY");
-          const created = await services().controller.create({ sessionId: randomUUID(), cwd: config.cwd, agentPreset: config.agentPreset });
+          const created = await services().controller.create({ sessionId: randomUUID(), cwd: settings.cwd, agentPreset: settings.agentPreset });
           if (body.title) await services().controller.rename({ sessionId: created.sessionId, title: body.title });
           return json(res, { session: await summary(await requireSession(created.sessionId)) });
         }
