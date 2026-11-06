@@ -1,4 +1,5 @@
 import { createServer } from "node:http";
+import { createHmac } from "node:crypto";
 import { afterEach, describe, expect, it } from "vitest";
 import { Config, createSessionHandler } from "../src/index.js";
 
@@ -12,7 +13,7 @@ afterEach(async () => {
   }
 });
 
-async function host({ legacyUserWrapper = false, terminalReason = "completed" } = {}) {
+async function host({ legacyUserWrapper = false, terminalReason = "completed", instanceId } = {}) {
   const listeners = new Map();
   const calls = [];
   const records = [{ header: { id: "terminal", createdAt: 1000 }, live: false, persisted: true }];
@@ -54,7 +55,7 @@ async function host({ legacyUserWrapper = false, terminalReason = "completed" } 
       return () => listeners.get(event).delete(listener);
     },
   };
-  const server = createServer(createSessionHandler(ctx, {}, token));
+  const server = createServer(createSessionHandler(ctx, { instanceId }, token));
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   servers.push(server);
   const origin = `http://127.0.0.1:${server.address().port}${prefix}`;
@@ -63,6 +64,36 @@ async function host({ legacyUserWrapper = false, terminalReason = "completed" } 
 }
 
 describe("DSH native Session Adapter", () => {
+  it.each([undefined, "dsh-custom"])("握手返回真实在线状态及绑定挑战的签名（实例 %s）", async (instanceId) => {
+    const h = await host({ instanceId });
+    const challenge = "a".repeat(64);
+    const response = await h.request("/handshake", "POST", { challenge });
+    expect(response.status).toBe(200);
+    const result = await response.json();
+    const expectedId = instanceId ?? process.env.OAI_DSH_INSTANCE_ID ?? "dsh";
+    expect(result).toMatchObject({ instanceId: expectedId, sessionScope: "deployment", online: true });
+    const capabilities = Object.fromEntries(Object.entries(result.capabilities).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0));
+    const payload = { capabilities, challenge, instanceId: expectedId, online: true, sessionScope: "deployment" };
+    expect(result.proof).toBe(createHmac("sha256", token).update("oai-agent-handshake-v1\0").update(JSON.stringify(payload)).digest("hex"));
+    expect(h.calls).toEqual(["listSessions"]);
+    const changed = await (await h.request("/handshake", "POST", { challenge: "b".repeat(64) })).json();
+    expect(changed.proof).not.toBe(result.proof);
+  });
+  it("握手在访问宿主前拒绝无认证和无效挑战", async () => {
+    const h = await host();
+    expect((await fetch(h.origin + "/handshake", { method: "POST" })).status).toBe(401);
+    for (const body of [{}, { challenge: "bad" }, { challenge: "A".repeat(64) }, { challenge: "a".repeat(64), extra: true }]) {
+      expect((await h.request("/handshake", "POST", body)).status).toBe(400);
+    }
+    expect(h.calls).toEqual([]);
+  });
+  it("真实宿主查询失败时拒绝返回成功握手", async () => {
+    const h = await host();
+    h.query.listSessions = async () => { throw new Error("测试宿主不可用"); };
+    const response = await h.request("/handshake", "POST", { challenge: "a".repeat(64) });
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ code: "AGENT_UNAVAILABLE" });
+  });
   it("uses only the installed host's complete native corpus and sees subsequent terminal sessions", async () => {
     const h = await host();
     expect((await (await h.request("/sessions")).json()).sessions.map((s) => s.id)).toEqual(["terminal"]);
@@ -147,5 +178,6 @@ describe("DSH native Session Adapter", () => {
   it("validates its standard plugin configuration", () => {
     expect(Config["~standard"].validate({ port: -1 }).issues).toBeDefined();
     expect(Config["~standard"].validate({}).value.port).toBe(8791);
+    expect(Config["~standard"].validate({ instanceId: "bad/id" }).issues).toBeDefined();
   });
 });
