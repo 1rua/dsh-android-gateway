@@ -26,7 +26,7 @@ function fixture(events = runningLog(), status = "running", config = {}) {
     listeners.get(name).add(listener);
     return () => listeners.get(name).delete(listener);
   } }, config, token);
-  async function request(action = "/generation", method = "GET", body) {
+  async function request(action = "/generation", method = "GET", body, observeResponse) {
     const req = Object.assign(Readable.from(body === undefined ? [] : [Buffer.from(JSON.stringify(body))]), {
       method, url: prefix + action, headers: { authorization: `Bearer ${token}` },
     });
@@ -36,6 +36,7 @@ function fixture(events = runningLog(), status = "running", config = {}) {
       write(value) { this.frames.push(JSON.parse(value)); return true; },
       end(value) { if (value !== undefined) this.body = JSON.parse(value); this.writableEnded = true; },
     });
+    observeResponse?.(res);
     await handler(req, res);
     return res;
   }
@@ -65,11 +66,11 @@ it("宿主未附着且没有原生终态时诚实返回未知", async () => {
   expect((await h.request()).body.generation).toMatchObject({ state: "unknown" });
 });
 it("精确取消同步比较当前原生轮次并保留inbox", async () => {
-  const h = fixture();
+  const h = fixture(undefined, "running", { promptTimeoutMs: 20 });
   const response = await h.request("/cancel", "POST", { value: { generationId: "dsh:one:message:native-user" } });
   expect(response.status).toBe(200);
   expect(h.agent.cancel).toHaveBeenCalledExactlyOnceWith({ kind: "user" }, { keepInbox: true });
-  expect(response.body).toMatchObject({ outcome: "unknown", generationId: "dsh:one:message:native-user" });
+  expect(response.body).toMatchObject({ outcome: "outcome_unknown", generationId: "dsh:one:message:native-user" });
 });
 it("过期终态、排队目标与外部新轮次均不误取消", async () => {
   const h = fixture();
@@ -171,4 +172,102 @@ it("重复身份预查挂起时仍按观察期限清理且不重新入队", asyn
   completeRead({ events: [] });
   await new Promise((resolve) => setImmediate(resolve));
   expect(h.services.sessionController.prompt).not.toHaveBeenCalled();
+});
+it("重附已消费输入后迟到用户消息仍保留原生轮次", async () => {
+  const h = fixture(undefined, "running", { observationTimeoutMs: 100 });
+  const task = h.request("/messages", "POST", { text: "合成输入", clientMessageId: "stable-client" });
+  await new Promise((resolve) => setImmediate(resolve));
+  h.emit({ seq: 3, type: "user/message", data: input() });
+  h.emit({ seq: 4, type: "turn/end", data: { turn: 7, reason: { kind: "completed" } } });
+  expect((await task).frames.at(-1)).toMatchObject({ type: "done", userMessageId: "native-user" });
+});
+it("重附预查快照之后到达终态可由同步原生日志补回", async () => {
+  const h = fixture(undefined, "running", { observationTimeoutMs: 100 });
+  let captured = false;
+  h.agent.session.snapshotEvents = () => {
+    const snapshot = [...h.events];
+    if (!captured) {
+      captured = true;
+      queueMicrotask(() => h.emit({ seq: 3, type: "turn/end", data: { turn: 7, reason: { kind: "completed" } } }));
+    }
+    return snapshot;
+  };
+  const response = await h.request("/messages", "POST", { text: "合成输入", clientMessageId: "stable-client" });
+  expect(response.frames.at(-1)).toMatchObject({ type: "done" });
+  expect(h.services.sessionController.prompt).not.toHaveBeenCalled();
+});
+it("官方follow开场快照恢复既有attempt并继续接收正文分片", async () => {
+  const h = fixture(undefined, "running", { observationTimeoutMs: 100 });
+  h.services.sessionController.follow = async function* (request, signal) {
+    expect(request).toMatchObject({ address: { kind: "session", sessionId: "one" }, assistantStream: true });
+    yield { type: "snapshot", assistantStream: { revision: 2, activeAttempt: { turn: 7, attemptId: "already-running", stream: [{ type: "text-chunks", texts: ["已有前缀"] }] } } };
+    yield { type: "assistant-stream", frame: { type: "chunk", attemptId: "already-running", chunk: { type: "text-delta", text: "后续分片" } } };
+    const terminal = { seq: 3, type: "turn/end", data: { turn: 7, reason: { kind: "completed" } } };
+    h.emit(terminal);
+    yield { type: "event", event: terminal };
+    expect(signal.aborted).toBe(true);
+  };
+  const response = await h.request("/messages", "POST", { text: "合成输入", clientMessageId: "stable-client" });
+  expect(response.frames.filter((frame) => frame.type === "delta").map((frame) => frame.text)).toEqual(["已有前缀", "后续分片"]);
+  expect(response.frames.at(-1)).toMatchObject({ type: "done" });
+});
+it("follow开场已覆盖助手正文时后续仅终态仍保留完整回复身份", async () => {
+  const h = fixture(undefined, "running", { observationTimeoutMs: 100 });
+  h.services.sessionController.follow = async function* () {
+    h.events.push({ seq: 3, type: "assistant/message", data: { turn: 7, message: { id: "opening-answer", role: "assistant", content: [{ type: "text", text: "开场已覆盖回复" }] } } });
+    yield { type: "snapshot", assistantStream: { revision: 3 } };
+    const terminal = { seq: 4, type: "turn/end", data: { turn: 7, reason: { kind: "completed" } } };
+    h.emit(terminal);
+    yield { type: "event", event: terminal };
+  };
+  const response = await h.request("/messages", "POST", { text: "合成输入", clientMessageId: "stable-client" });
+  expect(response.frames.at(-1)).toMatchObject({ type: "done", text: "开场已覆盖回复", messageId: "opening-answer" });
+});
+it("预查排队而follow开场已运行时先绑定轮次再恢复前缀和分片", async () => {
+  const h = fixture(runningLog().slice(0, 1), "idle", { observationTimeoutMs: 100 });
+  h.services.sessionController.follow = async function* () {
+    h.agent.status = "running";
+    h.events.push(...runningLog().slice(1));
+    yield { type: "snapshot", assistantStream: { revision: 2, activeAttempt: { turn: 7, attemptId: "promoted-attempt", stream: [{ type: "text-chunks", texts: ["开场前缀"] }] } } };
+    yield { type: "assistant-stream", frame: { type: "chunk", attemptId: "promoted-attempt", chunk: { type: "text-delta", text: "继续分片" } } };
+    const terminal = { seq: 3, type: "turn/end", data: { turn: 7, reason: { kind: "completed" } } };
+    h.emit(terminal);
+    yield { type: "event", event: terminal };
+  };
+  const response = await h.request("/messages", "POST", { text: "合成输入", clientMessageId: "stable-client" });
+  expect(response.frames.filter((frame) => frame.type === "delta").map((frame) => frame.text)).toEqual(["开场前缀", "继续分片"]);
+});
+it("中断恢复终态仍以未知原身份阻挡后续队列", () => {
+  const events = runningLog();
+  events.push({ seq: 3, type: "turn/end", data: { turn: 7, reason: { kind: "interrupted" } } });
+  const projection = projectGenerations("one", events);
+  expect(projection.current).toMatchObject({ generationId: "dsh:one:message:native-user", state: "unknown" });
+});
+it("取消等待同一目标的异步原生终态且不影响后续轮次", async () => {
+  const h = fixture();
+  h.agent.cancel.mockImplementation(() => queueMicrotask(() => {
+    h.emit({ seq: 3, type: "turn/end", data: { turn: 7, reason: { kind: "aborted" } } });
+    h.emit({ seq: 4, type: "turn/start", data: { turn: 8 } });
+  }));
+  const response = await h.request("/cancel", "POST", { value: { generationId: "dsh:one:message:native-user" } });
+  expect(response.body.outcome).toBe("cancelled");
+  expect(h.agent.cancel).toHaveBeenCalledTimes(1);
+  expect([...h.listeners.values()].every((value) => value.size === 0)).toBe(true);
+});
+it("人类历史排除模型替换副本且原始身份仍可唯一恢复", async () => {
+  const h = fixture();
+  h.events.push({ seq: 3, time: 1000, surfaceOp: "append", type: "user/message", data: input() },
+    { seq: 4, time: 1001, surfaceOp: { op: "replace", startSeq: 3, endSeq: 3 }, type: "user/message", data: input("model-copy") },
+    { seq: 5, type: "turn/end", data: { turn: 7, reason: { kind: "completed" } } });
+  expect((await h.request("/history")).body.messages.map((message) => message.id)).toEqual(["native-user"]);
+  expect((await h.request("/generation?clientMessageId=stable-client")).body.generation).toMatchObject({ userMessageId: "native-user", state: "completed" });
+});
+it("取消观察连接关闭后仍等待原始目标终态，不重复取消后续工作", async () => {
+  const h = fixture();
+  h.agent.cancel.mockImplementation(() => setImmediate(() => h.emit({ seq: 3, type: "turn/end", data: { turn: 7, reason: { kind: "aborted" } } })));
+  let response;
+  const task = h.request("/cancel", "POST", { value: { generationId: "dsh:one:message:native-user" } }, (value) => { response = value; });
+  response.emit("close");
+  expect((await task).body.outcome).toBe("cancelled");
+  expect(h.agent.cancel).toHaveBeenCalledTimes(1);
 });
