@@ -339,7 +339,7 @@ it("clears idle heartbeat timers after terminal and disconnect", async () => {
     const reader = response.body.getReader();
     expect(new TextDecoder().decode((await reader.read()).value)).toBe("\n");
     h.end("one");
-    while (!(await reader.read()).done) { /* consume terminal */ }
+    while (!(await reader.read()).done) { /* 消费终态。 */ }
     expect(active.size).toBe(0);
     const abort = new AbortController();
     const second = await post("two", { text: "hello" }, { signal: abort.signal });
