@@ -1,0 +1,496 @@
+{
+  "passed": true,
+  "coreCommit": "6efbd0c6c45b9776cf9c38b7f19d37b4073b18c2",
+  "adapterCommit": "6efbd0c6c45b9776cf9c38b7f19d37b4073b18c2",
+  "adapterSnapshotSha256": {
+    "diagnostics.js": "f6b3e17b9d9fc539b10ef94ae53728b87318ae4e9b39a3f88aef8f55356a1c8f",
+    "generation.js": "b930781fff17d9c6370e9a290658648fd61c6909edf5294dfc632f3d1774e195",
+    "index.js": "54bec1dd68ae8fd5f0beeea064d05a5fc16a80e6e40cf5e9373d03aaa2153caa",
+    "vitest.config.js": "bfae642fc4911c28f798045b7ba3ca1543b619facf9da7c4da97195de462aeaa"
+  },
+  "sourceEvidenceKind": "干净提交",
+  "cleanup": {
+    "passed": true,
+    "dshExited": true
+  },
+  "checks": [
+    {
+      "check": "新隔离实例与白名单模型配置准备",
+      "passed": true
+    },
+    {
+      "check": "官方真实DSH启动1",
+      "passed": true
+    },
+    {
+      "check": "Core使用管理员授权通过实际HMAC握手注册",
+      "passed": true
+    },
+    {
+      "check": "完整Core启动并真实发现DSH1",
+      "passed": true
+    },
+    {
+      "check": "真实Core HTTP账号登录成功",
+      "passed": true
+    },
+    {
+      "check": "新Core原生会话列表为空",
+      "passed": true
+    },
+    {
+      "check": "App路径创建具有非空真实标题与时间",
+      "passed": true,
+      "titleMatches": true
+    },
+    {
+      "check": "独立原生控制器新建后Core真实发现",
+      "passed": true,
+      "titleMatches": true
+    },
+    {
+      "check": "Core SSE收到原生身份后断开不取消宿主任务",
+      "passed": true,
+      "elapsedSeconds": 0.034
+    },
+    {
+      "check": "Core运行中重复观察恢复真实增量与终态",
+      "passed": true,
+      "elapsedSeconds": 10.071,
+      "frameTypes": [
+        "generation",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "delta",
+        "done"
+      ],
+      "frameStates": [
+        {
+          "type": "generation"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "done"
+        }
+      ],
+      "states": [
+        "completed"
+      ]
+    },
+    {
+      "check": "Core同clientMessageId重放不新增原生输入或模型请求",
+      "passed": true,
+      "frameTypes": [
+        "generation",
+        "done"
+      ]
+    },
+    {
+      "check": "Core取消前目标运行且已收到真实模型增量",
+      "passed": true,
+      "realDeltaObserved": true
+    },
+    {
+      "check": "Core精确取消得到真实cancelled终态",
+      "passed": true,
+      "outcome": "cancelled",
+      "states": [
+        "cancelled"
+      ]
+    },
+    {
+      "check": "后继轮次运行且身份与旧轮次隔离",
+      "passed": true
+    },
+    {
+      "check": "Core取消旧完成目标明确already_completed",
+      "passed": true,
+      "outcome": "already_completed"
+    },
+    {
+      "check": "实际Core关闭前后继原生轮次仍在运行",
+      "passed": true
+    },
+    {
+      "check": "完整Core启动并真实发现DSH2",
+      "passed": true
+    },
+    {
+      "check": "Core重启后仅GET恢复同一原生轮次",
+      "passed": true
+    },
+    {
+      "check": "Core重启及旧取消未影响后继真实完成",
+      "passed": true,
+      "states": [
+        "running",
+        "completed"
+      ]
+    },
+    {
+      "check": "三轮Core输入各保留一条原生用户消息",
+      "passed": true
+    },
+    {
+      "check": "Core人工历史保留稳定ID与客户端关联且无内部注入",
+      "passed": true
+    },
+    {
+      "check": "官方真实DSH启动2",
+      "passed": true
+    },
+    {
+      "check": "完整Core启动并真实发现DSH3",
+      "passed": true
+    },
+    {
+      "check": "DSH与Core双重启后历史和原生身份散列一致",
+      "passed": true,
+      "count": 6
+    },
+    {
+      "check": "Core冷重放不重新执行原消息",
+      "passed": true,
+      "frameTypes": [
+        "generation",
+        "done"
+      ]
+    },
+    {
+      "check": "多轮及重启后标题保留且活动时间前进",
+      "passed": true,
+      "titleMatches": true
+    },
+    {
+      "check": "原生来源证明真实白名单模型且无工具或自动重试",
+      "passed": true,
+      "eventCount": 38,
+      "toolEvents": 0,
+      "retryEvents": 0,
+      "nativeFailureCodes": []
+    },
+    {
+      "check": "专用模型与凭据源保持不变",
+      "passed": true
+    }
+  ],
+  "checkCount": 28,
+  "passedCheckCount": 28,
+  "rawResultSha256": "abeee946b7e4be42864a3b1f3db577e63341a91be6d1c42a49ceb2c2af285d66"
+}
