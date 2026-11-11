@@ -4,3 +4,4 @@
       config:
         port: 8791
         tokenEnv: OAI_DSH_ADAPTER_TOKEN
+        instanceId: dsh
