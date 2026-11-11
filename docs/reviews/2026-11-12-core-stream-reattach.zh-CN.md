@@ -44,3 +44,12 @@
 ## 独立双轴收敛
 
 [独立审查报告](2026-11-12-core-stream-reattach-artifacts/stream-reattach-independent-review.md) 确认首轮两项 P2（预查期间提交权交接、迟到拒绝抢占权威读取）均已修复，最终 Standards / Spec 未解决问题各为 0。审查者独立执行正式新增回归 14/14、双桥竞态 6/6、真实 Core HTTP / 受控宿主反馈环 2/2，未处理拒绝与终态监听均为 0。其完整套件数量与开发回归分开记载，没有把受控层当作真实 DSH/模型、正式服务或模拟器验收。
+
+
+## 最终真实 Core HTTP 与模型验收
+
+主任务使用既有白名单模型和全新隔离账号/DSH Home，分别对两桥完成真实官方 DSH＋完整 Core HTTP/SSE＋模型的三输入场景。[独立桥字段白名单结果](2026-11-12-core-stream-reattach-artifacts/standalone-core-http-final-public-summary.json) 与 [内置桥字段白名单结果](2026-11-12-core-stream-reattach-artifacts/builtin-core-http-final-public-summary.json) 均为 **28/28 通过**，子进程清理成功。摘要没有模型配置、账号、地址、随机会话 ID、时间戳或凭据读取元数据，保留原结果 SHA256 供本地核对；原始结果未推送。
+
+实际覆盖运行中 Core SSE 断观察后的同身份增量重附、同身份重复提交不增加原生输入/模型请求、收到真实模型增量后精确取消并得到 cancelled、旧完成目标取消不影响后继、后继运行中重启 Core 后仅 GET 恢复、DSH/Core 双重启后的历史 ID 与正文散列保持、冷重放不执行及标题/活动时间保持。独立模型重附场景约 8.219 秒，内置约 10.071 秒。两次均无工具调用或自动模型重试。
+
+执行来源为干净提交：Core/内置 `6efbd0c6c45b9776cf9c38b7f19d37b4073b18c2`，独立 `8bd40eaa49c4b60fcf9aea554faaeb83cad4baf1`。后续提交仅增加审查/脱敏证据，执行模块摘要与当前源逐字一致。此项验证到 Core HTTP 和模型，不替代最终本机生产更新、原模拟器用户历史回读与设备能力验收。
