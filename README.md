@@ -34,7 +34,7 @@ Android App ↔ OAI Core ↔ DSH Native Session Adapter ↔ DSH
 - 所有登录 OAI Core 的有效账号，均可读取当前已明确接入的 DSH 实例所包含的真实原生会话。
 - 通过宿主真实 `sessionQuery.listSessions()` 读取原生会话列表。
 - 自动包含电脑终端创建的已有会话、后续在终端创建的新会话，以及从 OAI App 创建的新会话。
-- 会话历史来自宿主真实 `sessionQuery.readSurface()`。
+- 会话历史优先来自宿主完整原生日志 `sessionQuery.readSession()`，旧宿主缺少该接口时保留 `readSurface()` 的文字历史读取。
 - 不按 OAI 账号过滤 DSH 共享会话，不扫描未配置的其他用户目录、DSH Profile 或其他服务实例。
 - 严禁将 DSH 共享会话误判为独立 OAI 账号会话。
 
@@ -47,7 +47,8 @@ Android App ↔ OAI Core ↔ DSH Native Session Adapter ↔ DSH
 - `sessionController.create` -> `create`
 - `sessionController.prompt` + `session/event` -> `send` / `stream`
 - `sessionController.rename` -> `rename`
-- `sessionController.cancel` -> `cancel`
+- `sessionQuery.readSession` + 活动 Agent 同步句柄 -> `generationRecovery` 与精确目标 `cancel`
+- 稳定客户端提交身份 -> `clientMessageIdentity`；宿主去重的跨重启保证单独验证，不默认声明 `idempotentSend`
 
 > **注意**：当前未验证可靠的原生删除与归档能力，因此默认不声明 `delete` 和 `archive`（置为 `false`）。严禁用本地隐藏或墓碑伪装原生删除。
 
@@ -60,7 +61,13 @@ Android App ↔ OAI Core ↔ DSH Native Session Adapter ↔ DSH
 - 注册握手：`POST /handshake` 接收 Core 的随机挑战，返回实例标识、`deployment` 会话范围、真实在线状态、能力和 HMAC 签名证明。
 - 实例标识：配置项 `instanceId`，默认读取 `OAI_DSH_INSTANCE_ID`，未设置时为 `dsh`；必须与 Core 候选清单中的 `instanceId` 一致。
 - 请求预算：请求体严格限制小于 1 MiB（1048576 字节），超限返回 413 `PAYLOAD_TOO_LARGE`
-- 响应格式：使用 NDJSON (`application/x-ndjson`) 转发宿主消息流增量及终态事件
+- 响应格式：使用 NDJSON (`application/x-ndjson`) 转发宿主消息流增量及终态事件；空行保活不携带新正文。
+- 消息身份：协商后接收 `clientMessageId`，关联真实原生用户消息、回复和历史；相同正文不同身份保持独立。
+- 生成查询：`GET /sessions/:id/generation` 返回权威活动状态；带 `clientMessageId` 或 `generationId` 查询原始接纳记录及持久终态，支持修订号等待。
+- 生成身份：从已接纳的原生用户消息 ID 构成，排队、运行和终态保持一致；没有原生终态且宿主已离线时明确为 `unknown`。
+- 精确取消：在同一同步调用栈核对活动 Agent 与目标原生轮次后执行取消，旧轮次或无目标请求不能取消后续任务。真实取消终态尚未到达时，不把取消受理冒充已取消。
+- 重复提交：已有原生接纳记录时只附着观察或重放真实终态，不重新调用宿主 prompt；未知结果保留未知，禁止无条件重发。
+- 观察资源：宿主受理与 HTTP 观察独立，断连、观察期限和慢消费只清理观察；队列按帧与字节有界并等待可写，溢出结束观察后通过原身份查结果。
 
 ## 安装与部署
 
@@ -121,5 +128,8 @@ plugin_manager action=install_bundle target=/absolute/path/to/dsh-android-gatewa
 ```bash
 npm test              # 运行适配器单元测试
 npm run typecheck     # TypeScript 类型检查
-npm run verify:upstream # 校验与上游 open-android-intelligence 参考实现一致性（防代码漂移）
+npm run verify:upstream # 核对会话、生成投影和回归测试；明确保留两侧部署Token加载差异
 ```
+
+
+本轮完整修复和验收状态见 [实施记录](docs/plans/DSH_OAI_CORE_NATIVE_RELIABILITY.md)。单元测试、真实宿主、专用模型、完整 Core 与 Android 分别记录证据；未完成的层级不以加载成功或失败路径替代。
