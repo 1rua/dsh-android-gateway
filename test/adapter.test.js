@@ -70,6 +70,28 @@ async function host({ legacyUserWrapper = false, terminalReason = "completed", o
 }
 
 describe("DSH native Session Adapter", () => {
+  it.each(["blocked", "max-tokens"])("确定失败的原生终态诊断不伪装未知：%s", async (terminalReason) => {
+    const h = await host({ terminalReason });
+    const previous = process.env.OAI_DSH_ADAPTER_DIAGNOSTICS;
+    process.env.OAI_DSH_ADAPTER_DIAGNOSTICS = "1";
+    const originalWrite = process.stderr.write;
+    const diagnostics = [];
+    process.stderr.write = function (chunk, ...args) {
+      if (String(chunk).startsWith("oai_native ")) diagnostics.push(JSON.parse(String(chunk).slice(11)));
+      else return originalWrite.call(this, chunk, ...args);
+      return true;
+    };
+    try {
+      const response = await h.request("/sessions/terminal/messages", "POST", { text: "合成终态诊断" });
+      await response.text();
+      expect(diagnostics.find((item) => item.stage === "adapter.dsh.native_terminal").state).toBe("failed");
+    } finally {
+      process.stderr.write = originalWrite;
+      if (previous === undefined) delete process.env.OAI_DSH_ADAPTER_DIAGNOSTICS;
+      else process.env.OAI_DSH_ADAPTER_DIAGNOSTICS = previous;
+    }
+  });
+
   it("向宿主传入有效受理信号并保留原生完成结果", async () => {
     const h = await host();
     const nativePrompt = h.controller.prompt;

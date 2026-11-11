@@ -229,7 +229,7 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
         const reason = event.data.reason?.kind;
         trace("adapter.dsh.native_terminal", { conversationId: id, clientMessageId: body.clientMessageId,
           messageId: identity.messageId,
-          state: ({ completed: "completed", error: "failed", aborted: "cancelled" })[reason] ?? "unknown" });
+          state: ({ completed: "completed", error: "failed", blocked: "failed", "max-tokens": "failed", aborted: "cancelled" })[reason] ?? "unknown" });
         finish(turnResult(reason, finalText, identity));
       }
     };
@@ -516,7 +516,7 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
       if (Object.keys(body).some((key) => key !== "value")) throw fail("SCHEMA_INVALID", 400);
       if (!capabilities()[action]) throw fail("UNSUPPORTED_CAPABILITY");
       if (action === "cancel") {
-        const value = body.value;
+        const value = body.value ?? undefined;
         if (value !== undefined && (!value || typeof value !== "object" || Array.isArray(value)
             || Object.keys(value).length !== 1 || typeof value.generationId !== "string" || !value.generationId || value.generationId.length > 1024)) throw fail("SCHEMA_INVALID", 400);
         const projection = await generationProjection(id);
