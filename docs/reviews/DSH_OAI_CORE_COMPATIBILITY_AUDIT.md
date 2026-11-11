@@ -4,7 +4,7 @@
 
 **原八项缺陷及实施中新增问题已取得双仓修复、独立审查与对应层级的成功证据。** 两桥分别完成真实官方 DSH＋完整 Core HTTP/SSE＋既有专用真实模型的 **28/28** 检查；原隔离 Android 用户 10 覆盖同签名 APK 后，旧取消会话重开、历史回读、后继真回复完成与原生会话重命名成功。本机最终精确更新后，重新 HMAC 注册、原实例/范围、全部既有会话能力、运行源码摘要和单 Bundle 均核验成功。
 
-**仍不能写“完整 Full 全绿”或“任意故障都精确一次”。** 本机 Full 留有既有 Hermes 虚拟环境 lib64 符号链接 ENOENT；后续 Android 模块 2279 项成功属于明确分段结果。最终 dev 的既有全量 CI [run 43077533569](https://github.com/1rua/open-android-intelligence/actions/runs/43077533569)已触发，本文写入时为进行中；最终源/服务下模拟器续验由主任务回填。未支持能力与未验证范围在 C/E 逐项注明。
+**本轮 DSH 原八项缺陷与本机既有支持范围验收通过，但整个仓库仍不满足发布门槛。** 原 Full CI [43077533569](https://github.com/1rua/open-android-intelligence/actions/runs/43077533569)已完成并失败：历史 Hermes 契约 pin 与当前协议冲突、设置备份格式参数 Lint 两项均在原审计基线已存在，分别由 OAI #158 / #159 跟踪，不是本轮 DSH 回归。现行全部 lanes 的 [oai-core.yml 43079814644](https://github.com/1rua/open-android-intelligence/actions/runs/43079814644)在后续 `ef09a03e` 成功；它没有覆盖失败的历史 pin、Lint/assemble 与 APK 完整性门禁，不能抵消 Full 失败。本机 Full 的既有 Hermes lib64 ENOENT、分段 Android 2279 项成功与一次 PR 时序失败也分别保留。最终同源码模拟器已完成真实 TCP 中断12秒恢复，详见 B/D；不宣称任意故障精确一次。
 
 ## A. 修复后总体结论
 
@@ -12,10 +12,10 @@
 | --- | --- |
 | 能否连接 Core，连接是否稳定？ | 已验证真实注册、Bearer/HMAC、完整 Core 登录与发现、Core 运行中重启和 DSH/Core 双重启；本机最终重新 HMAC 成功，目标服务 active/running、NRestarts=0，三次授权健康约 0.154—0.309 秒。只说明所测运行和恢复范围，不外推长期稳定、无缝 Token 轮换或任意网络故障。 |
 | 会话功能是否可靠？ | App 路径创建、原生控制器新建后 Core 发现、标题/活动时间、历史原生身份、重命名、重启回读、原 user10 旧数据均有证据。305 合成空正文会话与十五万事件摘要回归通过；真实终端图形界面双向操作没有独立 UI 证据。 |
-| 消息、取消与恢复是否可靠？ | 两桥完整 Core 的增量/终态、同身份运行中重附、同身份回放不增加原生输入/请求、精确取消、旧目标隔离、运行中 Core 重启后 GET 恢复和双重启冷回放均通过。Android 旧数据刷新/重开与后继完成通过；未知事实永久缺失、任意跨故障精确一次及所有排队时序不在该证据范围。 |
-| 是否仍有阻碍正常使用的已知 Bug？ | 原八项与新增规模、历史、重附缺陷均已有修复及回归/现场证据，最终独立审查未解决 Standards/Spec 问题各 0。仍保留本机 Full 环境失败与一次 PR 安装测试时序失败，未删除断言，也未将单项补跑冒充整轮成功。 |
+| 消息、取消与恢复是否可靠？ | 两桥完整 Core 的增量/终态、同身份运行中重附、同身份回放不增加原生输入/请求、精确取消、旧目标隔离、运行中 Core 重启后 GET 恢复和双重启冷回放均通过。Android旧数据刷新/重开与后继完成、真实TCP断开12秒后原输入/回复各1且历史保留均通过；未知事实永久缺失、任意跨故障精确一次及所有排队时序不在该证据范围。 |
+| 是否仍有阻碍正常使用的已知 Bug？ | 原八项与新增规模、历史、重附缺陷均已有修复及回归/现场证据，最终独立审查未解决 Standards/Spec 问题各 0。原Full CI另有两个基线已有门禁阻塞（#158/#159）；本机Full环境失败与一次PR安装测试时序失败也保留，未删除断言，未将单项补跑冒充整轮成功。 |
 | 是否有关键功能缺失，责任在哪里？ | 附件、原生命令/模型切换、结构化工具/审批、归档/删除、eventSync 仍不支持；本轮没有承诺扩展。设备认证/绑定/调度由 Core、执行和本地授权由 Android 负责；一项真实只读 state API 的授权、结果消费和 ACK 释放通过，不能推成全部设备能力已验收。 |
-| 是否已满足完整发布门槛？ | 现有会话/文字/精确取消/生成恢复修复已获得较完整分层证据，本机最终运行模块已对应双28摘要；正式收口仍需回填最终 CI、最终源/服务模拟器续验和独立文档审查。完整 Full 没有全绿，不宣称完成任意场景或全部功能发布验收。 |
+| 是否已满足完整发布门槛？ | 现有会话/文字/精确取消/生成恢复的本轮修复及本机支持范围验收已通过；54个Core Python文件和双桥JS实际摘要匹配最终源，真实TCP中断恢复通过。完整仓库发布仍未达标：Full CI失败的#158/#159尚未修复；现行矩阵成功和本轮DSH通过不能代替Full。文档交付最后由独立审查与主任务合并收口。 |
 
 ### 固定快照、运行版本与已合并交付
 
@@ -26,7 +26,8 @@
 | 最终 OAI 合并 | OAI #154，`74c007570ecf8a90b0edea96893500d1b995bf00` |
 | 双28实际执行提交 | Core/内置 `6efbd0c6c45b9776cf9c38b7f19d37b4073b18c2`；独立 `8bd40eaa49c4b60fcf9aea554faaeb83cad4baf1`；后续仅证据/说明增量，实际 JS 摘要与最终运行逐项一致 |
 | 实际宿主及模型 | DSH `0.2.2-rc.1`；专用白名单 `sub2api / deepseek-flash / high`。不修改真实默认模型，不复制模型密钥；不宣称这是上游最新发行版 |
-| 运行器 | Node `v26.7.0`；最终门禁另使用带 DSH 的 Node24 PATH；Python `3.14.6`，pytest `9.1.1`、aiohttp `3.14.5`；OAI Vitest `4.1.10`、独立 Vitest `3.2.4`；Android JDK21 / SDK36，保留各日志实际版本 |
+| 运行器 | Node `v26.7.0`；最终门禁另使用带 DSH 的 Node24 PATH；Python `3.14.6`，pytest `9.1.1`、aiohttp `3.14.5`；最终内置147项与独立104项均实际使用共享 Vitest `4.1.10`；独立package/锁定依赖为Vitest `3.2.4`，不能将锁定版本当作这次实际运行器；Android JDK21 / SDK36，保留各日志实际版本 |
+| 现行全部lanes CI快照 | `ef09a03e80716565299086322a69bc5cdb8aa3d1`；在74c之后含其他任务设置UI增量，运行43079814644成功；不是双28执行源码，也不是74c原Full的成功重跑 |
 | 原 user10 最终历史 APK | 源 `0e5b636735819f0c24ae5da1350e2e70e5aa559c`；SHA256 `33edbe4a3a8019b01b08c8f2ff47a2487445ec2ef90b52b7f67a22006b03e042`；六内建包已验、签名相同、保留原数据覆盖 |
 
 [独立桥完整 Core 28 项](2026-11-12-core-stream-reattach-artifacts/standalone-core-http-final-public-summary.json)、[内置桥完整 Core 28 项](2026-11-12-core-stream-reattach-artifacts/builtin-core-http-final-public-summary.json)分别保存固定来源与原结果 SHA256。运行入口摘要为独立 `4feb77fbd23ff9a00a65cfffe8ade90acf67fa0727454382a6797adb7863cebe`、内置 `54bec1dd68ae8fd5f0beeea064d05a5fc16a80e6e40cf5e9373d03aaa2153caa`；共同 generation.js 为 `b930781fff17d9c6370e9a290658648fd61c6909edf5294dfc632f3d1774e195`。本机最终[白名单核验](2026-11-12-final-acceptance-artifacts/production-final-public-summary.json)按部署角色列出三组入口/生成/诊断摘要，全部匹配。
@@ -53,11 +54,13 @@
 
 ### 本机更新、原数据与模拟器现场结果
 
-本机精确更新保留原选定 Home/Profile、账号、Agent manifests/key digests、account links 与 Core config；最终重新 HMAC、相同实例/部署范围、全部既有会话能力、运行模块摘要、单 active dsh-android-gateway 均成功，Core/DSH 服务 active/running，NRestarts=0。生产核验没有读取真实会话正文、没有发真实消息；不能从健康推断已验证所有私人历史正文。[最终部署白名单](2026-11-12-final-acceptance-artifacts/production-final-public-summary.json)不含PID、私有目录或系统身份库结构。
+本机精确更新保留原选定 Home/Profile、账号、Agent manifests/key digests、account links 与 Core config；最终重新 HMAC、相同实例/部署范围、全部既有会话能力、运行模块摘要、单 active dsh-android-gateway 均成功，Core/DSH 服务 active/running，NRestarts=0。生产核验没有读取真实会话正文、没有发真实消息；不能从健康推断已验证所有私人历史正文。最终比较初次发现54个Core Python文件中53个已匹配，唯一旧`gateway/transport.py`缺少结构化replay诊断和heartbeat响应头；在私有备份后精确更新并重启Core，[54/54比较](2026-11-12-final-acceptance-artifacts/production-core-final-source-comparison.json)现全部一致，[更新摘要](2026-11-12-final-acceptance-artifacts/production-core-transport-update-result.json)确认未更改凭据或会话。随后重新HMAC和服务状态核验仍通过。[最终部署白名单](2026-11-12-final-acceptance-artifacts/production-final-public-summary.json)不含PID、私有目录或系统身份库结构。
 
 [原生数据保留摘要](2026-11-12-final-acceptance-artifacts/production-retained-data-after-corpus.json)明确：**1140个原路径全部保留，但不是所有文件属性逐字未变**。一个空lock的mtime变化；一个既有v4压缩日志追加80字节空session/end-seed内部标记，仅读取旧尾部之后新增帧的[信封元数据](2026-11-12-final-acceptance-artifacts/production-native-appended-frame-metadata.json)，没有读取旧正文。主密钥属性由前序核验保留；不写“所有文件从未持久写入”。
 
-原用户10已在[同签名六包APK](2026-11-12-final-acceptance-artifacts/history-final-apk-evidence.json)覆盖后[重开旧取消会话、读历史、继续发送完成](2026-11-12-final-acceptance-artifacts/history-fixed-reopen-result.json)，无MESSAGE_ID_CONFLICT与历史失败提示，取消输入保留；[重命名经Core回读](2026-11-12-final-acceptance-artifacts/history-native-rename-summary.json)确认同一nativeSessionId与目标标题。该APK执行身份已固定；最后合并源/重启后服务的模拟器续验仍由主任务补充，不将后端模块更新自动当作重新完成全部设备界面验收。
+原用户10已在[同签名六包APK](2026-11-12-final-acceptance-artifacts/history-final-apk-evidence.json)覆盖后[重开旧取消会话、读历史、继续发送完成](2026-11-12-final-acceptance-artifacts/history-fixed-reopen-result.json)，无MESSAGE_ID_CONFLICT与历史失败提示，取消输入保留；[重命名经Core回读](2026-11-12-final-acceptance-artifacts/history-native-rename-summary.json)确认同一nativeSessionId与目标标题。该APK执行身份已固定。最后使用与双28相同最终执行模块的隔离Core/DSH，在同一user10完成[真实TCP中断恢复](2026-11-12-final-acceptance-artifacts/emulator-final-tcp-outage-public-summary.json)：UI只发送一次，确认原轮次running后主动关闭2条既存TCP并停止Core监听，独立GET确认不可达；12秒中断期间UI没有误报已连接。恢复后原轮次completed、原生用户输入1/回复1、旧历史ID保留、回复标记可见、UI重新已连接，无历史冲突或残留停止/Busy状态。此前仅移除adb reverse/监听的结果没有证明既有TCP断开，因此未当作真实断网归档。这是隔离Core/DSH同源码与原user10的验收，不是在生产私人历史中发消息。
+
+生产公开入口另完成[账号登录与原DSH发现](2026-11-12-final-acceptance-artifacts/production-public-auth-result.json)：认证和Agent发现成功，两个既有Agent中DSH为online；未读取真实会话列表/正文、未发消息、凭据未落盘。部署服务与隔离App验收的证据分别报告，不能互相冒充。
 
 [双Profile活跃任务摘要](2026-11-12-final-acceptance-artifacts/dual-profile-active-public-summary.json)为11/11通过，目标重启约0.208秒，非目标PID/启动/参数/环境/目录不变、原真实generation完成、354次健康0失败（最大30.17ms）、一次用户输入与一次请求、2个监听全部释放、目标无消息、原配置/凭据指纹不变、全部自有进程退出。`followStarted=0`，不把未触发follow记为执行。首次工具误检查旧Popen产生SYNTHETIC_HOST_EXITED失败，保留在现场记录；修正只等新PID后，以新Home新输入再验一次通过，没有重投未知输入。此项是真PID后备，**不替代双systemd unit**。
 
@@ -74,10 +77,10 @@
 | 加载、注册、Bearer/HMAC与健康 | 通过：真实宿主、完整Core、本机最终注册 | 最终管理员HMAC与能力为准；半注入早期create/send=false记录仍保留，不代替最终状态 |
 | 列表、App创建、原生新增发现、标题/时间 | 通过：完整Core双28；原user10发现与历史 | 305合成列表与十五万事件回归；真实终端图形界面双端操作未验证 |
 | 重命名、持久文字历史和应用重开 | 通过：Core/DSH重启、原user10同nativeID回读 | 非文字历史不支持；原生ID/来源关联通过，私人正文未读 |
-| 文字增量、完成/失败、身份关联 | 通过：双28完整Core成功/取消与受控失败终态；Android真回复 | 最终源/服务模拟器续验待补；未验证所有上游模型失败形态 |
+| 文字增量、完成/失败、身份关联 | 通过：双28完整Core成功/取消与受控失败终态；Android真回复 | 最终同源码隔离Core/DSH与原user10真实TCP中断恢复通过；未验证所有上游模型失败形态 |
 | 精确取消、旧目标与后继 | 通过：双桥真模型、Android停止与后继completed | 保留原取消能力；不是禁用cancel换取绿灯 |
 | 同身份重附、重复POST、Core运行中重启、双重启冷回放 | 通过：双28及独立受控窗口 | idempotentSend=false；未验证任意跨故障精确一次 |
-| 同会话排队、未知结果、网络恢复全部排列 | 通过：受控屏障/不重投及部分Core恢复；未验证：全部Android断网/排队排列 | 不说所有Queue坏，也不说所有故障排列正常；未知保留且不自动重发 |
+| 同会话排队、未知结果、网络恢复全部排列 | 通过：受控屏障/不重投、Core恢复及原user10的12秒真实TCP中断恢复；未验证：全部网络/排队排列 | 不说所有Queue坏，也不说所有故障排列正常；未知保留且不自动重发 |
 | 慢消费、有界队列、长历史、多会话隔离 | 通过：受控2000帧、drain/租约/竞态/十五万事件/305空正文 | 未验证任意大正文、第三方插件、长时间内存稳定、真实多账号压力 |
 | 归档/删除 | 不支持 | archive=false、delete=false，维持原支持范围 |
 | 附件输入、原生图片/文件历史 | 不支持 | Core/Android附件接口存在不等于DSH桥支持；本轮不扩功能 |
@@ -97,8 +100,8 @@
 
 | 验证与实际入口 | 通过 / 失败 / 跳过 | 证据与精度 |
 | --- | --- | --- |
-| 两侧完整Node：`node <已有vitest入口> run`，OAI指定adapter配置/文件 | 内置147 / 0 / 0；独立104 / 0 / 0 | [内置](2026-11-12-core-stream-reattach-artifacts/reattach-final-builtin-node.txt)、[独立](2026-11-12-core-stream-reattach-artifacts/reattach-final-standalone-node.txt)；真实宿主可选项在这次完整套件执行 |
-| Core DSH契约pytest + 最小竞态增量 | 102 / 0 / 0；增量跨语言6 / 0 / 0 | [契约](2026-11-12-core-stream-reattach-artifacts/reattach-core-contract.txt)、[跨语言](2026-11-12-core-stream-reattach-artifacts/reattach-final-core-cross-language.txt)；不同轮次，不伪称同命令108 |
+| 两侧完整Node：在OAI工作树根执行`node ../../node_modules/vitest/vitest.mjs run --config integrations/dsh-session-adapter/vitest.config.js`；在独立桥工作树根执行`node ../../node_modules/vitest/vitest.mjs run` | 内置147 / 0 / 0；独立104 / 0 / 0 | [内置](2026-11-12-core-stream-reattach-artifacts/reattach-final-builtin-node.txt)、[独立](2026-11-12-core-stream-reattach-artifacts/reattach-final-standalone-node.txt)；真实宿主可选项在这次完整套件执行 |
+| Core DSH契约pytest + 最小竞态增量 | 102 / 0 / 0；增量跨语言1个pytest用例 / 0 / 0 | [契约](2026-11-12-core-stream-reattach-artifacts/reattach-core-contract.txt)、[跨语言](2026-11-12-core-stream-reattach-artifacts/reattach-final-core-cross-language.txt)；增量日志实际为1 passed，用例内含多项协议断言，不能写6个pytest通过；不同轮次，不相加冒充同一套件 |
 | 类型与`OAI_UPSTREAM_ROOT=... node tools/verify-upstream-drift.mjs` | 类型成功；11对一致 | [类型](2026-11-12-core-stream-reattach-artifacts/reattach-final-typecheck.txt)、[漂移](2026-11-12-core-stream-reattach-artifacts/reattach-final-drift.txt) |
 | 独立审查14项正式回归、双桥6竞态、两侧CoreHTTP受控反馈环 | 14 / 0 / 0；6 / 0；2 / 0 | [独立结构化结果](2026-11-12-core-stream-reattach-artifacts/reattach-independent-review-results.json)，模型请求0，不能计作真实模型 |
 | 完整Core＋真实官方宿主＋模型 | 独立28/28、内置28/28，清理成功 | 上文双28白名单；原生eventCount各38，工具0、重试0、原生失败码空；独立重附约8.219秒、内置10.071秒 |
@@ -107,7 +110,18 @@
 | `npm run test:full`完整本机链 | 尚无完整成功；保留1项既有Hermes venv lib64 symlink ENOENT | 宿主权限复核同样失败；此前缺jszip、系统Python与历史fixture错误已分别补依赖/解释器/固定fixture并定向补跑，机器重启中断不算通过 |
 | 最终Fast与PR门禁 | Fast147全过；PR146过/1失败，同一旧install测试单项补跑通过 | [Fast](2026-11-12-core-stream-reattach-artifacts/reattach-final-fast.txt)、[PR失败](2026-11-12-core-stream-reattach-artifacts/reattach-final-pr.txt)、[补跑](2026-11-12-core-stream-reattach-artifacts/reattach-install-abort-focused-recheck.txt)。失败为原10ms回滚测试recovery目录时序，未改源码/断言，整轮仍失败 |
 | 较早Fast/PR的可选宿主层 | 139过 / 0失败 / 5跳过 | PATH缺DSH的该轮明确跳过；不以该轮宣称真实宿主层执行；最终完整Node单独覆盖 |
-| 最终dev全量CI | 进行中，不能填写通过 | OAI head74c00757，run43077533569；无watch或前台阻塞轮询；结束后由主任务单次核对回填 |
+| 原最终dev Full CI | completed / failure | `ci.yml`，head74c00757，run43077533569；Node历史Hermes契约pin与Android StringFormatMatches两项既有阻塞，后续相关步骤跳过，不能填写通过 |
+| 现行Core全部lanes矩阵 | completed / success | `oai-core.yml`，head ef09a03e，run43079814644；Core3.11/3.12、Hermes、DSH、Android全部lanes与CI Gate成功。该头包含其他任务设置UI增量，且工作流未覆盖历史pin、Lint/assemble/APK完整性，不能代替原Full |
+| 原user10最终TCP中断恢复 | passed=true，单输入1 / 回复1 | 关闭2条既有TCP+停止监听，独立GET确认不可达12秒；恢复后原轮次完成、旧历史ID保留、UI恢复、无冲突/残留Busy；仅adb reverse移除案例不作为真断网证据 |
+
+### Full失败责任与现行矩阵的独立证据
+
+[CI白名单摘要](2026-11-12-final-acceptance-artifacts/final-ci-public-summary.json)记录本次直接单次回读的两次运行状态：原Full `43077533569`在`74c00757`为completed/failure，现行全部lanes `43079814644`在`ef09a03e`为completed/success。没有watch或前台阻塞轮询。原Full两项失败分别由[OAI #158](https://github.com/1rua/open-android-intelligence/issues/158)与[OAI #159](https://github.com/1rua/open-android-intelligence/issues/159)单独负责：
+
+- 历史Hermes fixture固定`ebe527da2426dd25877dd335786e80cf85d1cdde`，其契约pin `f0b3f1bd4f6f3301b820e38c9f3241bcac05cd10`与当前四类协议受管路径不相同；差异在更早的`17895223c16fc84dfbe7c889943a608f7fbaa095`已出现。原审计基线24172841到最终74c的这些路径完全相同，本轮DSH没有引入差异。不能通过随意更新外仓pin、删断言或跳过门禁掩盖。
+- Android `SettingsBackupPresentation.kt:11`将Double传给`%1$s`，`lintFullDebug`报StringFormatMatches。Kotlin与`strings_settings.xml:78`在基线24172841和74c的blob完全相同，属于既有文案类型契约错误。Android构建失败后的插件入APK完整性步骤被跳过，不能记为已执行通过。
+
+现行`oai-core.yml`全矩阵成功补齐当前Core/适配器/Android测试证据，但没有运行上述Lint、APK assemble、完整性与历史pin门禁。即使这些基线阻塞非本轮DSH回归，整个仓库的发布标准仍未满足；本轮DSH支持范围验收可以独立判为通过。
 
 ### 复跑入口与输出隔离
 
@@ -142,13 +156,13 @@ python docs/reviews/2026-11-12-core-stream-reattach-artifacts/core-http-reattach
 
 | 优先级 | 实际剩余事项 | 处理与结论边界 |
 | --- | --- | --- |
-| 交付收尾，需回填 | 最终dev全量CI和最终源/服务模拟器续验 | 固定74c00757与d6093134；CI结束单次核对状态/链接，记录最终界面和原数据；未完成前不写完整发布验收已过 |
+| 全仓发布阻塞，独立修复 | 原Full43077533569失败，OAI #158历史pin与#159文案Lint | 两项均基线已有、非DSH引入，仍须各自修复并在明确SHA取得Full/构建/完整性证据。现行ef09a03e矩阵成功不能抵消；本报告不宣称全仓发布达标 |
 | 门禁环境缺口，明确保留 | 本机Full的Hermes lib64符号链接ENOENT及旧安装10ms时序失败 | 环境/测试事实与产品缺陷分开，不删除断言；分段2279成功与单项补跑不能覆盖整轮失败。远端Full即使成功也应作为独立证据 |
 | 支持边界，不扩大任务 | 附件、命令/模型切换、工具/审批、归档/删除、eventSync | 仍明确不支持，不能写“全功能”；没有要求本轮新增这些能力，也不以Core已有接口冒充桥支持 |
 | 未验证现场，按实际范围陈述 | 双systemd unit、无缝Token轮换/热重载、真实首次安装/卸载、任意大正文/第三方插件、所有网络与排队排列 | 维持未验证，不追加无关假设检查；PID后备活跃任务、当前本机更新、具体恢复场景已通过的事实保留 |
 | 身份/权限与恢复边界 | deployment共享corpus、设备Core/Android职责、未知提交屏障 | 不传账号到DSH，不复制设备授权；事实缺失不伪空闲、不自动重发、不宣称跨故障精确一次；私人会话正文保持未读取 |
 
-正式关闭总跟踪前，主任务应回填最后CI与模拟器续验，完成独立文档审查，更新[实施状态](../plans/DSH_OAI_CORE_IMPLEMENTATION_STATUS.md)及[计划](../plans/DSH_OAI_CORE_REMEDIATION_PLAN.md)中的历史进度说明；把已通过、失败、未验证、不支持与职责归属分别写清。所有文档和白名单材料都在仓库docs内，原始私有运行材料不入库。
+本轮DSH支持范围已完成最终源码部署、公开登录发现与原user10真实TCP中断恢复；CI两次运行状态已固定。正式关闭本轮总跟踪前，主任务应完成独立文档审查与远端issue状态核对，并将全仓发布阻塞移交已建OAI #158/#159，更新[实施状态](../plans/DSH_OAI_CORE_IMPLEMENTATION_STATUS.md)及[计划](../plans/DSH_OAI_CORE_REMEDIATION_PLAN.md)中的历史进度说明；把已通过、失败、未验证、不支持与职责归属分别写清。所有文档和白名单材料都在仓库docs内，原始私有运行材料不入库。
 
 ---
 

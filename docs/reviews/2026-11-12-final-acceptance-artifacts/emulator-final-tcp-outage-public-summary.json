@@ -1,0 +1,25 @@
+{
+  "sameAndroidUser10": true,
+  "singleUiSubmission": true,
+  "runningBeforeDisconnect": true,
+  "closedExistingTcpConnections": 2,
+  "listenerUnreachableDuringCut": true,
+  "disconnectUiCaptured": true,
+  "offlineUiSaysConnected": false,
+  "states": [
+    "completed"
+  ],
+  "nativeState": "completed",
+  "originalInputCount": 1,
+  "replyCount": 1,
+  "historyPreviousIdsPreserved": true,
+  "finalMarkerPresent": true,
+  "uiConnectedAfterRecovery": true,
+  "historyConflictAfterRecovery": false,
+  "generationStopControlStillVisible": false,
+  "uiReplyMarkerVisible": true,
+  "passed": true,
+  "outageSeconds": 12,
+  "runtimeSourceMatchesFinalDouble28": true,
+  "scope": "同user10与合成隔离Core/DSH；主动关闭既存TCP和Core监听，不是在生产私人历史发消息"
+}
