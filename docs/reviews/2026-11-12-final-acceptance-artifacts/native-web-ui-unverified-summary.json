@@ -1,0 +1,11 @@
+{
+  "officialWebUiVisualVerification": "未验证",
+  "reason": "现有浏览器控制不可用；IAB不可用、无Chrome/Chromium、专用Firefox未开放控制端口",
+  "appCreatedSessionVisibleInOfficialWebUi": false,
+  "messageVisibleInOfficialWebUi": false,
+  "webUiCreateThenCoreDiscover": false,
+  "uiNewSessionsCreated": 0,
+  "newModelRequests": 0,
+  "notEvidenceOfBusinessFailure": true,
+  "nativeControllerAndCoreDiscoveryEvidenceReportedSeparately": true
+}
