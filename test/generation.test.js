@@ -283,3 +283,25 @@ it("兼容Core将缺省轮次序列化为null并只取消权威当前轮次", as
   expect(response.body).toMatchObject({ outcome: "cancelled", generationId: "dsh:one:message:native-user" });
   expect(h.agent.cancel).toHaveBeenCalledTimes(1);
 });
+
+
+it.each([false, true])("人工历史不把四类宿主上下文伪装用户输入且保留旧来源，旧包装=%s", async (wrapped) => {
+  const h = fixture([], "idle");
+  const kinds = ["agent-instructions", "runtime-context", "skill-catalog", "time-context"];
+  h.events.push({ seq: 0, time: 1000, type: "turn/start", data: { turn: 1 } },
+    { seq: 1, time: 1100, type: "user/message", surfaceOp: "append", data: input("real-user", "real-client") });
+  for (const [index, kind] of kinds.entries()) h.events.push({ seq: index + 2, time: 1200 + index,
+    type: "user/message", surfaceOp: "append", data: { ...input("internal-" + index, undefined),
+      source: { kind }, content: [{ type: "text", text: "仅模型可见的合成上下文" }] } });
+  h.events.push({ seq: 6, time: 1300, type: "user/message", surfaceOp: "append", data: {
+    ...input("legacy-user", undefined), source: {} } },
+    { seq: 7, time: 1400, type: "assistant/message", surfaceOp: "append", data: { turn: 1,
+      message: { id: "answer", role: "assistant", content: [{ type: "text", text: "真实模型合成回复" }] } } },
+    { seq: 8, time: 1500, type: "turn/end", data: { turn: 1, reason: { kind: "completed" } } });
+  if (wrapped) for (const event of h.events) if (event.type === "user/message") event.data = { message: event.data };
+  const before = JSON.stringify(h.events);
+  const response = await h.request("/history");
+  expect(response.status).toBe(200);
+  expect(response.body.messages.map((item) => item.id)).toEqual(["real-user", "legacy-user", "answer"]);
+  expect(JSON.stringify(h.events)).toBe(before);
+});

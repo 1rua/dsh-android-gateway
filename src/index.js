@@ -16,6 +16,8 @@ const fail = (code, status = 409) => Object.assign(new Error(code), { code, stat
 const textOf = (message) => (message?.content ?? []).filter((part) => part.type === "text").map((part) => part.text).join("");
 // 当前宿主的用户消息直接存放在 data；助手消息保留轮次包装，兼容旧版用户消息包装。
 const messageOf = (event) => event.type === "user/message" ? (event.data?.message ?? event.data) : event.data?.message;
+// 官方客户端将这四类来源归为默认折叠的模型上下文，不是用户提交。
+const contextSources = new Set(["agent-instructions", "runtime-context", "skill-catalog", "time-context"]);
 const iso = (time) => new Date(time).toISOString();
 const turnResult = (reason, text, identity = {}) => {
   if (reason === "completed") return { type: "done", text, ...identity };
@@ -493,7 +495,8 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
         }
         // 官方人类会话记录只包含 append 来源，模型专用 replace 副本不进入界面。
         const messages = snapshot.events.filter((event) => ["user/message", "assistant/message"].includes(event.type)
-          && (event.surfaceOp === undefined || event.surfaceOp === "append"))
+          && (event.surfaceOp === undefined || event.surfaceOp === "append")
+          && (event.type !== "user/message" || !contextSources.has(messageOf(event)?.source?.kind)))
           .map((event) => {
             const message = messageOf(event);
             if (typeof message?.id !== "string" || !["user", "assistant"].includes(message.role) || !Array.isArray(message.content)) throw fail("HOST_INCOMPATIBLE", 502);
