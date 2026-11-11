@@ -1,0 +1,8 @@
+
+ RUN  v4.1.10 /mnt/data/projects/open-android-intelligence/.worktrees/dsh-stream-reattach
+
+
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+   Start at  01:58:04
+   Duration  259ms (transform 55ms, setup 0ms, import 113ms, tests 56ms, environment 0ms)
