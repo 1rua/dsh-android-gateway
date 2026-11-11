@@ -1,0 +1,9 @@
+{
+  "publicAccountAuthenticationSucceeded": true,
+  "nativeAgentDiscoverySucceeded": true,
+  "existingDshOnline": true,
+  "agentCount": 2,
+  "sessionListsOrBodiesRead": false,
+  "messagesSubmitted": 0,
+  "credentialsPersisted": false
+}

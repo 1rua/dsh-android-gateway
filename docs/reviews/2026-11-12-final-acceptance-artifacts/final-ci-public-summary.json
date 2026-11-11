@@ -1,0 +1,37 @@
+{
+  "full": {
+    "runId": 43077533569,
+    "head": "74c007570ecf8a90b0edea96893500d1b995bf00",
+    "status": "completed",
+    "conclusion": "failure",
+    "workflow": "ci.yml",
+    "url": "https://github.com/1rua/open-android-intelligence/actions/runs/43077533569",
+    "blockers": [
+      {
+        "issue": 158,
+        "kind": "固定历史Hermes fixture契约pin与当前协议要求冲突",
+        "alreadyExistedAtAuditBaseline": true,
+        "changedByDshRemediation": false
+      },
+      {
+        "issue": 159,
+        "kind": "设置备份Double参数与字符串%1$s的StringFormatMatches Lint冲突",
+        "alreadyExistedAtAuditBaseline": true,
+        "changedByDshRemediation": false
+      }
+    ]
+  },
+  "currentMatrix": {
+    "runId": 43079814644,
+    "head": "ef09a03e80716565299086322a69bc5cdb8aa3d1",
+    "status": "completed",
+    "conclusion": "success",
+    "workflow": "oai-core.yml",
+    "url": "https://github.com/1rua/open-android-intelligence/actions/runs/43079814644",
+    "laterUnrelatedSettingsUiChangesIncluded": true,
+    "allLanesEnabled": true,
+    "doesNotReplaceFullLintAssembleOrHistoricalPin": true
+  },
+  "metadataReadBack": true,
+  "wholeRepositoryReleaseGateSatisfied": false
+}
