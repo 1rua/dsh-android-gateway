@@ -4,7 +4,18 @@
 
 **原八项缺陷及实施中新增问题已取得双仓修复、独立审查与对应层级的成功证据。** 两桥分别完成真实官方 DSH＋完整 Core HTTP/SSE＋既有专用真实模型的 **28/28** 检查；原隔离 Android 用户 10 覆盖同签名 APK 后，旧取消会话重开、历史回读、后继真回复完成与原生会话重命名成功。本机最终精确更新后，重新 HMAC 注册、原实例/范围、全部既有会话能力、运行源码摘要和单 Bundle 均核验成功。
 
-**本轮 DSH 原八项缺陷与本机既有支持范围验收通过，但整个仓库仍不满足发布门槛。** 原 Full CI [43077533569](https://github.com/1rua/open-android-intelligence/actions/runs/43077533569)已完成并失败：历史 Hermes 契约 pin 与当前协议冲突、设置备份格式参数 Lint 两项均在原审计基线已存在，分别由 OAI #158 / #159 跟踪，不是本轮 DSH 回归。现行全部 lanes 的 [oai-core.yml 43079814644](https://github.com/1rua/open-android-intelligence/actions/runs/43079814644)在后续 `ef09a03e` 成功；它没有覆盖失败的历史 pin、Lint/assemble 与 APK 完整性门禁，不能抵消 Full 失败。本机 Full 的既有 Hermes lib64 ENOENT、分段 Android 2279 项成功与一次 PR 时序失败也分别保留。最终同源码模拟器已完成真实 TCP 中断12秒恢复，详见 B/D；不宣称任意故障精确一次。
+**本轮 DSH 原八项缺陷与本机既有支持范围验收通过；全仓发布门槛已从两个基线阻塞收敛为一个待确认阻塞。** 原 Full CI [43077533569](https://github.com/1rua/open-android-intelligence/actions/runs/43077533569)固定记录了历史 Hermes 契约 pin 与设置备份格式 Lint 两项失败。OAI #159 已由 PR #162 合并提交 dcc4746d4028921e66cce4efbacd2901ef22cb66 修复，远端 Android App Regression 重跑通过；OAI #158 的历史契约门禁修复在 PR #163 当前提交 652040fae7bb46043ec61c718278609edc4051bf，新基线 CI 尚在运行，未提前宣称 Full 已通过。OAI #164 已记录并修复历史门禁回归测试的向量夹具假阳性；OAI #165 继续跟踪 checkpoint 成功后旧 LOCAL_SAVE_FAILED 通知残留，原始模拟器短暂保存失败的具体根因仍未确定；OAI #167 跟踪与本次契约修复无关的 WebSocket Pong 时序测试波动。现行全部 lanes 的 [oai-core.yml 43079814644](https://github.com/1rua/open-android-intelligence/actions/runs/43079814644)成功，但它不能替代当前提交的 Full 结果。本机 Full 的 Hermes lib64 环境缺口和分段测试边界仍保留。最终同源码模拟器已完成真实 TCP 中断12秒恢复，详见 B/D；不宣称任意故障精确一次。
+
+## 0. 2026-11-12 Issue 与修复计划收口
+
+- 总跟踪仍为 [DSH #1](https://github.com/1rua/dsh-android-gateway/issues/1)，已合并的 DSH #7/#8/#11/#13/#14 与 OAI #144/#145/#147/#149/#151/#154 保持有效。
+- 已关闭 OAI #159（PR #162，合并提交 dcc4746d）；OAI #166 的账号切换通知测试首次失败在失败作业重跑后通过，按测试波动关闭并保留日志证据。
+- OAI #158 由 PR #163 处理；OAI #164 的测试假阳性已在同一 PR 补齐六份向量、all-pass/fail/missing/duplicate 对照，独立复核无 P0/P1/P2 阻断，待新基线 CI 完成后再合并和关闭。
+- OAI #142 继续跟踪活动生成查询、断线重附与队列恢复；隔离 Repository→Workbench→SQLite 诊断 5/5 通过，但真实模拟器验收曾出现短暂“会话记录保存失败”提示，不能用合成测试替代现场根因确认。
+- OAI #165 单独跟踪通知生命周期：受控注入 checkpoint 失败后，后续保存和回读成功但旧 LOCAL_SAVE_FAILED 仍可残留；修复应绑定阶段、稳定错误码、会话/修订代次，并在恢复成功后清理旧通知。
+- OAI #167 单独跟踪 GatewayWebSocketBackpressureTest 的控制 Pong 时序失败；该失败与历史契约门禁没有调用关系，已完成一次失败重跑并通过，需后续判断是否保留为时序波动或补充测试稳定性修复。
+
+**当前发布判定**：DSH/OAI 真实兼容链、消息会话能力和本机模拟器范围仍按前述证据通过；完整仓库发布必须等待 PR #163 新基线 CI 完成，并继续把 #142/#165 的未确定现场风险标为开放。
 
 ## A. 修复后总体结论
 
