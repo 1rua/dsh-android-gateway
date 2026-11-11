@@ -1,0 +1,160 @@
+{
+  "reviewDate": "2026-11-12",
+  "snapshots": {
+    "oai": {
+      "base": "eecbb06fbe591591bc367e08b8fd0f98b0e7e23d",
+      "head": "cf57e834897798fa0b58c40c3bb1781c867b02e3",
+      "indexSha256": "54bec1dd68ae8fd5f0beeea064d05a5fc16a80e6e40cf5e9373d03aaa2153caa"
+    },
+    "dsh": {
+      "base": "c44511547ecc12e53717ab290a49cf35adc88c22",
+      "head": "93222dc3dba25d8bce87fe67f5dda134f0b2f2f2",
+      "indexSha256": "4feb77fbd23ff9a00a65cfffe8ade90acf67fa0727454382a6797adb7863cebe",
+      "verifiedExecutionHead": "25a988e807f7854b313285d632c0d312cc749aa1",
+      "verifiedExecutionIndexSha256": "0c14bfc648843bff7df690cbe85e6eca49ad549a0c202c25acb086e203417de9",
+      "laterChange": "仅中文注释，已逐处核对，无执行语义差异；最终6项独立探针再通过"
+    }
+  },
+  "priorConfirmedSpecFindings": 2,
+  "priorFindingsFixedAndRetested": 2,
+  "finalUnresolvedStandardsFindings": 0,
+  "finalUnresolvedSpecFindings": 0,
+  "independentNodeTests": {
+    "passed": 14,
+    "failed": 0,
+    "skipped": 0
+  },
+  "independentRaceProbe": {
+    "syntheticOnly": true,
+    "checks": [
+      {
+        "name": "内置桥：首观察预查断开后唯一首次提交转交",
+        "passed": true,
+        "prompts": 1
+      },
+      {
+        "name": "内置桥：旧传输拒绝等待另一观察权威预查",
+        "passed": true,
+        "prompts": 1
+      },
+      {
+        "name": "内置桥：旧轮次迟到失败不影响新声明及其他身份Busy",
+        "passed": true,
+        "prompts": 2
+      },
+      {
+        "name": "独立桥：首观察预查断开后唯一首次提交转交",
+        "passed": true,
+        "prompts": 1
+      },
+      {
+        "name": "独立桥：旧传输拒绝等待另一观察权威预查",
+        "passed": true,
+        "prompts": 1
+      },
+      {
+        "name": "独立桥：旧轮次迟到失败不影响新声明及其他身份Busy",
+        "passed": true,
+        "prompts": 2
+      }
+    ],
+    "unhandled": [],
+    "allPassed": true
+  },
+  "independentCoreHttp": [
+    {
+      "bridge": "builtin",
+      "scenario": "真实Core和桥处理器，宿主事件为受控夹具，不是模型E2E",
+      "modelRequests": 0,
+      "firstFrameTypes": [
+        "generation"
+      ],
+      "bridgeAfterClientDisconnect": {
+        "promptCount": 1,
+        "status": "running",
+        "listeners": 2
+      },
+      "secondFrames": [
+        {
+          "type": "generation",
+          "generationId": "dsh:one:message:native-user"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "done",
+          "generationId": "dsh:one:message:native-user",
+          "userMessageId": "native-user",
+          "messageId": "native-reply"
+        }
+      ],
+      "bridgeAfterReattach": {
+        "promptCount": 1,
+        "status": "running",
+        "listeners": 4
+      },
+      "bridgeAfterNativeTerminal": {
+        "promptCount": 1,
+        "status": "idle",
+        "listeners": 0
+      },
+      "nativeTerminalState": "completed",
+      "reproducedSessionBusy": false,
+      "sameGenerationObservedWithoutResubmission": true,
+      "passed": true,
+      "cleanup": {
+        "dshFixtureExited": true
+      },
+      "result": "core-http-reattach-probe-20261111T181003Z-33231a/results.json"
+    },
+    {
+      "bridge": "standalone",
+      "scenario": "真实Core和桥处理器，宿主事件为受控夹具，不是模型E2E",
+      "modelRequests": 0,
+      "firstFrameTypes": [
+        "generation"
+      ],
+      "bridgeAfterClientDisconnect": {
+        "promptCount": 1,
+        "status": "running",
+        "listeners": 2
+      },
+      "secondFrames": [
+        {
+          "type": "generation",
+          "generationId": "dsh:one:message:native-user"
+        },
+        {
+          "type": "delta"
+        },
+        {
+          "type": "done",
+          "generationId": "dsh:one:message:native-user",
+          "userMessageId": "native-user",
+          "messageId": "native-reply"
+        }
+      ],
+      "bridgeAfterReattach": {
+        "promptCount": 1,
+        "status": "running",
+        "listeners": 4
+      },
+      "bridgeAfterNativeTerminal": {
+        "promptCount": 1,
+        "status": "idle",
+        "listeners": 0
+      },
+      "nativeTerminalState": "completed",
+      "reproducedSessionBusy": false,
+      "sameGenerationObservedWithoutResubmission": true,
+      "passed": true,
+      "cleanup": {
+        "dshFixtureExited": true
+      },
+      "result": "core-http-reattach-probe-20261111T181003Z-688ab5/results.json"
+    }
+  ],
+  "driftPairsPassed": 11,
+  "deviceOrRealModelValidationPerformed": false
+}

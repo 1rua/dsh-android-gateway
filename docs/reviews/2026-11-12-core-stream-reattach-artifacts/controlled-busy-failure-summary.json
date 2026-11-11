@@ -1,0 +1,28 @@
+{
+  "scenario": "真实Core和桥处理器，宿主事件为受控夹具，不是模型E2E",
+  "modelRequests": 0,
+  "firstFrameTypes": [
+    "generation"
+  ],
+  "bridgeAfterClientDisconnect": {
+    "promptCount": 1,
+    "status": "running",
+    "listeners": 2
+  },
+  "bridgeAfterReattach": {
+    "promptCount": 1,
+    "status": "running",
+    "listeners": 2
+  },
+  "bridgeAfterNativeTerminal": {
+    "promptCount": 1,
+    "status": "idle",
+    "listeners": 0
+  },
+  "nativeTerminalState": "completed",
+  "reproducedSessionBusy": true,
+  "passed": true,
+  "cleanup": {
+    "dshFixtureExited": true
+  }
+}

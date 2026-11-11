@@ -1,0 +1,35 @@
+{
+  "syntheticOnly": true,
+  "results": [
+    {
+      "name": "内置桥",
+      "scenario": "第二观察正在等待权威历史，旧prompt传输失败先到，持久原生受理事实随后返回",
+      "prompts": 1,
+      "secondFrames": [
+        {
+          "type": "error",
+          "code": "OUTCOME_UNKNOWN",
+          "state": "unknown"
+        }
+      ],
+      "knownNativeUser": "native-user",
+      "knownGeneration": "dsh:one:message:native-user",
+      "listeners": 0
+    },
+    {
+      "name": "独立桥",
+      "scenario": "第二观察正在等待权威历史，旧prompt传输失败先到，持久原生受理事实随后返回",
+      "prompts": 1,
+      "secondFrames": [
+        {
+          "type": "error",
+          "code": "OUTCOME_UNKNOWN",
+          "state": "unknown"
+        }
+      ],
+      "knownNativeUser": "native-user",
+      "knownGeneration": "dsh:one:message:native-user",
+      "listeners": 0
+    }
+  ]
+}

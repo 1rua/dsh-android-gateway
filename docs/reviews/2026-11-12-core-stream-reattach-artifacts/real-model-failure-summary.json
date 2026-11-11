@@ -1,0 +1,64 @@
+{
+  "evidenceKind": "隔离合成输入真实模型失败结果的字段白名单摘要；原始运行结果不推送",
+  "passed": false,
+  "checks": [
+    {
+      "check": "新隔离实例与白名单模型配置准备",
+      "passed": true
+    },
+    {
+      "check": "官方真实DSH启动1",
+      "passed": true
+    },
+    {
+      "check": "Core使用管理员授权通过实际HMAC握手注册",
+      "passed": true
+    },
+    {
+      "check": "完整Core启动并真实发现DSH1",
+      "passed": true
+    },
+    {
+      "check": "真实Core HTTP账号登录成功",
+      "passed": true
+    },
+    {
+      "check": "新Core原生会话列表为空",
+      "passed": true
+    },
+    {
+      "check": "App路径创建具有非空真实标题与时间",
+      "passed": true
+    },
+    {
+      "check": "独立原生控制器新建后Core真实发现",
+      "passed": true
+    },
+    {
+      "check": "Core SSE收到原生身份后断开不取消宿主任务",
+      "passed": true,
+      "elapsedSeconds": 0.103
+    },
+    {
+      "check": "Core运行中重复观察恢复真实增量与终态",
+      "passed": false,
+      "elapsedSeconds": 0.237,
+      "frameTypes": [
+        "error"
+      ],
+      "states": [
+        "running",
+        "completed"
+      ]
+    }
+  ],
+  "failure": {
+    "stage": "disconnect-recover",
+    "code": "ASSERTION_FAILED",
+    "errorType": "Failure"
+  },
+  "cleanup": {
+    "passed": true,
+    "dshExited": true
+  }
+}
