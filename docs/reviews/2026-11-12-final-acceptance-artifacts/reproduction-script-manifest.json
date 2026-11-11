@@ -1,0 +1,22 @@
+{
+  "core_http_reliability.py": {
+    "executedSourceSha256": "61f7720350c5c27eb4b25098a55f32b3b4d7a295e1824c8623fa8ce666c77e9b",
+    "archivedSourceSha256": "08a2adca11f895fefa05a63a49b18f5e4fa5762a070e6f59b20fcacf9d6b306d",
+    "changes": "仅显式模型/凭据参数、docs外输出根与相对结果引用；场景断言未改"
+  },
+  "run_real_model.py": {
+    "executedSourceSha256": "ccc333a549946552f625626a8df349d0c02481ed189683ae171def0d63ea5a72",
+    "archivedSourceSha256": "b1053a6e5bba824b81acba1cb479257511237e166b252143f541d62af1231419",
+    "changes": "仅显式模型/凭据参数、docs外输出根与相对结果引用；场景断言未改"
+  },
+  "reliability.py": {
+    "executedSourceSha256": "4e67d7247e36f13d0c5cf3964c12afa9d8f4437fcc9e4f134546d01db6b30d16",
+    "archivedSourceSha256": "4e67d7247e36f13d0c5cf3964c12afa9d8f4437fcc9e4f134546d01db6b30d16",
+    "changes": "逐字复制"
+  },
+  "boot-isolated.mjs": {
+    "executedSourceSha256": "6296120be145b4f9ee55183ff01184d5a206d5cf9e08fdd78ae8914f3c60d268",
+    "archivedSourceSha256": "6296120be145b4f9ee55183ff01184d5a206d5cf9e08fdd78ae8914f3c60d268",
+    "changes": "逐字复制"
+  }
+}

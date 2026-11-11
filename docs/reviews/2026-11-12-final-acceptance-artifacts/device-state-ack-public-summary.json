@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "declaredAndroidUser": 10,
+  "androidUserMappingVerifiedByScript": false,
+  "capabilityId": "org.openandroidintelligence.screen-reader.read",
+  "parameters": {
+    "operation": "state"
+  },
+  "requestIdSha256": "34bc445318fe50cbf04efdb2095559cc413a31f740af9decb64db307916e3182",
+  "states": [
+    {
+      "state": "pending",
+      "localAuthorizationState": null
+    },
+    {
+      "state": "claimed",
+      "localAuthorizationState": "awaiting_confirmation"
+    },
+    {
+      "state": "succeeded",
+      "localAuthorizationState": null
+    }
+  ],
+  "display": {
+    "widthPixels": 1080,
+    "heightPixels": 2400,
+    "rotation": 0
+  },
+  "nodesEmpty": true,
+  "acknowledged": true,
+  "resultPayloadReleased": true,
+  "boundary": "仅真实只读state API，设备与Android用户对应由主任务在用户10上下文核对；不包含账号、设备ID、完整能力目录或屏幕元数据"
+}

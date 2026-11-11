@@ -1,0 +1,78 @@
+{
+  "scenario": "双Profile非目标真实活跃任务隔离",
+  "passed": true,
+  "sourceCommits": {
+    "core": "eec66e04188b44921ebe58e61cbbd7ba58ddb8b8",
+    "adapter": "a36b54201bc42b708925adfa2468f6d2a1852103"
+  },
+  "sourceSha256": {
+    "diagnostics.js": "e8b75dad9ede772415c12960ae9ce6018803e1b890e368c038b0dea13253c364",
+    "generation.js": "b930781fff17d9c6370e9a290658648fd61c6909edf5294dfc632f3d1774e195",
+    "index.js": "b5ed48fae300da3acfc2f5d651b286577af67724a9ec10580ed9959b87022c56",
+    "configuration.py": "edeb77f087ca08e03dde0e5a7a4a6f0ce58e20b0dfedf53d77e60f556fc2d448"
+  },
+  "checks": [
+    {
+      "check": "两套官方宿主已启动且初始均无会话",
+      "passed": true
+    },
+    {
+      "check": "重启前非目标真实轮次运行且已有模型请求头",
+      "passed": true
+    },
+    {
+      "check": "活跃任务期间目标Profile重启受理",
+      "passed": true,
+      "elapsedSeconds": 0.208
+    },
+    {
+      "check": "目标PID改变且Home和Profile保持",
+      "passed": true
+    },
+    {
+      "check": "非目标PID启动时间命令环境及目录全部不变",
+      "passed": true
+    },
+    {
+      "check": "非目标原轮次最终真实完成且回复来自同一任务",
+      "passed": true
+    },
+    {
+      "check": "重启期间非目标健康持续可用",
+      "passed": true,
+      "sampleCount": 354,
+      "failedSamples": 0,
+      "maximumElapsedMs": 30.17
+    },
+    {
+      "check": "本轮桥监听全部释放且未遗留follow",
+      "passed": true
+    },
+    {
+      "check": "仅一次原生输入和一次真实模型请求且未调用工具或重试",
+      "passed": true
+    },
+    {
+      "check": "目标Profile没有收到消息或创建原生会话",
+      "passed": true,
+      "targetSessionCount": 0
+    },
+    {
+      "check": "真实模型配置和凭据文件内容未变",
+      "passed": true
+    }
+  ],
+  "checkCount": 11,
+  "actualMessageSubmissions": 1,
+  "targetModelSubmissions": 0,
+  "configurationUnchangedAtCleanup": true,
+  "credentialOnDisk": false,
+  "cleanup": {
+    "passed": true,
+    "ownedProcessesRemaining": 0,
+    "errors": []
+  },
+  "boundary": "真实官方DSH与Core PID后备；不替代双systemd unit验收",
+  "observerBoundary": "本次新输入通路注册的2个桥监听均释放；followStarted=0，未把未触发的follow重附通路记为本次已执行。",
+  "sourceResultSha256": "83ec4058400716e6249abfb548fa2e4314cd80580183dca7ae3baf651ba0e5b2"
+}

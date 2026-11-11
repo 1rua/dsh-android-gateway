@@ -1,0 +1,39 @@
+{
+  "implementationHead": "0cf9f1965c96ba0d7218bf64014887e643f1f104",
+  "reviewEndHead": "0e5b636735819f0c24ae5da1350e2e70e5aa559c",
+  "sourceSha256": "321604b189d946ce440210f5f239fe6d7935627dfacb907aa963addd2ee55b04",
+  "focused": {
+    "tests": "5",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "timestamp": "2026-11-11T17:42:27",
+    "time": "3.213"
+  },
+  "testCases": [
+    {
+      "name": "workbenchReopensCancelledPlaceholderAndReadsNativeHistoryWithoutPostingAgain",
+      "passed": true
+    },
+    {
+      "name": "legacySteeringIdentityUpgradesDurablyWithoutRecreatingTheUserMessage",
+      "passed": true
+    },
+    {
+      "name": "acceptedIdentityUpgradeAndStalePlaceholderWritePreserveNativeIdentityAndNewerFacts",
+      "passed": true
+    },
+    {
+      "name": "historySnapshotCanUpgradePlaceholderWhileRealIdentityConflictsStillRollback",
+      "passed": true
+    },
+    {
+      "name": "cancelledClientPlaceholderAdoptsNativeHistoryAfterReopenWithoutLosingTerminalFacts",
+      "passed": true
+    }
+  ],
+  "compiledIdentityProbeChecks": 10,
+  "confirmedStandardsFindings": 0,
+  "confirmedSpecFindings": 0,
+  "deviceValidationPerformed": false
+}

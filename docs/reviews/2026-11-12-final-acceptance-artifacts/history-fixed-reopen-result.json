@@ -1,0 +1,12 @@
+{
+  "sameOldAndroidUser": true,
+  "reopenedPriorCancelledConversation": true,
+  "connected": true,
+  "conflictVisible": false,
+  "historyFailureVisible": false,
+  "cancelledInputRetained": true,
+  "afterSameUserApkUpgrade": true,
+  "subsequentReplyMarkerVisible": true,
+  "subsequentReplyTerminalCompleted": true,
+  "sourceApkCommit": "0e5b636735819f0c24ae5da1350e2e70e5aa559c"
+}
