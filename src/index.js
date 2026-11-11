@@ -105,12 +105,59 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
     // 宿主查询没有可验证的归档状态，不能声明无法如实回读的管理能力。
     return value;
   };
-  const records = async () => {
+  const records = async (signal) => {
     if (!capabilities().list) throw fail("HOST_INCOMPATIBLE", 503);
-    return await services().query.listSessions();
+    return await services().query.listSessions(signal);
   };
-  const requireSession = async (id) => {
-    const record = (await records()).find((item) => item.header?.id === id);
+  // 目录及精确读取只属于观察请求；断开与期限均不取消宿主生成。
+  const queryRequest = async (req, res, operation) => {
+    if (req.aborted || res.destroyed || res.writableEnded) throw fail("OBSERVER_CLOSED", 499);
+    const abort = new AbortController();
+    const closed = () => abort.abort(fail("OBSERVER_CLOSED", 499));
+    const timer = setTimeout(() => abort.abort(fail("AGENT_QUERY_TIMEOUT", 504)), budgets.promptTimeoutMs);
+    req.once("aborted", closed);
+    res.once("close", closed);
+    let rejectAbort;
+    const cancelled = new Promise((_, reject) => { rejectAbort = () => reject(abort.signal.reason); });
+    abort.signal.addEventListener("abort", rejectAbort, { once: true });
+    try {
+      return await Promise.race([operation(abort.signal), cancelled]);
+    } finally {
+      clearTimeout(timer);
+      req.off("aborted", closed);
+      res.off("close", closed);
+      abort.signal.removeEventListener("abort", rejectAbort);
+      abort.abort(fail("OBSERVER_CLOSED", 499));
+    }
+  };
+  // 整个插件共享两个读取槽，多个观察请求也不会放大宿主冷读并发。
+  let summaryReaders = 0;
+  const summaryWaiters = [];
+  const withSummaryReader = async (signal, operation) => {
+    signal.throwIfAborted();
+    if (summaryReaders >= 2) {
+      await new Promise((resolve, reject) => {
+        const waiter = { resolve: () => { signal.removeEventListener("abort", cancelled); resolve(); } };
+        const cancelled = () => {
+          const index = summaryWaiters.indexOf(waiter);
+          if (index >= 0) summaryWaiters.splice(index, 1);
+          reject(signal.reason);
+        };
+        summaryWaiters.push(waiter);
+        signal.addEventListener("abort", cancelled, { once: true });
+      });
+    } else summaryReaders++;
+    try {
+      signal.throwIfAborted();
+      return await operation();
+    } finally {
+      const next = summaryWaiters.shift();
+      if (next) next.resolve();
+      else summaryReaders--;
+    }
+  };
+  const requireSession = async (id, signal) => {
+    const record = (await records(signal)).find((item) => item.header?.id === id);
     if (!record) throw fail("SESSION_NOT_FOUND", 404);
     return record;
   };
@@ -127,13 +174,61 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
     return typeof agent?.session?.snapshotEvents === "function"
       ? projectGenerations(id, agent.session.snapshotEvents(), { liveRunning: agent.status === "running" }) : undefined;
   };
-  const summary = async (record) => {
+  const summary = async (record, signal) => withSummaryReader(signal, async () => {
     const { query } = services();
-    const title = typeof query.readTitle === "function" ? await query.readTitle(record.header.id) : undefined;
-    const surface = typeof query.readSurface === "function" ? await query.readSurface(record.header.id) : undefined;
+    const sessions = ctx.get("sessions");
+    let title, surface;
+    if (typeof query.observeSession === "function" && typeof sessions?.prepare === "function") {
+      // 官方精确观察不做全库预查；租约仅在此同步摘要折叠期间持有。
+      const observation = await query.observeSession(record.header.id, { signal, projectionMode: "none" });
+      let prepared;
+      try {
+        signal.throwIfAborted();
+        // prepare 不进入宿主会话表、不发布事件、不写持久层；复用官方 surface 解释器。
+        prepared = sessions.prepare(randomUUID(), { seed: observation.events, meta: observation.header,
+          inheritedEventCount: observation.inheritedEventCount });
+        const titleEvent = observation.events.findLast((event) => event.type === "session/title");
+        // 与官方 foldSessionTitle 相同的最新不可变标题字段，不触发逐项全库扫描。
+        title = titleEvent === undefined ? undefined : { title: titleEvent.data.title, updatedAt: titleEvent.time };
+        surface = { events: prepared.surface.nodes.map((seq) => observation.events[seq]) };
+      } finally {
+        prepared?.[Symbol.dispose]?.();
+        observation[Symbol.dispose]();
+      }
+    } else {
+      // 旧宿主仍保留已存在的摘要能力，读取并发同样有界。
+      title = typeof query.readTitle === "function" ? await query.readTitle(record.header.id, signal) : undefined;
+      signal.throwIfAborted();
+      surface = typeof query.readSurface === "function" ? await query.readSurface(record.header.id) : undefined;
+    }
+    signal.throwIfAborted();
     let updatedAt = Math.max(record.header.createdAt, title?.updatedAt ?? 0);
     for (const event of surface?.events ?? []) updatedAt = Math.max(updatedAt, event.time);
     return { id: record.header.id, title: title?.title ?? record.header.id, updatedAt: iso(updatedAt), archived: false };
+  });
+  const summaries = async (signal) => {
+    const listed = await records(signal);
+    const results = new Array(listed.length);
+    const failed = new AbortController();
+    const readingSignal = AbortSignal.any([signal, failed.signal]);
+    let next = 0, failure;
+    const worker = async () => {
+      while (next < listed.length && !failure) {
+        readingSignal.throwIfAborted();
+        const index = next++;
+        try { results[index] = await summary(listed[index], readingSignal); }
+        catch (error) {
+          failure ??= error;
+          failed.abort(failure);
+          throw error;
+        }
+      }
+    };
+    const completed = await Promise.allSettled(Array.from({ length: Math.min(2, listed.length) }, worker));
+    if (failure) throw failure;
+    const rejected = completed.find((value) => value.status === "rejected");
+    if (rejected) throw rejected.reason;
+    return results;
   };
   const json = (res, value, status = 200) => {
     res.writeHead(status, { "content-type": "application/json", "cache-control": "no-store" });
@@ -413,7 +508,7 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
             || !/^[a-f0-9]{64}$/.test(body.challenge)) throw fail("SCHEMA_INVALID", 400);
         const declared = capabilities();
         // 与状态接口一样核验真实宿主查询，不能凭函数存在就声明在线。
-        await records();
+        await queryRequest(req, res, records);
         const online = declared.list && declared.history;
         const sorted = Object.fromEntries(Object.entries(declared).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0));
         const payload = { capabilities: sorted, challenge: body.challenge, instanceId: budgets.instanceId,
@@ -424,11 +519,11 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
       if (req.method === "GET" && path === PREFIX + "/status") {
         const caps = capabilities();
         // 执行真实查询，持久层失败时不能仅凭插件已加载就声明在线。
-        await records();
+        await queryRequest(req, res, records);
         return json(res, { online: caps.list && caps.history, capabilities: caps });
       }
       if (path === PREFIX + "/sessions") {
-        if (req.method === "GET") return json(res, { sessions: await Promise.all((await records()).map(summary)) });
+        if (req.method === "GET") return json(res, { sessions: await queryRequest(req, res, summaries) });
         if (req.method === "POST") {
           if (!capabilities().create) throw fail("UNSUPPORTED_CAPABILITY");
           const body = await bodyOf(req);
@@ -440,7 +535,7 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
           const created = await services().controller.create({ sessionId: randomUUID(), cwd: config.cwd, agentPreset: config.agentPreset });
           trace("adapter.dsh.create_returned", { conversationId: created.sessionId });
           if (body.title) await services().controller.rename({ sessionId: created.sessionId, title: body.title });
-          return json(res, { session: await summary(await requireSession(created.sessionId)) });
+          return json(res, { session: await queryRequest(req, res, async (signal) => summary(await requireSession(created.sessionId, signal), signal)) });
         }
       }
       const match = new RegExp(`^${PREFIX}/sessions/([^/]+)/(history|generation|messages|rename|archive|delete|cancel)$`).exec(path);
@@ -557,6 +652,7 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
       }
       return json(res, { id, action, ...(action === "archive" ? { archived: body.value } : {}) });
     } catch (error) {
+      if (res.destroyed || res.writableEnded) return;
       if (!res.headersSent) json(res, { code: error.code ?? "AGENT_UNAVAILABLE" }, error.status ?? 503);
       else if (!res.writableEnded) res.end();
     }
