@@ -271,3 +271,15 @@ it("取消观察连接关闭后仍等待原始目标终态，不重复取消后�
   expect((await task).body.outcome).toBe("cancelled");
   expect(h.agent.cancel).toHaveBeenCalledTimes(1);
 });
+
+
+it("兼容Core将缺省轮次序列化为null并只取消权威当前轮次", async () => {
+  const h = fixture();
+  h.agent.cancel.mockImplementation(() => {
+    h.events.push({ seq: 3, type: "turn/end", data: { turn: 7, reason: { kind: "aborted" } } });
+  });
+  const response = await h.request("/cancel", "POST", { value: null });
+  expect(response.status).toBe(200);
+  expect(response.body).toMatchObject({ outcome: "cancelled", generationId: "dsh:one:message:native-user" });
+  expect(h.agent.cancel).toHaveBeenCalledTimes(1);
+});
