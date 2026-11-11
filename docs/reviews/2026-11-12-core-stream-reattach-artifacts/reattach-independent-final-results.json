@@ -1,0 +1,37 @@
+{
+  "syntheticOnly": true,
+  "checks": [
+    {
+      "name": "内置桥：首观察预查断开后唯一首次提交转交",
+      "passed": true,
+      "prompts": 1
+    },
+    {
+      "name": "内置桥：旧传输拒绝等待另一观察权威预查",
+      "passed": true,
+      "prompts": 1
+    },
+    {
+      "name": "内置桥：旧轮次迟到失败不影响新声明及其他身份Busy",
+      "passed": true,
+      "prompts": 2
+    },
+    {
+      "name": "独立桥：首观察预查断开后唯一首次提交转交",
+      "passed": true,
+      "prompts": 1
+    },
+    {
+      "name": "独立桥：旧传输拒绝等待另一观察权威预查",
+      "passed": true,
+      "prompts": 1
+    },
+    {
+      "name": "独立桥：旧轮次迟到失败不影响新声明及其他身份Busy",
+      "passed": true,
+      "prompts": 2
+    }
+  ],
+  "unhandled": [],
+  "allPassed": true
+}

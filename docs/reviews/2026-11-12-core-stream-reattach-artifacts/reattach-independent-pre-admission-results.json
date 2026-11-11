@@ -1,0 +1,33 @@
+{
+  "syntheticOnly": true,
+  "results": [
+    {
+      "name": "内置桥",
+      "scenario": "首观察在只读预查阶段断开，第二同身份观察预查成功且保持连接",
+      "prompts": 0,
+      "secondFrames": [
+        {
+          "type": "error",
+          "code": "OUTCOME_UNKNOWN",
+          "state": "unknown"
+        }
+      ],
+      "listeners": 0,
+      "firstSubmitted": false
+    },
+    {
+      "name": "独立桥",
+      "scenario": "首观察在只读预查阶段断开，第二同身份观察预查成功且保持连接",
+      "prompts": 0,
+      "secondFrames": [
+        {
+          "type": "error",
+          "code": "OUTCOME_UNKNOWN",
+          "state": "unknown"
+        }
+      ],
+      "listeners": 0,
+      "firstSubmitted": false
+    }
+  ]
+}
