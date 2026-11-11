@@ -1,0 +1,11 @@
+import { createServer } from 'node:http';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+const source = process.env.DSH_AUDIT_SOURCE ? pathToFileURL(resolve(process.env.DSH_AUDIT_SOURCE)) : new URL('../../../../../src/index.js', import.meta.url);
+const { createSessionHandler } = await import(source);
+const query = { listSessions: async () => [{ header: { id: 'audit-session', createdAt: 0 } }], readSurface: async () => ({events: []}) };
+const ctx = { get: key => key === 'sessionQuery' ? query : { prompt() {} }, on: () => () => {} };
+const token = 'audit-only-synthetic-token-000000000000';
+const server = createServer(createSessionHandler(ctx, { port: 18791, instanceId: 'audit-dsh' }, token));
+server.listen(0, '127.0.0.1', () => console.log(JSON.stringify({port:server.address().port})));
+process.on('SIGTERM', () => { server.closeAllConnections(); server.close(); });

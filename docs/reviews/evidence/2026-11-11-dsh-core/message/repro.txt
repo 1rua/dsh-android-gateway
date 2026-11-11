@@ -1,0 +1,34 @@
+证据：clientMessageId -> 400 SCHEMA_INVALID，宿主调用0
+证据：2次提交 -> 2个不同原生requestId；done缺少userMessageId/messageId
+证据：历史id保留，source.rpcId和clientMessageId均不输出
+✔ 独立插件拒绝当前 clientMessageId，未触发宿主 (4.742432ms)
+✔ 相同文本重复提交分配不同 requestId，终态不回传原生消息 ID (3.75302ms)
+✔ 历史保留消息ID但丢弃来源rpcId关联 (7.706144ms)
+证据：断连后signal.aborted=true，监听器2，处理器未结束，下一提交409 SESSION_BUSY
+✔ 受理悬挂时观察断连不能清理监听器及Busy (2.936528ms)
+证据：观察超时已写AGENT_TIMEOUT，但未结束响应/处理器，监听器2、Busy仍保留
+✔ 受理悬挂时30分钟观察定时器不能释放处理器（仅缩短计时，不改生产源码） (30.339772ms)
+证据：done已写出但receipt未返回，响应不结束、监听器2
+✔ 原生终态先于受理回执到达时不能及时结束响应 (0.798825ms)
+证据：第一次write=false后仍累积2000帧，约2MiB合成正文，无drain等待/观察缓冲上限
+证据：value.generationId=old-generation -> 200；宿主仅收到sessionId，未核对轮次
+✔ 慢消费者write返回false后仍继续写入2000个delta (7.5625ms)
+证据：15万条合成事件 -> GET sessions 503 AGENT_UNAVAILABLE，且无宿主调用
+证据：调用真实DSH原型；入口后abort仍accepted，入口前abort拒绝；不传signal抛TypeError
+证据：真实DSH取消方法忽略old-generation，直接对当前Agent调用cancel
+证据：真实DSH命中inbox同rpcId时提前accepted，不执行第二次入队
+✔ 过期generationId取消仍调用宿主的当前会话取消 (0.646377ms)
+✔ 长会话列表摘要使用Math.max参数展开触发RangeError并503 (11.148799ms)
+✔ 真实安装DSH方法只检查受理入口signal，不监听已受理后断连 (241.287127ms)
+✔ 真实安装DSH取消原语不比较目标轮次而取消当前Agent (4.856063ms)
+✔ 真实安装DSH按已存在rpcId去重，独立随机requestId无法复用此判断 (0.364165ms)
+证据：双会话并发各自关联turn 7/19，同attemptId不串流；完成一条后监听器4→2，全部完成2→0
+✔ 独立插件双会话并发时按会话及轮次隔离事件并分别清理监听器 (2.191944ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 412.382457

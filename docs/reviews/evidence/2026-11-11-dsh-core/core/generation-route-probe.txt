@@ -1,0 +1,2 @@
+{"online": true, "send": true, "currentGeneration": "NOT_FOUND", "httpStatus": 404}
+1 passed: 当前 Core 在 send=true 的 DSH 上查询活动生成返回 404

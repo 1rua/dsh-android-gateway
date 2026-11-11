@@ -1,0 +1,8 @@
+
+ RUN  v4.1.10 /mnt/data/projects/open-android-intelligence
+
+
+ Test Files  4 passed (4)
+      Tests  89 passed (89)
+   Start at  20:39:41
+   Duration  1.48s (transform 190ms, setup 0ms, import 171ms, tests 918ms, environment 0ms)

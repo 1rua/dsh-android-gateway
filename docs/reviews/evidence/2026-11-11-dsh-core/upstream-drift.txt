@@ -1,0 +1,9 @@
+npm warn Unknown project config "minimum-release-age". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown user config "minimum-release-age". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> dsh-android-gateway@0.3.0 verify:upstream
+> node tools/verify-upstream-drift.mjs
+
+[VERIFY-DRIFT] MISMATCH detected between src/index.js and upstream index.js!
+[VERIFY-DRIFT] MISMATCH detected between test/adapter.test.js and upstream adapter.test.js!
+[VERIFY-DRIFT] MISMATCH detected between cordis.patch.yml and upstream cordis.patch.yml!

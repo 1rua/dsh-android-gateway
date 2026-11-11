@@ -1,0 +1,91 @@
+[
+  {
+    "check": "真实宿主状态",
+    "status": 200,
+    "body": {
+      "online": true,
+      "capabilities": {
+        "list": true,
+        "history": true,
+        "create": true,
+        "send": true,
+        "rename": true,
+        "archive": false,
+        "delete": false,
+        "cancel": true,
+        "stream": true
+      }
+    }
+  },
+  {
+    "check": "真实宿主启动",
+    "passed": true
+  },
+  {
+    "check": "Core真实握手与签名验证",
+    "passed": true
+  },
+  {
+    "check": "Core真实身份库注册回读",
+    "passed": true
+  },
+  {
+    "check": "Core真实健康检查",
+    "passed": true
+  },
+  {
+    "check": "真实会话发现",
+    "count": 0
+  },
+  {
+    "check": "真实创建和列表回读",
+    "passed": true
+  },
+  {
+    "check": "真实空历史",
+    "count": 0
+  },
+  {
+    "check": "真实重命名回读",
+    "passed": true
+  },
+  {
+    "check": "真实宿主无模型凭据的发送失败路径",
+    "frameTypes": [
+      "error"
+    ],
+    "terminalCode": "AGENT_FAILED",
+    "businessSuccess": false
+  },
+  {
+    "check": "发送后的真实历史行数",
+    "count": 5
+  },
+  {
+    "check": "无凭据访问拒绝",
+    "status": 401,
+    "passed": true
+  },
+  {
+    "check": "真实宿主状态",
+    "status": 200,
+    "body": {
+      "online": true,
+      "capabilities": {
+        "list": true,
+        "history": true,
+        "create": true,
+        "send": true,
+        "rename": true,
+        "archive": false,
+        "delete": false,
+        "cancel": true,
+        "stream": true
+      }
+    }
+  },
+  {
+    "check": "真实宿主重启与持久会话",
+    "passed": true
+  }
+]

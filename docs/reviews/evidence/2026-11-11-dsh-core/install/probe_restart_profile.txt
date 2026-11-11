@@ -1,0 +1,2 @@
+{"用例": "明确指定 target-home / worker", "结果": true, "实际重启": [["systemctl", "--user", "restart", "dsh.service"]], "包含所选Profile": false}
+1 个缺陷复现断言通过；未执行真实 systemctl 或进程信号
