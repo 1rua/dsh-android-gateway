@@ -57,11 +57,11 @@ export function projectGenerations(sessionId, events, { liveRunning = false } = 
         if (splice.outcome === "canceled") record.cancelled = true;
         else if (activeTurn !== undefined) record.nativeTurn = activeTurn;
       }
-    } else if (event.type === "user/message") {
+    } else if (event.type === "user/message" && (event.surfaceOp === undefined || event.surfaceOp === "append")) {
       const record = remember(messageOf(event));
       const turn = event.data?.turn ?? activeTurn;
       if (turn !== undefined) { turnFor(turn); record.nativeTurn = turn; }
-    } else if (event.type === "assistant/message") {
+    } else if (event.type === "assistant/message" && (event.surfaceOp === undefined || event.surfaceOp === "append")) {
       const turn = event.data?.turn ?? activeTurn;
       if (turn !== undefined) {
         const result = turnFor(turn);
@@ -90,6 +90,7 @@ export function projectGenerations(sessionId, events, { liveRunning = false } = 
       state: liveRunning ? "running" : "unknown", revision, text: "", nativeTurn: activeTurn };
     generations.push(current);
   }
+  current ??= generations.find((item) => item.state === "unknown");
   current ??= generations.find((item) => item.state === "queued");
   return { revision, current: current ?? null, generations, activeTurn };
 }

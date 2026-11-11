@@ -103,3 +103,15 @@ hostTest("原样提取真实发行包取消方法，验证匹配后同步中止�
   await Promise.resolve();
   expect(events).toHaveLength(2);
 });
+hostTest("真实Session的人类历史保留append来源并排除模型replace副本", async () => {
+  const requireHost = createRequire(hostEntry);
+  const { Session, isAppendSurfaceEvent, interruptedTurnClosers } = await import(pathToFileURL(requireHost.resolve("@deepseek-ai/dsh-session")).href);
+  const session = Session.create("replace-contract");
+  session.append("turn/start", { turn: 1 });
+  const original = session.append("user/message", { id: "original", role: "user", source: { kind: "user", rpcId: "original-client" }, content: [{ type: "text", text: "人类已见原文" }] }, { surfaceOp: "append" });
+  session.append("user/message", { id: "model-copy", role: "user", source: { kind: "user", rpcId: "original-client" }, content: [{ type: "text", text: "模型压缩副本" }] }, { surfaceOp: { op: "replace", startSeq: original.seq, endSeq: original.seq }, sourceEventSeqs: [original.seq] });
+  expect(session.snapshotEvents().filter(isAppendSurfaceEvent).map((event) => event.data.id)).toEqual(["original"]);
+  const events = [...session.snapshotEvents(), ...interruptedTurnClosers(session.snapshotEvents())];
+  const { projectGenerations } = await import("../src/generation.js");
+  expect(projectGenerations("replace-contract", events).current).toMatchObject({ state: "unknown" });
+});

@@ -120,6 +120,11 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
     return projectGenerations(id, typeof agent?.session?.snapshotEvents === "function" ? agent.session.snapshotEvents() : snapshot.events,
       { liveRunning: agent?.status === "running" });
   };
+  const liveProjection = (id) => {
+    const agent = services().agents?.get(id);
+    return typeof agent?.session?.snapshotEvents === "function"
+      ? projectGenerations(id, agent.session.snapshotEvents(), { liveRunning: agent.status === "running" }) : undefined;
+  };
   const summary = async (record) => {
     const { query } = services();
     const title = typeof query.readTitle === "function" ? await query.readTitle(record.header.id) : undefined;
@@ -150,8 +155,11 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
     const admission = {};
     const lookupObserver = {};
     const identity = {};
+    const pendingFrames = [];
+    const followAbort = new AbortController();
     let currentTurn, ownTurn, finalText = "", ending = false, stopped = false, admitted = false, generationAnnounced = false;
-    let queuedBytes = 0, wake, stopDrain, admissionTimer, observationTimer;
+    let queuedBytes = 0, pendingBytes = 0, pauseFrames = body.clientMessageId !== undefined && capabilities().generationRecovery;
+    let followFrames = false, wake, stopDrain, admissionTimer, observationTimer;
     const notify = () => { const resolve = wake; wake = undefined; resolve?.(); };
     const stop = () => {
       stopped = true;
@@ -160,6 +168,8 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
       notify();
       stopDrain?.();
       lookupObserver.resolve?.(undefined);
+      followAbort.abort();
+      pendingFrames.length = 0;
     };
     const overflow = () => {
       // 仅结束观察连接，不改宿主收件队列或运行轮次。
@@ -182,13 +192,15 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
       clearTimeout(observationTimer);
       enqueue(value);
       lookupObserver.resolve?.(undefined);
+      followAbort.abort();
     };
     // 用原生用户消息的 rpcId 绑定本次提交，其他终端轮次不能提前完成本次观察。
-    disposers.push(ctx.on("session/event", (session, event) => {
+    const acceptEvent = (session, event) => {
       if (session?.id !== id || ending || stopped) return;
       if (event.type === "turn/start") currentTurn = event.data.turn;
       if (event.type === "user/message" && messageOf(event)?.source?.rpcId === requestId) {
-        ownTurn = currentTurn;
+        ownTurn = event.data?.turn ?? currentTurn ?? ownTurn;
+        if (ownTurn === undefined) ownTurn = findGeneration(liveProjection(id) ?? { generations: [] }, { clientMessageId: requestId })?.nativeTurn;
         admitted = true;
         // 即使受理回执延迟，原生持久事件仍可证明输入已被接纳。
         clearTimeout(admissionTimer);
@@ -220,10 +232,10 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
           state: ({ completed: "completed", error: "failed", aborted: "cancelled" })[reason] ?? "unknown" });
         finish(turnResult(reason, finalText, identity));
       }
-    }));
-    disposers.push(ctx.on("agent/assistant-stream", (payload) => {
-      const frame = payload?.frame;
-      if (ending || stopped || payload?.agent?.session?.id !== id || ownTurn === undefined) return;
+    };
+    disposers.push(ctx.on("session/event", (session, event) => { if (!followFrames) acceptEvent(session, event); }));
+    const acceptFrame = (frame) => {
+      if (ending || stopped || ownTurn === undefined) return;
       if (frame?.type === "start" && frame.turn === ownTurn) {
         if (ownAttempts.size >= MAX_OBSERVER_FRAMES && !ownAttempts.has(frame.attemptId)) return overflow();
         ownAttempts.add(frame.attemptId);
@@ -237,7 +249,57 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
         enqueue({ type: "delta", text: frame.chunk.text });
       }
       if (frame?.type === "end") ownAttempts.delete(frame.attemptId);
+    };
+    disposers.push(ctx.on("agent/assistant-stream", (payload) => {
+      if (ending || stopped || payload?.agent?.session?.id !== id || followFrames) return;
+      if (pauseFrames) {
+        const size = Buffer.byteLength(JSON.stringify(payload.frame));
+        if (pendingFrames.length >= MAX_OBSERVER_FRAMES || pendingBytes + size > MAX_OBSERVER_BYTES) return overflow();
+        pendingFrames.push(payload.frame); pendingBytes += size;
+      } else acceptFrame(payload.frame);
     }));
+    const attachNativeFrames = () => {
+      const controller = services().controller;
+      pauseFrames = false;
+      if (typeof controller.follow !== "function") {
+        for (const frame of pendingFrames) acceptFrame(frame);
+        pendingFrames.length = 0; pendingBytes = 0;
+        return;
+      }
+      followFrames = true;
+      pendingFrames.length = 0; pendingBytes = 0;
+      // 官方 follow 的开场快照给出已开始 attempt 及正文前缀，后续帧无缺口。
+      (async () => {
+        for await (const item of controller.follow({ address: { kind: "session", sessionId: id }, assistantStream: true, maxMessages: 1 }, followAbort.signal)) {
+          if (ending || stopped) break;
+          if (item.type === "snapshot") {
+            // 开场快照可能晚于预查：先同步权威轮次、正文和身份，再恢复活动尝试。
+            const latest = findGeneration(liveProjection(id) ?? { generations: [] }, { clientMessageId: requestId });
+            if (latest) {
+              if (latest.nativeTurn !== undefined) ownTurn = latest.nativeTurn;
+              finalText = latest.text;
+              if (latest.messageId !== undefined) identity.messageId = latest.messageId;
+            }
+            const attempt = item.assistantStream?.activeAttempt;
+            if (attempt?.turn === ownTurn) ownAttempts.add(attempt.attemptId);
+            let prefix = "", bytes = 0;
+            for (const record of attempt?.turn === ownTurn ? attempt.stream ?? [] : []) {
+              const text = record.type === "text-chunks" ? record.texts.join("")
+                : record.type === "chunk" && record.chunk?.type === "text-delta" ? record.chunk.text : "";
+              bytes += Buffer.byteLength(text);
+              if (bytes > MAX_OBSERVER_BYTES) { overflow(); break; }
+              prefix += text;
+            }
+            if (prefix && !stopped) enqueue({ type: "delta", text: prefix });
+            if (latest && ["completed", "failed", "cancelled"].includes(latest.state)) {
+              finish(latest.state === "completed" ? { type: "done", text: finalText, ...identity }
+                : { type: "error", code: latest.code ?? "AGENT_FAILED", ...identity });
+            }
+          } else if (item.type === "assistant-stream") acceptFrame(item.frame);
+          else if (item.type === "event") acceptEvent({ id }, item.event);
+        }
+      })().catch(() => { if (!followAbort.signal.aborted) unknown(); });
+    };
     const waitForDrain = () => new Promise((resolve) => {
       const done = () => {
         clearTimeout(timer);
@@ -268,13 +330,14 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
         // 传输错误无法证明输入尚未进入宿主队列。
         if (!admitted) unknown();
       };
-      const existing = body.clientMessageId !== undefined && capabilities().generationRecovery
+      let existing = body.clientMessageId !== undefined && capabilities().generationRecovery
         ? await new Promise((resolve) => {
           lookupObserver.resolve = resolve;
           lookupObserver.reject = () => { unknown(); resolve(undefined); };
           observeLookup(generationProjection(id).then((projection) => findGeneration(projection, { clientMessageId: body.clientMessageId })), lookupObserver);
         }) : null;
       lookupObserver.resolve = lookupObserver.reject = undefined;
+      if (existing) existing = findGeneration(liveProjection(id) ?? { generations: [existing] }, { clientMessageId: body.clientMessageId }) ?? existing;
       if (existing) {
         admitted = true;
         ownTurn = existing.nativeTurn;
@@ -292,7 +355,11 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
         if (existing.state === "completed") finish({ type: "done", text: finalText, ...identity });
         else if (["failed", "cancelled"].includes(existing.state)) finish({ type: "error", code: existing.code ?? "AGENT_FAILED", ...identity });
         else if (existing.state === "unknown") unknown();
+        else attachNativeFrames();
       } else if (!ending && !stopped) {
+        pauseFrames = false;
+        for (const frame of pendingFrames) acceptFrame(frame);
+        pendingFrames.length = 0; pendingBytes = 0;
         trace("adapter.dsh.host_submitted", { conversationId: id, clientMessageId: body.clientMessageId });
         observeAdmission(Promise.resolve().then(() => services().controller.prompt({
           requestId, sessionId: id, mode: "queue", content: [{ type: "text", text: body.text }],
@@ -424,7 +491,9 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
           // 同轮次多个输入共用回复时，以最先被原生日志接纳的输入作为回复锚点。
           if (receipt.messageId !== undefined && !byReply.has(receipt.messageId)) byReply.set(receipt.messageId, receipt);
         }
-        const messages = snapshot.events.filter((event) => ["user/message", "assistant/message"].includes(event.type))
+        // 官方人类会话记录只包含 append 来源，模型专用 replace 副本不进入界面。
+        const messages = snapshot.events.filter((event) => ["user/message", "assistant/message"].includes(event.type)
+          && (event.surfaceOp === undefined || event.surfaceOp === "append"))
           .map((event) => {
             const message = messageOf(event);
             if (typeof message?.id !== "string" || !["user", "assistant"].includes(message.role) || !Array.isArray(message.content)) throw fail("HOST_INCOMPATIBLE", 502);
@@ -455,8 +524,23 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
         if (!generation) throw fail(value?.generationId ? "GENERATION_NOT_FOUND" : "NO_ACTIVE_TURN", value?.generationId ? 404 : 409);
         const outcome = cancellationOutcome(generation);
         if (outcome !== "unknown") return json(res, { id, action, generationId: generation.generationId, outcome });
-        // 从这次活动读取到取消副作用保持同步，异步历史快照不参与最终比较。
-        const { requested, ...result } = cancelGeneration(id, generation.generationId, (sessionId) => services().agents.get(sessionId));
+        const result = await new Promise((resolve) => {
+          let timer, dispose, settled = false;
+          const base = { id, action, generationId: generation.generationId, outcome: "outcome_unknown" };
+          const finish = (receipt) => { if (settled) return; settled = true; clearTimeout(timer); dispose?.(); resolve(receipt); };
+          const check = () => {
+            const current = findGeneration(liveProjection(id) ?? { generations: [] }, { generationId: generation.generationId });
+            const terminal = cancellationOutcome(current);
+            if (terminal !== "unknown") finish({ ...base, outcome: terminal });
+          };
+          // 先订阅，再同步比较和取消，随后重读；终态等待不拥有其他任务的取消权。
+          dispose = ctx.on("session/event", (session) => { if (session?.id === id) check(); });
+          timer = setTimeout(() => finish(base), Math.min(budgets.promptTimeoutMs, 5000));
+          const { requested, ...receipt } = cancelGeneration(id, generation.generationId, (sessionId) => services().agents.get(sessionId));
+          if (receipt.outcome !== "unknown") finish(receipt);
+          else if (!requested) finish(base);
+          else check();
+        });
         return json(res, result);
       }
       const { controller, registry } = services();
