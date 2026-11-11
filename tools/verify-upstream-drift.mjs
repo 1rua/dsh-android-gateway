@@ -10,7 +10,7 @@ const pairs = [
   ["src/index.js", "index.js"], ["src/generation.js", "generation.js"], ["src/diagnostics.js", "diagnostics.js"],
   ["test/adapter.test.js", "adapter.test.js"], ["test/reliability.test.js", "reliability.test.js"],
   ["test/generation.test.js", "generation.test.js"], ["test/host-contract.test.js", "host-contract.test.js"],
-  ["test/diagnostics.test.js", "diagnostics.test.js"], ["cordis.patch.yml", "cordis.patch.yml"],
+  ["test/diagnostics.test.js", "diagnostics.test.js"], ["test/corpus.test.js", "corpus.test.js"], ["cordis.patch.yml", "cordis.patch.yml"],
 ];
 
 // 只归一化已明确的部署入口差异，执行状态、消息及取消实现仍逐字比较。

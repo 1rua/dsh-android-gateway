@@ -115,3 +115,96 @@ hostTest("真实Session的人类历史保留append来源并排除模型replace�
   const { projectGenerations } = await import("../src/generation.js");
   expect(projectGenerations("replace-contract", events).current).toMatchObject({ state: "unknown" });
 });
+
+hostTest("官方未进入store的prepare摘要与原readSurface及readTitle逐字段一致", async () => {
+  const requireHost = createRequire(hostEntry);
+  const { Session, SessionStore } = await import(pathToFileURL(requireHost.resolve("@deepseek-ai/dsh-session")).href);
+  const { SessionQueryEngine } = await import(pathToFileURL(requireHost.resolve("@deepseek-ai/dsh-session-query")).href);
+  const { foldSessionTitle } = await import(pathToFileURL(requireHost.resolve("@deepseek-ai/dsh-session-title")).href);
+  const { currentSessionMessageProjections } = await import(pathToFileURL(requireHost.resolve("@deepseek-ai/dsh-session-format-catalog/message-projections")).href);
+  const source = Session.create("native-semantic-summary");
+  source.append("turn/start", { turn: 1 });
+  const original = source.append("user/message", { id: "original", role: "user", source: { kind: "user", rpcId: "synthetic-original" }, content: [{ type: "text", text: "已替换的合成输入" }] }, { surfaceOp: "append" });
+  source.append("user/message", { id: "replacement", role: "user", source: { kind: "user", rpcId: "synthetic-replacement" }, content: [{ type: "text", text: "当前合成表面" }] },
+    { surfaceOp: { op: "replace", startSeq: original.seq, endSeq: original.seq }, sourceEventSeqs: [original.seq] });
+  source.append("session/title", { title: "保留原生标题", messageSeqs: [], source: { kind: "user" } });
+  source.append("turn/end", { turn: 1, reason: { kind: "completed" } });
+  const events = structuredClone(source.snapshotEvents()).map((event) => ({ ...event,
+    time: event.type === "turn/end" ? 15000 : event.type === "session/title" ? 4000 : event.seq === original.seq ? 9000 : 3000 }));
+  const header = { ...source.header, createdAt: 1000 };
+  const originalSurface = await SessionQueryEngine.prototype.readSurface.call({
+    _corpus: { load: async () => ({ header, inheritedEventCount: 0, events }) },
+  }, source.id);
+  const title = foldSessionTitle(events);
+  const expected = { id: source.id, title: title.title,
+    updatedAt: new Date(Math.max(header.createdAt, title.updatedAt, ...originalSurface.events.map((event) => event.time))).toISOString(), archived: false };
+  let disposed = 0, prepared = 0;
+  const store = new Map([[source.id, source]]);
+  const query = {
+    listSessions: async () => [{ header }], readSurface: async () => { throw new Error("不得回到全库路径"); },
+    readTitle: async () => { throw new Error("不得回到全库路径"); },
+    observeSession: async () => ({ header, events, inheritedEventCount: 0, [Symbol.dispose]() { disposed++; } }),
+  };
+  const sessions = { prepare(id, options) {
+    prepared++;
+    return SessionStore.prototype.prepare.call({ store, projections: currentSessionMessageProjections }, id, options);
+  } };
+  const ctx = { get: (name) => ({ sessionQuery: query, sessions })[name] };
+  const req = Object.assign(Readable.from([]), { method: "GET", url: "/oai/session-adapter/v1/sessions", headers: { authorization: `Bearer ${token}` } });
+  const res = Object.assign(new EventEmitter(), {
+    writeHead(status) { this.statusCode = status; this.headersSent = true; },
+    end(body) { this.body = JSON.parse(body); this.writableEnded = true; },
+  });
+  await createSessionHandler(ctx, {}, token)(req, res);
+  expect(res.statusCode).toBe(200);
+  expect(res.body.sessions).toEqual([expected]);
+  expect(expected.updatedAt).toBe(new Date(4000).toISOString());
+  expect(disposed).toBe(1);
+  expect(prepared).toBe(1);
+  expect([...store.keys()]).toEqual([source.id]);
+  expect(source.snapshotEvents()).toHaveLength(events.length);
+});
+
+hostTest("继承日志的精确摘要保留原生标题时间且不追加种子事件", async () => {
+  const requireHost = createRequire(hostEntry);
+  const { Session, SessionStore } = await import(pathToFileURL(requireHost.resolve("@deepseek-ai/dsh-session")).href);
+  const { SessionQueryEngine } = await import(pathToFileURL(requireHost.resolve("@deepseek-ai/dsh-session-query")).href);
+  const { foldSessionTitle } = await import(pathToFileURL(requireHost.resolve("@deepseek-ai/dsh-session-title")).href);
+  const { currentSessionMessageProjections } = await import(pathToFileURL(requireHost.resolve("@deepseek-ai/dsh-session-format-catalog/message-projections")).href);
+  const parent = Session.create("summary-parent");
+  parent.append("turn/start", { turn: 1 });
+  parent.append("user/message", { id: "inherited-input", role: "user", source: { kind: "user" }, content: [{ type: "text", text: "继承的合成输入" }] }, { surfaceOp: "append" });
+  parent.append("turn/end", { turn: 1, reason: { kind: "completed" } });
+  const inherited = parent.snapshotEvents();
+  const source = Session.create("seeded-summary", inherited, { ...parent.header, id: "seeded-summary", isSeeded: true }, inherited.length, currentSessionMessageProjections);
+  source.append("session/title", { title: "继承后重命名", messageSeqs: [], source: { kind: "user" } });
+  const events = structuredClone(source.snapshotEvents()).map((event) => ({ ...event, time: event.type === "session/title" ? 8000 : 2000 }));
+  const header = { ...source.header, createdAt: 1000 }, before = JSON.stringify(events);
+  const originalSurface = await SessionQueryEngine.prototype.readSurface.call({ _corpus: {
+    load: async () => ({ header, inheritedEventCount: inherited.length, events }),
+  } }, source.id);
+  const title = foldSessionTitle(events);
+  const expected = { id: source.id, title: title.title,
+    updatedAt: new Date(Math.max(header.createdAt, title.updatedAt, ...originalSurface.events.map((event) => event.time))).toISOString(), archived: false };
+  const store = new Map();
+  let released = 0, detachedEvents;
+  const query = { listSessions: async () => [{ header }], readSurface() { throw new Error("不得全库预查"); },
+    observeSession: async () => ({ header, inheritedEventCount: inherited.length, events, [Symbol.dispose]() { released++; } }) };
+  const sessions = { prepare(id, options) {
+    const prepared = SessionStore.prototype.prepare.call({ store, projections: currentSessionMessageProjections }, id, options);
+    detachedEvents = prepared.snapshotEvents();
+    return prepared;
+  } };
+  const ctx = { get: (name) => ({ sessionQuery: query, sessions })[name] };
+  const req = Object.assign(Readable.from([]), { method: "GET", url: "/oai/session-adapter/v1/sessions", headers: { authorization: `Bearer ${token}` } });
+  const res = Object.assign(new EventEmitter(), { writeHead(status) { this.statusCode = status; this.headersSent = true; },
+    end(body) { this.body = JSON.parse(body); this.writableEnded = true; } });
+  await createSessionHandler(ctx, {}, token)(req, res);
+  expect(res.statusCode).toBe(200);
+  expect(res.body.sessions).toEqual([expected]);
+  expect(expected.updatedAt).toBe(new Date(8000).toISOString());
+  expect(detachedEvents).toHaveLength(events.length);
+  expect(JSON.stringify(events)).toBe(before);
+  expect(store.size).toBe(0);
+  expect(released).toBe(1);
+});
