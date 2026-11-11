@@ -1,0 +1,55 @@
+{
+  "syntheticOnly": true,
+  "corpusCount": 305,
+  "bodyEvents": 0,
+  "withContextPlugin": false,
+  "fixture": "/tmp/dsh-seeded-corpus-hchtp362",
+  "requests": [
+    {
+      "route": "/status",
+      "authenticated": false,
+      "status": 401,
+      "elapsedMs": 18.52,
+      "online": null
+    },
+    {
+      "route": "/status",
+      "authenticated": true,
+      "status": 200,
+      "elapsedMs": 212.37,
+      "online": true
+    },
+    {
+      "route": "/status",
+      "authenticated": true,
+      "status": 200,
+      "elapsedMs": 271.61,
+      "online": true
+    },
+    {
+      "route": "/status",
+      "authenticated": true,
+      "status": 200,
+      "elapsedMs": 190.71,
+      "online": true,
+      "duringListing": true
+    },
+    {
+      "route": "/status",
+      "authenticated": false,
+      "status": 401,
+      "elapsedMs": 1.17,
+      "online": null,
+      "duringListing": true
+    },
+    {
+      "route": "/sessions",
+      "authenticated": true,
+      "status": 200,
+      "elapsedMs": 800.01,
+      "sessionCount": 305
+    }
+  ],
+  "modelRequests": 0,
+  "allPassed": true
+}

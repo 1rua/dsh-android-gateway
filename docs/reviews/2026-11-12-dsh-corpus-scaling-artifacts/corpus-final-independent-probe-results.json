@@ -1,0 +1,51 @@
+{
+  "syntheticOnly": true,
+  "checks": [
+    {
+      "name": "内置桥：断开后迟到租约全部释放且后续请求恢复",
+      "passed": true,
+      "acquired": 7,
+      "disposed": 7,
+      "maximum": 2,
+      "maxPending": 2
+    },
+    {
+      "name": "内置桥：18请求交错取消共享读取上限且没有遗留名额",
+      "passed": true,
+      "acquired": 42,
+      "disposed": 42,
+      "maximum": 2,
+      "maxPending": 2
+    },
+    {
+      "name": "内置桥：超时后迟到租约全部释放",
+      "passed": true,
+      "acquired": 44,
+      "disposed": 44
+    },
+    {
+      "name": "独立桥：断开后迟到租约全部释放且后续请求恢复",
+      "passed": true,
+      "acquired": 7,
+      "disposed": 7,
+      "maximum": 2,
+      "maxPending": 2
+    },
+    {
+      "name": "独立桥：18请求交错取消共享读取上限且没有遗留名额",
+      "passed": true,
+      "acquired": 42,
+      "disposed": 42,
+      "maximum": 2,
+      "maxPending": 2
+    },
+    {
+      "name": "独立桥：超时后迟到租约全部释放",
+      "passed": true,
+      "acquired": 44,
+      "disposed": 44
+    }
+  ],
+  "unhandled": [],
+  "allPassed": true
+}

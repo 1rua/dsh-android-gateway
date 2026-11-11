@@ -1,0 +1,11 @@
+Starting a Gradle Daemon, 12 busy and 20 incompatible and 3 stopped Daemons could not be reused, use --status for details
+Calculating task graph as no cached configuration is available for tasks: noVpnSurfaceCheck
+
+> Configure project :app
+Unable to initialize metrics, ensure /home/djbd/.android is writable, details: /home/djbd/.android/analytics.settings (Read-only file system)
+
+> Task :noVpnSurfaceCheck UP-TO-DATE
+
+BUILD SUCCESSFUL in 7s
+1 actionable task: 1 up-to-date
+Configuration cache entry stored.

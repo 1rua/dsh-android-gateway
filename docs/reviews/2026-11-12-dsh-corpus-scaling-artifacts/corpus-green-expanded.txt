@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 /mnt/data/projects/open-android-intelligence/.worktrees/dsh-corpus-scaling
+
+
+ Test Files  2 passed (2)
+      Tests  10 passed (10)
+   Start at  00:49:39
+   Duration  787ms (transform 141ms, setup 0ms, import 194ms, tests 232ms, environment 0ms)
+
