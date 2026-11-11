@@ -1,0 +1,130 @@
+{
+  "核对时间": "2026-11-11T21:19:27.426262+08:00",
+  "范围": "仅登记问题和制定修复计划，生产修复未实施",
+  "审计基准": {
+    "DSH": "325a48058dafbfdb0686dc060e08674d8810b4c1",
+    "OAI_dev": "24172841f9a564c53416f7d066f3450d4feb2bfe"
+  },
+  "issues": [
+    {
+      "audit_id": "TRACKING",
+      "repository": "1rua/dsh-android-gateway",
+      "number": 1,
+      "url": "https://github.com/1rua/dsh-android-gateway/issues/1",
+      "title": "跟踪: DSH 与 OAI Core 兼容性审计修复计划（8项问题）",
+      "state": "open",
+      "labels": [
+        "documentation",
+        "enhancement"
+      ],
+      "updated_at": "2026-11-11T13:17:25Z",
+      "body_sha256": "28d48496ff725f5787c6fe17634a039c01a08d489409063f5a7c6b550f4b8522"
+    },
+    {
+      "audit_id": "AUD-001",
+      "repository": "1rua/dsh-android-gateway",
+      "number": 2,
+      "url": "https://github.com/1rua/dsh-android-gateway/issues/2",
+      "title": "[P1][AUD-001] 取消请求忽略目标生成轮次，可能误停同会话的新任务",
+      "state": "open",
+      "labels": [
+        "bug"
+      ],
+      "updated_at": "2026-11-11T13:18:25Z",
+      "body_sha256": "7d2d8377defd3befe10fe33e74aea74d319d8b49a40e875b22ddfba54f48245a"
+    },
+    {
+      "audit_id": "AUD-002",
+      "repository": "1rua/dsh-android-gateway",
+      "number": 3,
+      "url": "https://github.com/1rua/dsh-android-gateway/issues/3",
+      "title": "[P1][AUD-002] 受理回执挂起后断连、超时或终态无法释放会话 Busy",
+      "state": "open",
+      "labels": [
+        "bug"
+      ],
+      "updated_at": "2026-11-11T13:16:27Z",
+      "body_sha256": "c48a380897c58fec355f662cee5344c943de19ee96306bf9dd6faad5b8b6558b"
+    },
+    {
+      "audit_id": "AUD-003",
+      "repository": "1rua/dsh-android-gateway",
+      "number": 4,
+      "url": "https://github.com/1rua/dsh-android-gateway/issues/4",
+      "title": "[P2][AUD-003] 客户端提交与原生消息身份关联丢失，影响历史合并和未知结果查询",
+      "state": "open",
+      "labels": [
+        "bug"
+      ],
+      "updated_at": "2026-11-11T13:16:30Z",
+      "body_sha256": "034335f6ce917134712bfa34cfb5709f7b966d27e0e2b70cb8392916f998e1de"
+    },
+    {
+      "audit_id": "AUD-004",
+      "repository": "1rua/dsh-android-gateway",
+      "number": 5,
+      "url": "https://github.com/1rua/dsh-android-gateway/issues/5",
+      "title": "[P2][AUD-004] 慢消费者写缓冲满后仍持续写入，观察缓冲缺少上限",
+      "state": "open",
+      "labels": [
+        "bug"
+      ],
+      "updated_at": "2026-11-11T13:16:34Z",
+      "body_sha256": "e33f54a01487f4598fb9b9e3bbf67c4ad7985f78ff60ebe3f527f42868944840"
+    },
+    {
+      "audit_id": "AUD-005",
+      "repository": "1rua/dsh-android-gateway",
+      "number": 6,
+      "url": "https://github.com/1rua/dsh-android-gateway/issues/6",
+      "title": "[P2][AUD-005] 长会话摘要展开事件时间触发参数超限，导致整个会话列表 503",
+      "state": "open",
+      "labels": [
+        "bug"
+      ],
+      "updated_at": "2026-11-11T13:16:41Z",
+      "body_sha256": "470e38100ad333db88f051e4bc18af6227f003c2241f970e1ab867ab7e1367fb"
+    },
+    {
+      "audit_id": "AUD-006",
+      "repository": "1rua/open-android-intelligence",
+      "number": 140,
+      "url": "https://github.com/1rua/open-android-intelligence/issues/140",
+      "title": "[P1][AUD-006] 安装后重启忽略所选 DSH Home/Profile，可能中断其他实例",
+      "state": "open",
+      "labels": [
+        "bug",
+        "ready-for-agent"
+      ],
+      "updated_at": "2026-11-11T13:16:44Z",
+      "body_sha256": "899079af8a5b85973322695f80241098af71aa8b8e703927d7ca700e3dc4ba62"
+    },
+    {
+      "audit_id": "AUD-007",
+      "repository": "1rua/open-android-intelligence",
+      "number": 141,
+      "url": "https://github.com/1rua/open-android-intelligence/issues/141",
+      "title": "[P1][AUD-007] 内置 DSH 桥省略 prompt 必需的 AbortSignal，真实宿主无法受理",
+      "state": "open",
+      "labels": [
+        "bug",
+        "ready-for-agent"
+      ],
+      "updated_at": "2026-11-11T13:16:50Z",
+      "body_sha256": "f5442f96aafd3f6cc509af9fed8ca1f2cb8d437cc258481dccea8520fe19da8f"
+    },
+    {
+      "audit_id": "AUD-008",
+      "repository": "1rua/open-android-intelligence",
+      "number": 142,
+      "url": "https://github.com/1rua/open-android-intelligence/issues/142",
+      "title": "[P2][AUD-008] DSH 活动生成查询与能力门禁缺失，断线或 Busy 后队列恢复受阻",
+      "state": "open",
+      "labels": [
+        "bug"
+      ],
+      "updated_at": "2026-11-11T13:16:52Z",
+      "body_sha256": "1e0bc8d21ae660965f74bc16352fc5e2bed4c11b50f3ba7e5d2ce2aa39d455aa"
+    }
+  ]
+}

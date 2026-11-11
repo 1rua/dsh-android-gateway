@@ -1,0 +1,9 @@
+
+ RUN  v3.2.4 /tmp/dsh-audit-20261111/plugin
+
+ ✓ test/adapter.test.js (20 tests) 141ms
+
+ Test Files  1 passed (1)
+      Tests  20 passed (20)
+   Start at  20:39:57
+   Duration  319ms (transform 29ms, setup 0ms, collect 25ms, tests 141ms, environment 0ms, prepare 55ms)
