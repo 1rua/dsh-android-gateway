@@ -23,12 +23,26 @@ const turnResult = (reason, text, identity = {}) => {
   if (reason === "completed") return { type: "done", text, ...identity };
   const codes = { error: "AGENT_FAILED", aborted: "CANCELLED", blocked: "AGENT_BLOCKED", "max-tokens": "AGENT_MAX_TOKENS", interrupted: "OUTCOME_UNKNOWN" };
   const code = codes[reason] ?? "HOST_INCOMPATIBLE";
-  return { type: "error", code, ...(["OUTCOME_UNKNOWN", "HOST_INCOMPATIBLE"].includes(code) ? { state: "unknown" } : {}) };
+  return { type: "error", code, ...identity, ...(["OUTCOME_UNKNOWN", "HOST_INCOMPATIBLE"].includes(code) ? { state: "unknown" } : {}) };
 };
 
 // 观察结束后，挂起的受理回执只保留可解除的槽位，不持有响应、文字缓存和监听器。
-function observeAdmission(promise, observer) {
-  promise.then((receipt) => observer.accept?.(receipt), () => observer.fail?.());
+function releaseSubmission(claims, claim) {
+  if (claims.get(claim.id) === claim && claim.observers.size === 0
+      && (!claim.recoverable || !claim.submitted || claim.authoritative || claim.result === "rejected")) claims.delete(claim.id);
+}
+
+// 未决宿主承诺只保留标量提交身份和可解绑回执槽，不持有 HTTP、正文或监听器。
+function observeAdmission(promise, claims, claim) {
+  promise.then((receipt) => {
+    claim.result = receipt?.accepted === true ? "accepted" : receipt?.accepted === false ? "rejected" : "unknown";
+    for (const observer of claim.observers) observer.accept?.(receipt);
+    releaseSubmission(claims, claim);
+  }, () => {
+    claim.result = "unknown";
+    for (const observer of claim.observers) observer.fail?.();
+    releaseSubmission(claims, claim);
+  });
 }
 
 function observeLookup(promise, observer) {
@@ -84,7 +98,7 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
   const validated = Config["~standard"].validate(config);
   if (validated.issues) throw fail("SCHEMA_INVALID", 500);
   const budgets = validated.value;
-  const busy = new Set();
+  const busy = new Map();
   const services = () => ({ query: ctx.get("sessionQuery"), controller: ctx.get("sessionController"), registry: ctx.get("workspaceRegistry"), agents: ctx.get("agents") });
   const capabilities = () => {
     const { query, controller, registry, agents } = services();
@@ -166,8 +180,14 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
     const { query, agents } = services();
     const snapshot = await query.readSession(id);
     const agent = agents.get(id);
-    return projectGenerations(id, typeof agent?.session?.snapshotEvents === "function" ? agent.session.snapshotEvents() : snapshot.events,
+    const projection = projectGenerations(id, typeof agent?.session?.snapshotEvents === "function" ? agent.session.snapshotEvents() : snapshot.events,
       { liveRunning: agent?.status === "running" });
+    const claim = busy.get(id);
+    if (claim?.recoverable && findGeneration(projection, { clientMessageId: claim.clientMessageId })) {
+      claim.authoritative = true;
+      releaseSubmission(busy, claim);
+    }
+    return projection;
   };
   const liveProjection = (id) => {
     const agent = services().agents?.get(id);
@@ -239,22 +259,38 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
     const trace = diagnosticTrace(req.headers);
     trace("adapter.dsh.message_received", { conversationId: id, clientMessageId: body.clientMessageId });
     let firstContent = false;
+    if (req.aborted || res.destroyed || res.writableEnded) return;
     if (!capabilities().send) throw fail("UNSUPPORTED_CAPABILITY");
     if (typeof body.text !== "string" || !body.text.trim()
         || (body.clientMessageId !== undefined && (typeof body.clientMessageId !== "string"
           || !/^[A-Za-z0-9._~-]{1,128}$/.test(body.clientMessageId)))) throw fail("SCHEMA_INVALID", 400);
-    if (busy.has(id)) throw fail("SESSION_BUSY");
-    busy.add(id);
     const requestId = body.clientMessageId ?? randomUUID();
+    const recoverable = body.clientMessageId !== undefined && capabilities().generationRecovery;
+    let submission = busy.get(id);
+    if (submission?.recoverable && submission.observers.size === 0
+        && findGeneration(liveProjection(id) ?? { generations: [] }, { clientMessageId: submission.clientMessageId })) {
+      submission.authoritative = true;
+      releaseSubmission(busy, submission);
+      submission = busy.get(id);
+    }
+    if (submission && !(recoverable && submission.clientMessageId === body.clientMessageId)) {
+      throw fail(submission.observers.size ? "SESSION_BUSY" : "OUTCOME_UNKNOWN");
+    }
+    const ownsSubmission = submission === undefined;
+    if (!submission) {
+      submission = { id, clientMessageId: body.clientMessageId, recoverable, submitted: false, authoritative: false, observers: new Set() };
+      busy.set(id, submission);
+    }
     const disposers = [];
     const queue = [];
     const ownAttempts = new Set();
     const admission = {};
+    submission.observers.add(admission);
     const lookupObserver = {};
     const identity = {};
     const pendingFrames = [];
     const followAbort = new AbortController();
-    let currentTurn, ownTurn, finalText = "", ending = false, stopped = false, admitted = false, generationAnnounced = false;
+    let currentTurn, ownTurn, finalText = "", ending = false, stopped = false, admitted = false, generationAnnounced = false, lookupComplete = false;
     let queuedBytes = 0, pendingBytes = 0, pauseFrames = body.clientMessageId !== undefined && capabilities().generationRecovery;
     let followFrames = false, wake, stopDrain, admissionTimer, observationTimer;
     const notify = () => { const resolve = wake; wake = undefined; resolve?.(); };
@@ -269,7 +305,7 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
       pendingFrames.length = 0;
     };
     const overflow = () => {
-      // 仅结束观察连接，不改宿主收件队列或运行轮次。
+      // Only the observation socket ends. The host inbox and turn are untouched.
       stop();
       res.destroy();
     };
@@ -291,7 +327,8 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
       lookupObserver.resolve?.(undefined);
       followAbort.abort();
     };
-    // 用原生用户消息的 rpcId 绑定本次提交，其他终端轮次不能提前完成本次观察。
+    // rpcId belongs to the native user message. Other terminal turns in this
+    // shared session cannot prematurely complete this App submission.
     const acceptEvent = (session, event) => {
       if (session?.id !== id || ending || stopped) return;
       if (event.type === "turn/start") currentTurn = event.data.turn;
@@ -299,7 +336,7 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
         ownTurn = event.data?.turn ?? currentTurn ?? ownTurn;
         if (ownTurn === undefined) ownTurn = findGeneration(liveProjection(id) ?? { generations: [] }, { clientMessageId: requestId })?.nativeTurn;
         admitted = true;
-        // 即使受理回执延迟，原生持久事件仍可证明输入已被接纳。
+        // Native persistence is admission evidence even if prompt() is delayed.
         clearTimeout(admissionTimer);
         const message = messageOf(event);
         if (typeof message.id === "string" && message.id) identity.userMessageId = message.id;
@@ -411,7 +448,7 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
     });
     res.on("close", stop);
     res.on("error", overflow);
-    const unknown = () => finish({ type: "error", code: "OUTCOME_UNKNOWN", state: "unknown" });
+    const unknown = () => finish({ type: "error", code: "OUTCOME_UNKNOWN", ...identity, state: "unknown" });
     admissionTimer = setTimeout(unknown, budgets.promptTimeoutMs);
     observationTimer = setTimeout(unknown, budgets.observationTimeoutMs);
     try {
@@ -419,12 +456,15 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
       // 宿主要求有效的受理信号；该信号独立于观察连接，断线不取消已提交输入。
       const admissionSignal = new AbortController().signal;
       admission.accept = (receipt) => {
-        if (stopped || ending) return;
+        if (stopped || ending || !lookupComplete) return;
         clearTimeout(admissionTimer);
-        if (receipt?.accepted !== true && !admitted) finish({ type: "error", code: "AGENT_REJECTED" });
+        if (receipt?.accepted !== true && !admitted) {
+          if (receipt?.accepted === false || !recoverable) finish({ type: "error", code: "AGENT_REJECTED" });
+          else unknown();
+        }
       };
       admission.fail = () => {
-        // 传输错误无法证明输入尚未进入宿主队列。
+        // Transport errors cannot establish whether the input reached inbox.
         if (!admitted) unknown();
       };
       let existing = body.clientMessageId !== undefined && capabilities().generationRecovery
@@ -434,9 +474,11 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
           observeLookup(generationProjection(id).then((projection) => findGeneration(projection, { clientMessageId: body.clientMessageId })), lookupObserver);
         }) : null;
       lookupObserver.resolve = lookupObserver.reject = undefined;
+      lookupComplete = true;
       if (existing) existing = findGeneration(liveProjection(id) ?? { generations: [existing] }, { clientMessageId: body.clientMessageId }) ?? existing;
       if (existing) {
         admitted = true;
+        submission.authoritative = true;
         ownTurn = existing.nativeTurn;
         identity.generationId = existing.generationId;
         identity.userMessageId = existing.userMessageId;
@@ -454,13 +496,20 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
         else if (existing.state === "unknown") unknown();
         else attachNativeFrames();
       } else if (!ending && !stopped) {
+        if (submission.result === "accepted") admission.accept({ accepted: true });
+        else if (submission.result === "rejected") admission.accept({ accepted: false });
+        else if (submission.result === "unknown") admission.fail();
         pauseFrames = false;
         for (const frame of pendingFrames) acceptFrame(frame);
         pendingFrames.length = 0; pendingBytes = 0;
-        trace("adapter.dsh.host_submitted", { conversationId: id, clientMessageId: body.clientMessageId });
-        observeAdmission(Promise.resolve().then(() => services().controller.prompt({
-          requestId, sessionId: id, mode: "queue", content: [{ type: "text", text: body.text }],
-        }, admissionSignal)), admission);
+        // 同一提交只有首个观察可以入队；其他观察等待原生事件或诚实结束为未知。
+        if (ownsSubmission && !ending && !stopped) {
+          submission.submitted = true;
+          trace("adapter.dsh.host_submitted", { conversationId: id, clientMessageId: body.clientMessageId });
+          observeAdmission(Promise.resolve().then(() => services().controller.prompt({
+            requestId, sessionId: id, mode: "queue", content: [{ type: "text", text: body.text }],
+          }, admissionSignal)), busy, submission);
+        }
       }
       while (!stopped) {
         if (!queue.length) {
@@ -491,7 +540,8 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
       lookupObserver.resolve = lookupObserver.reject = undefined;
       for (const dispose of disposers) dispose();
       ownAttempts.clear();
-      busy.delete(id);
+      submission.observers.delete(admission);
+      releaseSubmission(busy, submission);
     }
   }
 

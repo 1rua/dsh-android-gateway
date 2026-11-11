@@ -259,7 +259,8 @@ describe("DSH native Session Adapter", () => {
   ])("does not report a %s native turn as successful", async (terminalReason, code) => {
     const h = await host({ terminalReason });
     const events = (await (await h.request("/sessions/terminal/messages", "POST", { text: "hello" })).text()).trim().split("\n").map(JSON.parse);
-    expect(events.at(-1)).toEqual({ type: "error", code, ...(code === "OUTCOME_UNKNOWN" ? { state: "unknown" } : {}) });
+    expect(events.at(-1)).toEqual({ type: "error", code, userMessageId: "submitted", messageId: "native-reply",
+      ...(code === "OUTCOME_UNKNOWN" ? { state: "unknown" } : {}) });
     expect(events.some((event) => event.type === "done")).toBe(false);
   });
   it("validates its standard plugin configuration", () => {

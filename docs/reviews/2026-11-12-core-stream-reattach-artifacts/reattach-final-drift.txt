@@ -1,0 +1,12 @@
+[VERIFY-DRIFT] 一致：src/index.js
+[VERIFY-DRIFT] 一致：src/generation.js
+[VERIFY-DRIFT] 一致：src/diagnostics.js
+[VERIFY-DRIFT] 一致：test/adapter.test.js
+[VERIFY-DRIFT] 一致：test/reliability.test.js
+[VERIFY-DRIFT] 一致：test/generation.test.js
+[VERIFY-DRIFT] 一致：test/host-contract.test.js
+[VERIFY-DRIFT] 一致：test/diagnostics.test.js
+[VERIFY-DRIFT] 一致：test/corpus.test.js
+[VERIFY-DRIFT] 一致：test/reattach.test.js
+[VERIFY-DRIFT] 一致：cordis.patch.yml
+[VERIFY-DRIFT] 原生会话契约与回归测试保持一致；仅保留已列明的部署入口差异。

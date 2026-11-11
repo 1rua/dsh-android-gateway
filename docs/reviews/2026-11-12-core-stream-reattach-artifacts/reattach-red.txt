@@ -1,0 +1,108 @@
+
+ RUN  v4.1.10 /mnt/data/projects/open-android-intelligence/.worktrees/dsh-stream-reattach
+
+ ❯ integrations/dsh-session-adapter/reattach.test.js (6 tests | 5 failed) 48ms
+   × 原观察仍存活时同身份可独立重附，任一观察关闭不影响其余观察或再次提交 10ms
+   × 首次受理挂起时两个同身份观察共享提交，不同身份仍Busy，迟到接纳能到达全部观察 2ms
+   × 全部观察断开后无受理事实仍保持未知且不重投，权威查询恢复后允许后续输入 32ms
+   × 多个观察收到同一错误终态，完成重放不增加原生提交 1ms
+   × 慢观察溢出只释放自身，其他同身份观察继续增量且新观察仍不重投 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  integrations/dsh-session-adapter/reattach.test.js > 原观察仍存活时同身份可独立重附，任一观察关闭不影响其余观察或再次提交
+AssertionError: expected 409 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 409
+
+ ❯ integrations/dsh-session-adapter/reattach.test.js:81:29
+     79|   const second = h.request();
+     80|   await until(() => second.res.frames.length > 0 || second.res.body !=…
+     81|   expect(second.res.status).toBe(200); expect(second.res.frames[0]).to…
+       |                             ^
+     82|   first.res.destroy(); await first.task;
+     83|   const third = h.request(); await until(() => third.res.frames.length…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  integrations/dsh-session-adapter/reattach.test.js > 首次受理挂起时两个同身份观察共享提交，不同身份仍Busy，迟到接纳能到达全部观察
+AssertionError: expected { code: 'SESSION_BUSY' } to be undefined
+
+- Expected:
+undefined
+
++ Received:
+{
+  "code": "SESSION_BUSY",
+}
+
+ ❯ integrations/dsh-session-adapter/reattach.test.js:96:27
+     94|   const other = h.request("other-client"); await other.task;
+     95|   expect(other.res.status).toBe(409); expect(other.res.body.code).toBe…
+     96|   expect(second.res.body).toBeUndefined(); expect(h.controller.prompt)…
+       |                           ^
+     97|   h.accept(); h.delta(); h.receipts[0].resolve({ accepted: true }); h.…
+     98|   await Promise.all([first.task, second.task]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  integrations/dsh-session-adapter/reattach.test.js > 全部观察断开后无受理事实仍保持未知且不重投，权威查询恢复后允许后续输入
+AssertionError: expected "vi.fn()" to be called 1 times, but got 2 times
+ ❯ integrations/dsh-session-adapter/reattach.test.js:107:31
+    105|   first.res.destroy(); await first.task; expect(h.count()).toBe(0);
+    106|   const duplicate = h.request(); await duplicate.task;
+    107|   expect(h.controller.prompt).toHaveBeenCalledTimes(1); expect(duplica…
+       |                               ^
+    108|   const other = h.request("other-client"); await other.task;
+    109|   expect(other.res.body).toMatchObject({ code: "OUTCOME_UNKNOWN" });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  integrations/dsh-session-adapter/reattach.test.js > 多个观察收到同一错误终态，完成重放不增加原生提交
+AssertionError: expected 409 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 409
+
+ ❯ integrations/dsh-session-adapter/reattach.test.js:127:29
+    125|   const h = fixture(); const first = h.request(); await until(() => h.…
+    126|   const second = h.request(); await until(() => second.res.frames.leng…
+    127|   expect(second.res.status).toBe(200); h.finish("error"); await Promis…
+       |                             ^
+    128|   for (const result of [first, second]) expect(result.res.frames.at(-1…
+    129|   const replay = h.request(); await replay.task;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  integrations/dsh-session-adapter/reattach.test.js > 慢观察溢出只释放自身，其他同身份观察继续增量且新观察仍不重投
+AssertionError: expected 409 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 409
+
+ ❯ integrations/dsh-session-adapter/reattach.test.js:139:27
+    137|   await until(() => slow.res.frames.length === 1);
+    138|   const fast = h.request(); await until(() => fast.res.frames.length >…
+    139|   expect(fast.res.status).toBe(200);
+       |                           ^
+    140|   for (let i = 0; i < 135; i++) { h.delta(String(i)); await tick(); }
+    141|   await slow.task; expect(slow.res.destroyed).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 1 passed (6)
+   Start at  01:44:35
+   Duration  200ms (transform 35ms, setup 0ms, import 60ms, tests 48ms, environment 0ms)
+
