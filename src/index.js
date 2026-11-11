@@ -304,7 +304,7 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
       pendingFrames.length = 0;
     };
     const overflow = () => {
-      // Only the observation socket ends. The host inbox and turn are untouched.
+      // 仅结束观察连接，不改宿主收件队列或运行轮次。
       stop();
       res.destroy();
     };
@@ -326,8 +326,7 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
       lookupObserver.resolve?.(undefined);
       followAbort.abort();
     };
-    // rpcId belongs to the native user message. Other terminal turns in this
-    // shared session cannot prematurely complete this App submission.
+    // 用原生用户消息的 rpcId 绑定本次提交，其他终端轮次不能提前完成本次观察。
     const acceptEvent = (session, event) => {
       if (session?.id !== id || ending || stopped) return;
       if (event.type === "turn/start") currentTurn = event.data.turn;
@@ -335,7 +334,7 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
         ownTurn = event.data?.turn ?? currentTurn ?? ownTurn;
         if (ownTurn === undefined) ownTurn = findGeneration(liveProjection(id) ?? { generations: [] }, { clientMessageId: requestId })?.nativeTurn;
         admitted = true;
-        // Native persistence is admission evidence even if prompt() is delayed.
+        // 即使受理回执延迟，原生持久事件仍可证明输入已被接纳。
         clearTimeout(admissionTimer);
         const message = messageOf(event);
         if (typeof message.id === "string" && message.id) identity.userMessageId = message.id;
