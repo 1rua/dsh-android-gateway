@@ -21,6 +21,7 @@ function fixture(config = {}) {
   const events = [], listeners = new Map(), receipts = [];
   const session = { id: "one", snapshotEvents: () => events };
   const agent = { status: "idle", session, cancel: vi.fn() };
+  let live = agent;
   const controller = { prompt: vi.fn((input, signal) => {
     signal.throwIfAborted();
     const receipt = deferred(); receipts.push({ input, ...receipt }); return receipt.promise;
@@ -30,9 +31,10 @@ function fixture(config = {}) {
     events.push(event);
     for (const listener of listeners.get("session/event") ?? []) listener(session, event);
   };
-  const ctx = { get: (name) => ({ agents: { get: () => agent }, sessionController: controller,
+  const services = { agents: { get: () => live }, sessionController: controller,
     sessionQuery: { listSessions: async () => [{ header: { id: "one", createdAt: 1000 } }],
-      readSession: async () => ({ events }), readSurface: async () => ({ events }) } })[name],
+      readSession: async () => ({ events }), readSurface: async () => ({ events }) } };
+  const ctx = { get: (name) => services[name],
     on(name, listener) {
       if (!listeners.has(name)) listeners.set(name, new Set());
       listeners.get(name).add(listener); return () => listeners.get(name).delete(listener);
@@ -69,7 +71,7 @@ function fixture(config = {}) {
     agent.status = "idle"; emit("turn/end", { turn, reason: { kind } });
   };
   const count = () => [...listeners.values()].reduce((sum, value) => sum + value.size, 0);
-  return { request, controller, receipts, accept, delta, finish, count, agent, events, emit };
+  return { request, controller, receipts, accept, delta, finish, count, agent, events, emit, services, setLive: (value) => { live = value; } };
 }
 
 it("原观察仍存活时同身份可独立重附，任一观察关闭不影响其余观察或再次提交", async () => {
@@ -196,4 +198,43 @@ it("已关闭的观察在处理器恢复时不创建提交或宿主监听", asyn
   // 列表预查先让出一次执行机会，模拟路由解析完成前客户端已经关闭。
   const observer = h.request(); observer.res.destroy(); await observer.task;
   expect(h.controller.prompt).not.toHaveBeenCalled(); expect(h.count()).toBe(0);
+});
+
+
+it("共享迟到传输拒绝不抢占另一观察尚未完成的权威读取", async () => {
+  const h = fixture(); const first = h.request(); await until(() => h.receipts.length === 1);
+  first.res.destroy(); await first.task;
+  const lookup = deferred(); h.services.sessionQuery.readSession = () => lookup.promise;
+  const second = h.request(); await tick(); h.receipts[0].reject(new Error("合成迟到传输拒绝")); await tick();
+  expect(second.res.writableEnded).toBe(false);
+  h.accept(); lookup.resolve({ events: h.events });
+  await until(() => second.res.frames.some((frame) => frame.type === "generation"));
+  h.finish(); await second.task;
+  expect(second.res.frames.at(-1)).toMatchObject({ type: "done", userMessageId: "native-user-1" });
+  expect(h.controller.prompt).toHaveBeenCalledTimes(1); expect(h.count()).toBe(0);
+});
+
+it("原生用户事实与终态已经写入时，宿主卸载活动Agent后不留下未知提交屏障", async () => {
+  const h = fixture(); const first = h.request(); await until(() => h.receipts.length === 1);
+  h.accept(); h.finish(); await first.task; h.setLive(undefined);
+  const next = h.request("other-client"); await until(() => h.receipts.length === 2 || next.res.writableEnded);
+  expect(next.res.body).toBeUndefined(); expect(h.controller.prompt).toHaveBeenCalledTimes(2);
+  h.setLive(h.agent); h.accept(1); h.finish("completed", 2); h.receipts[1].resolve({ accepted: true }); await next.task;
+  h.receipts[0].resolve({ accepted: true }); await tick(); expect(h.count()).toBe(0);
+});
+
+
+it("首观察在只读预查期间断开时，仍存活观察可原子领取尚未开始的首次提交", async () => {
+  const h = fixture(); const initial = deferred(), following = deferred(); let reads = 0;
+  h.services.sessionQuery.readSession = () => ++reads === 1 ? initial.promise : following.promise;
+  const first = h.request(); await until(() => reads === 1);
+  const second = h.request(); await until(() => reads === 2);
+  first.res.destroy(); await first.task; expect(h.controller.prompt).not.toHaveBeenCalled();
+  following.resolve({ events: [] });
+  await until(() => h.receipts.length === 1 || second.res.writableEnded);
+  expect(h.controller.prompt).toHaveBeenCalledTimes(1);
+  h.accept(); h.receipts[0].resolve({ accepted: true }); h.finish(); await second.task;
+  initial.resolve({ events: [] }); await tick();
+  expect(second.res.frames.at(-1)).toMatchObject({ type: "done", userMessageId: "native-user-1" });
+  expect(h.controller.prompt).toHaveBeenCalledTimes(1); expect(h.count()).toBe(0);
 });

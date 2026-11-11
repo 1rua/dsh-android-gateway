@@ -1,0 +1,25 @@
+
+ RUN  v4.1.10 /mnt/data/projects/open-android-intelligence/.worktrees/dsh-stream-reattach
+
+ ❯ integrations/dsh-session-adapter/reattach.test.js (14 tests | 1 failed) 168ms
+   × 首观察在只读预查期间断开时，仍存活观察可原子领取尚未开始的首次提交 104ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  integrations/dsh-session-adapter/reattach.test.js > 首观察在只读预查期间断开时，仍存活观察可原子领取尚未开始的首次提交
+AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times
+ ❯ integrations/dsh-session-adapter/reattach.test.js:235:31
+    233|   following.resolve({ events: [] });
+    234|   await until(() => h.receipts.length === 1 || second.res.writableEnde…
+    235|   expect(h.controller.prompt).toHaveBeenCalledTimes(1);
+       |                               ^
+    236|   h.accept(); h.receipts[0].resolve({ accepted: true }); h.finish(); a…
+    237|   initial.resolve({ events: [] }); await tick();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 13 passed (14)
+   Start at  01:58:43
+   Duration  510ms (transform 144ms, setup 0ms, import 184ms, tests 168ms, environment 0ms)

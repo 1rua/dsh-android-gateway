@@ -276,7 +276,6 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
     if (submission && !(recoverable && submission.clientMessageId === body.clientMessageId)) {
       throw fail(submission.observers.size ? "SESSION_BUSY" : "OUTCOME_UNKNOWN");
     }
-    const ownsSubmission = submission === undefined;
     if (!submission) {
       submission = { id, clientMessageId: body.clientMessageId, recoverable, submitted: false, authoritative: false, observers: new Set() };
       busy.set(id, submission);
@@ -342,6 +341,7 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
         if (typeof message.id === "string" && message.id) identity.userMessageId = message.id;
         if (identity.userMessageId && capabilities().generationRecovery) {
           identity.generationId = generationIdFor(id, identity.userMessageId);
+          submission.authoritative = true;
           if (!generationAnnounced) {
             generationAnnounced = true;
             enqueue({ type: "generation", generationId: identity.generationId,
@@ -464,8 +464,8 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
         }
       };
       admission.fail = () => {
-        // Transport errors cannot establish whether the input reached inbox.
-        if (!admitted) unknown();
+        // 传输错误不能抢在此观察的权威预查之前决定本轮未知。
+        if (lookupComplete && !admitted) unknown();
       };
       let existing = body.clientMessageId !== undefined && capabilities().generationRecovery
         ? await new Promise((resolve) => {
@@ -502,8 +502,8 @@ export function createSessionHandler(ctx, config, token, { heartbeatIntervalMs =
         pauseFrames = false;
         for (const frame of pendingFrames) acceptFrame(frame);
         pendingFrames.length = 0; pendingBytes = 0;
-        // 同一提交只有首个观察可以入队；其他观察等待原生事件或诚实结束为未知。
-        if (ownsSubmission && !ending && !stopped) {
+        // 只读预查后同步领取尚未开始的提交；首观察离开可交接，已提交则永不重投。
+        if (!submission.submitted && !ending && !stopped) {
           submission.submitted = true;
           trace("adapter.dsh.host_submitted", { conversationId: id, clientMessageId: body.clientMessageId });
           observeAdmission(Promise.resolve().then(() => services().controller.prompt({

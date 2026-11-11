@@ -1,0 +1,71 @@
+npm warn Unknown user config "minimum-release-age". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> test:fast
+> python3 tools/smart-test.py --level fast
+
+npm warn Unknown env config "minimum-release-age". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown user config "minimum-release-age". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> mvp:lock:check
+> npm run lock:check
+
+npm warn Unknown env config "minimum-release-age". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown user config "minimum-release-age". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> lock:check
+> node --experimental-strip-types tools/check-dependency-lock.ts
+
+MVP dependency lock: PASS (8 rows)
+npm warn Unknown env config "minimum-release-age". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown user config "minimum-release-age". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn allow-scripts .npmrc allow-scripts setting is being ignored because --allow-scripts was passed on the command line
+
+ RUN  v4.1.10 /mnt/data/projects/open-android-intelligence/.worktrees/dsh-stream-reattach
+
+
+ Test Files  7 passed | 1 skipped (8)
+      Tests  139 passed | 5 skipped (144)
+   Start at  01:56:18
+   Duration  2.01s (transform 159ms, setup 0ms, import 299ms, tests 1.05s, environment 1ms)
+
+Starting a Gradle Daemon, 12 busy and 21 incompatible and 9 stopped Daemons could not be reused, use --status for details
+Calculating task graph as no cached configuration is available for tasks: noVpnSurfaceCheck
+
+> Configure project :app
+Unable to initialize metrics, ensure /home/djbd/.android is writable, details: /home/djbd/.android/analytics.settings (Read-only file system)
+
+> Task :noVpnSurfaceCheck
+
+BUILD SUCCESSFUL in 10s
+1 actionable task: 1 executed
+Configuration cache entry stored.
+检测到变更文件数量: 18
+  - docs/plans/2026-11-12-core-stream-reattach.zh-CN.md
+  - docs/reviews/2026-11-12-core-stream-reattach-artifacts/core-http-reattach-probe-20261111T175039Z-71a00e.json
+  - docs/reviews/2026-11-12-core-stream-reattach-artifacts/core-http-reattach-probe-20261111T175040Z-8cce9a.json
+  - docs/reviews/2026-11-12-core-stream-reattach-artifacts/core-http-reattach-probe.py
+  - docs/reviews/2026-11-12-core-stream-reattach-artifacts/reattach-builtin-core-http-probe.txt
+  - docs/reviews/2026-11-12-core-stream-reattach-artifacts/reattach-core-contract.txt
+  - docs/reviews/2026-11-12-core-stream-reattach-artifacts/reattach-final-builtin-node.txt
+  - docs/reviews/2026-11-12-core-stream-reattach-artifacts/reattach-final-drift.txt
+  - docs/reviews/2026-11-12-core-stream-reattach-artifacts/reattach-final-standalone-node.txt
+  - docs/reviews/2026-11-12-core-stream-reattach-artifacts/reattach-final-typecheck.txt
+  ... 及其余 8 个文件
+=== 智能测试验证计划 [Level: FAST] ===
+影响范围评估: {'is_full_required': False, 'affects_security_or_contract': False, 'affects_oai_core': False, 'affects_configuration': False, 'affects_measurements': False, 'affects_observer': False, 'affects_android_kernel': False, 'affects_hermes': False, 'affects_dsh': True, 'affects_plugins': False, 'affects_android_control': False, 'affects_android_conversation': False, 'affects_android_gateway': False, 'affects_android_app': False, 'affects_android_settings': False, 'affects_android_notifications': False}
+
+--- 阶段 1: 静态安全与契约门禁 ---
+
+[EXEC] npm run mvp:lock:check (cwd: /mnt/data/projects/open-android-intelligence/.worktrees/dsh-stream-reattach)
+
+--- 阶段 3: DSH Session Adapter 测试 ---
+
+[EXEC] node --check integrations/dsh-session-adapter/index.js (cwd: /mnt/data/projects/open-android-intelligence/.worktrees/dsh-stream-reattach)
+
+[EXEC] npx --yes vitest run --config integrations/dsh-session-adapter/vitest.config.js (cwd: /mnt/data/projects/open-android-intelligence/.worktrees/dsh-stream-reattach)
+
+--- 阶段 4: Android 增量测试 [1 个参数] ---
+
+[EXEC] ./gradlew noVpnSurfaceCheck (cwd: /mnt/data/projects/open-android-intelligence/.worktrees/dsh-stream-reattach/apps/android)
+
+✅ 所有阶段验证通过！
