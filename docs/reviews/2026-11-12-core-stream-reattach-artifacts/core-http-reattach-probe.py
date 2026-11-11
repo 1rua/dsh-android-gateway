@@ -8,6 +8,7 @@ import secrets
 import signal
 import sys
 import time
+import tempfile
 import uuid
 
 import aiohttp
@@ -76,7 +77,7 @@ async def frames(response, stop_at_generation=False):
 
 async def main(args):
     os.umask(0o077)
-    root=BASE/('core-http-reattach-probe-'+time.strftime('%Y%m%dT%H%M%SZ',time.gmtime())+'-'+secrets.token_hex(3))
+    root=args.output_root.resolve()/('core-http-reattach-probe-'+time.strftime('%Y%m%dT%H%M%SZ',time.gmtime())+'-'+secrets.token_hex(3))
     root.mkdir()
     (root/'bridge.mjs').write_text(NODE)
     sys.path.insert(0,str(args.core_root.resolve()/'oai-core/src'))
@@ -171,11 +172,12 @@ async def main(args):
         result['cleanup']={'dshFixtureExited':process is None or process.returncode is not None}
         os.environ.pop('OAI_CONTROLLED_BUSY_TOKEN',None)
         (root/'results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
-        print(json.dumps({**result,'result':str((root/'results.json').relative_to(BASE))},ensure_ascii=False))
+        print(json.dumps({**result,'result':os.path.relpath(root/'results.json', Path.cwd())},ensure_ascii=False))
     return 0 if result['passed'] else 1
 
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output-root',type=Path,default=Path(tempfile.gettempdir()))
     parser.add_argument('--core-root',type=Path,required=True);parser.add_argument('--adapter',type=Path,required=True)
     sys.exit(asyncio.run(main(parser.parse_args())))
