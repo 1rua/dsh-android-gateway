@@ -1,0 +1,125 @@
+{
+  "syntheticOnly": true,
+  "corpusCount": 305,
+  "bodyEvents": 0,
+  "modelRequests": 0,
+  "adapterSha256": {
+    "index.js": "f93aae1d8bc3cf603944e71c56f9f8e1e27759be7ca4fec4f6ef2d35b6d7e393",
+    "generation.js": "b930781fff17d9c6370e9a290658648fd61c6909edf5294dfc632f3d1774e195",
+    "diagnostics.js": "f6b3e17b9d9fc539b10ef94ae53728b87318ae4e9b39a3f88aef8f55356a1c8f"
+  },
+  "checks": [
+    {
+      "name": "完整目录仅一次持久层列表",
+      "passed": true,
+      "sessionCount": 305,
+      "metrics": {
+        "listCalls": 1,
+        "observations": 305,
+        "pending": 0,
+        "maxPending": 2,
+        "leased": 0,
+        "maxLeased": 1,
+        "disposed": 305,
+        "abortedPending": 0,
+        "abortedListings": 0,
+        "prepared": 610,
+        "created": 0,
+        "events": 0,
+        "storeSize": 0
+      },
+      "elapsedMs": 660.8
+    },
+    {
+      "name": "精确观察有界且租约全部释放",
+      "passed": true,
+      "metrics": {
+        "listCalls": 1,
+        "observations": 305,
+        "pending": 0,
+        "maxPending": 2,
+        "leased": 0,
+        "maxLeased": 1,
+        "disposed": 305,
+        "abortedPending": 0,
+        "abortedListings": 0,
+        "prepared": 610,
+        "created": 0,
+        "events": 0,
+        "storeSize": 0
+      }
+    },
+    {
+      "name": "摘要没有发布或持久化会话",
+      "passed": true,
+      "metadataEntries": 305
+    },
+    {
+      "name": "25毫秒关闭连接后目录信号中止且没有遗留",
+      "passed": true,
+      "metrics": {
+        "listCalls": 1,
+        "observations": 0,
+        "pending": 0,
+        "maxPending": 0,
+        "leased": 0,
+        "maxLeased": 0,
+        "disposed": 0,
+        "abortedPending": 0,
+        "abortedListings": 1,
+        "prepared": 0,
+        "created": 0,
+        "events": 0,
+        "storeSize": 0
+      }
+    },
+    {
+      "name": "宿主目录后已进入有界观察",
+      "passed": true
+    },
+    {
+      "name": "观察期间断开会中止同批读取且释放槽",
+      "passed": true,
+      "metrics": {
+        "listCalls": 1,
+        "observations": 2,
+        "pending": 0,
+        "maxPending": 2,
+        "leased": 0,
+        "maxLeased": 0,
+        "disposed": 0,
+        "abortedPending": 2,
+        "abortedListings": 0,
+        "prepared": 0,
+        "created": 0,
+        "events": 0,
+        "storeSize": 0
+      }
+    },
+    {
+      "name": "断开后新目录请求仍返回全部会话",
+      "passed": true,
+      "metrics": {
+        "listCalls": 1,
+        "observations": 305,
+        "pending": 0,
+        "maxPending": 2,
+        "leased": 0,
+        "maxLeased": 1,
+        "disposed": 305,
+        "abortedPending": 0,
+        "abortedListings": 0,
+        "prepared": 610,
+        "created": 0,
+        "events": 0,
+        "storeSize": 0
+      }
+    },
+    {
+      "name": "所有读取结束后原生文件及会话表未改变",
+      "passed": true
+    }
+  ],
+  "allPassed": true,
+  "ownedProcessStopped": true
+}

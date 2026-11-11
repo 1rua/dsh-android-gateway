@@ -1,0 +1,66 @@
+
+ RUN  v4.1.10 /mnt/data/projects/open-android-intelligence/.worktrees/dsh-corpus-scaling
+
+ ❯ integrations/dsh-session-adapter/corpus.test.js (3 tests | 3 failed) 260ms
+   × 完整列表只扫描一次目录，并有界观察、释放所有租约且保留原surface更新时间 7ms
+   × 观察关闭时中止挂起读取，不继续领取后续会话或保留响应监听 1ms
+   × 目录查询超过受理期限时传递取消并返回明确超时 251ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  integrations/dsh-session-adapter/corpus.test.js > 完整列表只扫描一次目录，并有界观察、释放所有租约且保留原surface更新时间
+AssertionError: expected 19 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 19
+
+ ❯ integrations/dsh-session-adapter/corpus.test.js:54:26
+     52|   expect(res.body.sessions).toHaveLength(9);
+     53|   expect(res.body.sessions[0]).toEqual({ id: "native-0", title: "最新原生标…
+     54|   expect(state.listings).toBe(1);
+       |                          ^
+     55|   expect(state.legacyReads).toBe(0);
+     56|   expect(state.observations).toBe(9);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  integrations/dsh-session-adapter/corpus.test.js > 观察关闭时中止挂起读取，不继续领取后续会话或保留响应监听
+AssertionError: expected +0 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 0
+
+ ❯ integrations/dsh-session-adapter/corpus.test.js:77:30
+     75|   await tick(); res.destroyed = true; res.emit("close");
+     76|   await Promise.race([work, new Promise((_, reject) => setTimeout(() =…
+     77|   expect(state.observations).toBe(2);
+       |                              ^
+     78|   expect(state.signals.every((signal) => signal.aborted)).toBe(true);
+     79|   expect(res.listenerCount("close")).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  integrations/dsh-session-adapter/corpus.test.js > 目录查询超过受理期限时传递取消并返回明确超时
+Error: 健康查询未超时
+ ❯ Timeout._onTimeout integrations/dsh-session-adapter/corpus.test.js:91:56
+     89|   const res = response();
+     90|   await Promise.race([createSessionHandler(ctx, { promptTimeoutMs: 15 …
+     91|     new Promise((_, reject) => setTimeout(() => reject(new Error("健康查询…
+       |                                                        ^
+     92|   expect(res.statusCode).toBe(504);
+     93|   expect(res.body.code).toBe("AGENT_QUERY_TIMEOUT");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  00:44:57
+   Duration  417ms (transform 37ms, setup 0ms, import 63ms, tests 260ms, environment 0ms)
+

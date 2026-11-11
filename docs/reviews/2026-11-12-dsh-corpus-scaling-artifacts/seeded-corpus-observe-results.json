@@ -1,0 +1,51 @@
+{
+  "syntheticOnly": true,
+  "corpusCount": 305,
+  "bodyEvents": 0,
+  "withContextPlugin": false,
+  "fixture": "/tmp/dsh-seeded-corpus-q1mju9s4",
+  "requests": [
+    {
+      "route": "/status",
+      "authenticated": false,
+      "status": 401,
+      "elapsedMs": 22.07,
+      "online": null
+    },
+    {
+      "route": "/status",
+      "authenticated": true,
+      "status": 200,
+      "elapsedMs": 102.84,
+      "online": true
+    },
+    {
+      "route": "/status",
+      "authenticated": true,
+      "status": 200,
+      "elapsedMs": 156.35,
+      "online": true
+    }
+  ],
+  "modelRequests": 0,
+  "observeApiProbe": {
+    "records": 305,
+    "observed": 305,
+    "concurrency": 2,
+    "listCallsForListing": 1,
+    "listCallsDuringObservations": 0,
+    "elapsedMs": 386.92445,
+    "httpStatus": 200
+  },
+  "allPassed": true,
+  "sourceCommits": {
+    "core": "520eb6696c658d2ca6e36ab489eb76a902f11790",
+    "adapter": "acc028af1eb6529aaffd99217d5a797b1c9320bc"
+  },
+  "adapterSourceSha256": {
+    "index.js": "659cc20ce1b61601f92350a4d452300839f52b99d063d9feb18ef6323041d9de",
+    "generation.js": "b930781fff17d9c6370e9a290658648fd61c6909edf5294dfc632f3d1774e195",
+    "diagnostics.js": "e8b75dad9ede772415c12960ae9ce6018803e1b890e368c038b0dea13253c364"
+  },
+  "adapterSnapshotMatchesAuditedSources": true
+}

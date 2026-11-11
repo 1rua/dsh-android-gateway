@@ -1,0 +1,55 @@
+{
+  "syntheticOnly": true,
+  "corpusCount": 305,
+  "bodyEvents": 0,
+  "withContextPlugin": false,
+  "fixture": "/tmp/dsh-seeded-corpus-ph6p1ow3",
+  "requests": [
+    {
+      "route": "/status",
+      "authenticated": false,
+      "status": 401,
+      "elapsedMs": 23.21,
+      "online": null
+    },
+    {
+      "route": "/status",
+      "authenticated": true,
+      "status": 200,
+      "elapsedMs": 147.02,
+      "online": true
+    },
+    {
+      "route": "/status",
+      "authenticated": true,
+      "status": 200,
+      "elapsedMs": 133.74,
+      "online": true
+    },
+    {
+      "route": "/sessions",
+      "authenticated": true,
+      "status": 200,
+      "elapsedMs": 498.99,
+      "sessionCount": 305
+    },
+    {
+      "route": "/status",
+      "authenticated": true,
+      "status": 200,
+      "elapsedMs": 101.21,
+      "online": true,
+      "duringListing": true
+    },
+    {
+      "route": "/status",
+      "authenticated": false,
+      "status": 401,
+      "elapsedMs": 0.49,
+      "online": null,
+      "duringListing": true
+    }
+  ],
+  "modelRequests": 0,
+  "allPassed": true
+}
