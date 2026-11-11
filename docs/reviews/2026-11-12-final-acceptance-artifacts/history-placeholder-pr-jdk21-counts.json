@@ -1,0 +1,30 @@
+{
+  "conversation-domain": {
+    "tests": 47,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "classes": 9
+  },
+  "conversation-ui": {
+    "tests": 855,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "classes": 93
+  },
+  "conversation-data": {
+    "tests": 61,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "classes": 8
+  },
+  "app": {
+    "tests": 1258,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "classes": 104
+  }
+}

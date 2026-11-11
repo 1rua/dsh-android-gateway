@@ -1,0 +1,19 @@
+{
+  "accountsPreserved": true,
+  "agentManifestsAndKeyDigestsPreserved": true,
+  "accountLinksPreserved": true,
+  "coreConfigPreserved": true,
+  "originalNativeEntryCount": 1140,
+  "originalNativeMetadataPreserved": false,
+  "newNativeEntryCount": 0,
+  "masterKeyMetadataPreviouslyPreserved": true,
+  "originalNativePathsPreserved": true,
+  "nativeChanges": {
+    "emptyLockMtimeChanged": 1,
+    "oneExistingLogAppendedBytes": 80,
+    "appendedFrameType": "session/end-seed",
+    "appendedFrameDataKeys": [],
+    "privateExistingBodyRead": false,
+    "explanation": "官方Session恢复/prepare路径可追加空end-seed标记；本轮只解压原文件末尾之后80字节，不读取既有504字节或正文。未断言所有原文件逐字未变。"
+  }
+}

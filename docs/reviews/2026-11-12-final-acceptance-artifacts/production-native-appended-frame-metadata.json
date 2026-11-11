@@ -1,0 +1,14 @@
+[
+  {
+    "appendedBytes": 80,
+    "newFrameEventTypes": [
+      "session/end-seed"
+    ],
+    "newFrameSequences": [
+      5
+    ],
+    "newFrameDataKeys": [
+      []
+    ]
+  }
+]

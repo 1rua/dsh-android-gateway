@@ -1,0 +1,172 @@
+{
+  "evidenceKind": "Full后续模块任务正确JDK21最终单次成功，对应现存XML；完整Full前Core环境失败仍单列",
+  "modules": [
+    {
+      "module": "notification-collector",
+      "tests": 46,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "notification-control",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "notification-host",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "platform-kernel",
+      "tests": 100,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "plugin-package",
+      "tests": 51,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "plugin-runtime-wasm",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "plugin-ui",
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "policy-engine",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "screen-control",
+      "tests": 41,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "sms-collector",
+      "tests": 52,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "artifact-ports",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "assistant-holder",
+      "tests": 217,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "call-log-collector",
+      "tests": 102,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "capability-ports",
+      "tests": 67,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "capability-sync-runtime",
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "control-ports",
+      "tests": 38,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "conversation-data",
+      "tests": 61,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "conversation-domain",
+      "tests": 47,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "conversation-ui",
+      "tests": 855,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "core-model",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "device-primitives",
+      "tests": 55,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "encrypted-store",
+      "tests": 25,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "gateway-client",
+      "tests": 404,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "totals": {
+    "tests": 2279,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}

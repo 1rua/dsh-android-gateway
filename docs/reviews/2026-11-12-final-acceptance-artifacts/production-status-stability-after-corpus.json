@@ -1,0 +1,20 @@
+[
+  {
+    "http": 200,
+    "elapsedSeconds": 0.309,
+    "online": true,
+    "allExistingCapabilitiesReady": true
+  },
+  {
+    "http": 200,
+    "elapsedSeconds": 0.154,
+    "online": true,
+    "allExistingCapabilitiesReady": true
+  },
+  {
+    "http": 200,
+    "elapsedSeconds": 0.212,
+    "online": true,
+    "allExistingCapabilitiesReady": true
+  }
+]

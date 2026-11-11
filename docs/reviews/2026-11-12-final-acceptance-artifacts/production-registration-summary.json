@@ -1,0 +1,22 @@
+{
+  "managementAuthenticated": true,
+  "handshakeVerified": true,
+  "existingAgentManifestsAndKeyDigestsPreserved": true,
+  "sessionScope": "deployment",
+  "online": true,
+  "capabilities": {
+    "list": true,
+    "history": true,
+    "create": true,
+    "send": true,
+    "rename": true,
+    "archive": false,
+    "delete": false,
+    "cancel": true,
+    "stream": true,
+    "streamHeartbeat": true,
+    "generationRecovery": true,
+    "idempotentSend": false,
+    "clientMessageIdentity": true
+  }
+}
