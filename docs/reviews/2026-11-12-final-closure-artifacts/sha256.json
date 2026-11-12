@@ -1,0 +1,14 @@
+{
+  "device-cli-1794441971-public-result.json": "fd473db394e4947e9d2ff54dc08bc92d98412b9ac47275d248020555d425d0db",
+  "device-cli-mcp-discovery.json": "41358316dae05ee4cfd83fe31a1a6f140250d8d2a4c146e3d535f31a4523a862",
+  "device-mcp-1794442016-public-result.json": "ea80f0f2778f6cbeb0b86042226abcd4b14354c63fdf38c75f6265049ec91403",
+  "device-mcp-1794442202-public-result.json": "ceb0d4173f65715ec636168c89118688573633c16494a1159c1f75958e587558",
+  "device-permission-restoration.json": "7c6eeaabb1fa96435de3e7faec4583c90311a37d374c818afb683e19e51451b3",
+  "device-transport-result-index.json": "e6d3967d8a4a8b257d820ba5fc4c4f10db1e3489d5b078a4a4234276ef63fdd8",
+  "full-02ad-public-summary.json": "9c702c2482f007e276c8be4a2dca7ad67d8175becc8ec2d582179a17a91302a0",
+  "openclaw-pr4-final-normalization-check.json": "61e3dd8e3240c1547be64eaa3dfc5745c5467a1b6c9c0b51b717ef0565a98c89",
+  "pr171-spec-review.md": "7369d79bce943a635a5b6a8bcd9789af611c9f35f9ab4a038c1b7dfdddcc8608",
+  "pr171-standards-review.md": "c5b5f81a2fb7eaad3dd4f30e3ee41b5095a8970105547df8b0d75349075d7a77",
+  "production-core-source-recheck.json": "ee808ca2ad8b45755c007bfecc8e75a2739c2a7ca1215b8126b54cc02cbd6c0f",
+  "production-runtime-recheck.json": "a570f4aa572f50cd4cf9f888d4240ab6fed18c0cb9fe28c3e8e4e96f2b53381d"
+}

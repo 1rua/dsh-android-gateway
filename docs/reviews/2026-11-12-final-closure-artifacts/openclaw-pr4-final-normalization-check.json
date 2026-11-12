@@ -1,0 +1,11 @@
+{
+  "baseline": "35b2a595fd4374eb64761d08a90d83ea5390570f",
+  "reviewedSourceHead": "2f1a08a33ec0255302789a03b48194364dd754ed",
+  "finalHead": "3fafc92a148e83b8b47a0876029c94dbd51ff20b",
+  "nonDocsByteEquivalent": true,
+  "normalizedLogs": 8,
+  "onlyOneTrailingLfRemovedEach": true,
+  "evidenceSha256Verified": 25,
+  "fullThreeDotDiffCheckExitCode": 0,
+  "finalCi": "success"
+}

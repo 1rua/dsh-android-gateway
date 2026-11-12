@@ -1,0 +1,26 @@
+{
+  "androidUser": 10,
+  "isolatedSyntheticAccountOnly": true,
+  "cli": {
+    "devicesSucceeded": true,
+    "capabilitiesSucceeded": true,
+    "selectedDeviceSha256": "b8ba7cc5c64495b31a9a3d925dc49692663a10d29d77d7388c0dc9cb48113ace",
+    "screenReadStateReady": true,
+    "schemaAvailable": true,
+    "androidStatus": "READY",
+    "reason": null
+  },
+  "mcp": {
+    "stdioInitialized": true,
+    "requiredToolsDiscovered": 6,
+    "devicesSucceeded": true,
+    "capabilitiesSucceeded": true,
+    "sameSelectedDeviceAndCapabilityState": true,
+    "schemaAgreementWhenAvailable": true
+  },
+  "deviceOperationsSubmitted": 0,
+  "sensitiveBodiesPersisted": false,
+  "syntheticTransportCredentialRevoked": true,
+  "noActiveCredentialRetainedInConfig": true,
+  "passed": true
+}

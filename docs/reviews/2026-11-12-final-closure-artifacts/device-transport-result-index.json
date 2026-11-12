@@ -1,0 +1,27 @@
+{
+  "runs": [
+    {
+      "artifact": "device-cli-1794441971-public-result.json",
+      "transport": "cli",
+      "passed": true,
+      "terminal": "succeeded",
+      "failureCode": null
+    },
+    {
+      "artifact": "device-mcp-1794442016-public-result.json",
+      "transport": "mcp",
+      "passed": false,
+      "terminal": "failed",
+      "failureCode": "SCREEN_CHANGED"
+    },
+    {
+      "artifact": "device-mcp-1794442202-public-result.json",
+      "transport": "mcp",
+      "passed": true,
+      "terminal": "succeeded",
+      "failureCode": null
+    }
+  ],
+  "allFailuresRetained": true,
+  "sensitiveResultBodiesIncluded": false
+}

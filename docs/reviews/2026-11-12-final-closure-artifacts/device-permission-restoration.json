@@ -1,0 +1,16 @@
+{
+  "verifiedAt": "2026-11-11T23:53:26.839107+00:00",
+  "androidUser": 10,
+  "package": "com.openandroidintelligence.mobile",
+  "exactComponentConfirmedInSystemSettings": true,
+  "enabledThroughSystemConfirmationUi": true,
+  "boundServiceConfirmed": true,
+  "capabilityInitially": "ANDROID_PERMISSION_REQUIRED",
+  "initialReason": "ACCESSIBILITY_SERVICE_UNAVAILABLE",
+  "capabilityAfterPublication": "READY",
+  "schemaAvailableAfterPublication": true,
+  "cliAndMcpAgree": true,
+  "otherOaiTestAppServiceEnabled": false,
+  "privateScreenContentRead": false,
+  "deviceOperationsSubmitted": 0
+}
