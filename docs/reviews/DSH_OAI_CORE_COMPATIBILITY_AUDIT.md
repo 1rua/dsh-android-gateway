@@ -23,7 +23,7 @@
 
 设备通路后续证据：CLI和官方MCP stdio在原隔离用户10发现同一设备及Schema；系统无障碍关闭时准确返回ANDROID_PERMISSION_REQUIRED，按系统确认恢复后发布READY。CLI一次state读取与MCP稳定屏幕上一次新state读取都完成单次本地确认、succeeded、摘要、ACK和正文释放。MCP首次SCREEN_CHANGED失败保留，不以一次成功抹去失败；只说明这一只读能力及所测通路，不宣称全部设备能力通过。
 
-**当前发布判定：尚未完成。** 最终dev Full43129391533仍在执行；真实用户10 Core重启队列复测两条输入/回复各1、历史稳定、最终UI稳定但观察到一次保存失败提示，#142继续开放。最终APK保留数据覆盖、Full和报告闭环仍是关闭条件；见[最终收口计划](../plans/2026-11-12-final-closure.zh-CN.md)。
+**当前发布判定：尚未完成。** 最终dev Full43129391533已失败1项ColdStartConnectionTest，失败作业正在重跑；真实用户10 Core重启队列复测两条输入/回复各1、历史稳定、最终UI稳定但观察到一次保存失败提示，#142继续开放。最终APK保留数据覆盖、Full和报告闭环仍是关闭条件；见[最终收口计划](../plans/2026-11-12-final-closure.zh-CN.md)。
 ## A. 修复后总体结论
 
 | 六个主要问题 | 当前结论与直接证据 |
