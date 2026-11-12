@@ -1,0 +1,37 @@
+{
+  "transport": "mcp",
+  "androidUser": 10,
+  "syntheticAccountOnly": true,
+  "operationsSubmitted": 1,
+  "schemaDiscoveredAndMatched": true,
+  "states": [
+    {
+      "state": "pending",
+      "localAuthorizationState": null
+    },
+    {
+      "state": "claimed",
+      "localAuthorizationState": "awaiting_confirmation"
+    },
+    {
+      "state": "claimed",
+      "localAuthorizationState": "executing"
+    },
+    {
+      "state": "succeeded",
+      "localAuthorizationState": null
+    }
+  ],
+  "display": {
+    "widthPixels": 1080,
+    "heightPixels": 2400,
+    "rotation": 0
+  },
+  "nodesEmpty": true,
+  "resultDigestVerified": true,
+  "acknowledged": true,
+  "resultPayloadReleased": true,
+  "requestIdSha256": "e275211f0fdf39c89a9a2ea6182c599191604de643d4f87f31db88b445a2f96a",
+  "passed": true,
+  "temporaryCredentialRevoked": true
+}

@@ -1,0 +1,32 @@
+{
+  "recordedAt": "2026-11-11T23:31:56.427287+00:00",
+  "runId": 43094885415,
+  "workflow": "CI",
+  "event": "pull_request",
+  "headSha": "02ad53e09049c2b06c21cacd9d009c2f14e6d5bd",
+  "runnerMergeSha": "105d9d5bf44270157f45bd00bf2f5748205cbade",
+  "status": "completed",
+  "conclusion": "failure",
+  "historicalHermesVectors": {
+    "passed": 70,
+    "failed": 0
+  },
+  "nodeFailure": {
+    "step": "Verify historical and current plugin contracts",
+    "command": "python gateway-contract/tools/check-contract-pin.py --plugin-root-env OPENCLAW_PLUGIN_ROOT",
+    "pin": "f0b3f1bd4f6f3301b820e38c9f3241bcac05cd10",
+    "diagnosisInProgress": true
+  },
+  "androidFailure": {
+    "class": "HermesHttpInteropTest",
+    "method": "batchAcceptanceDispatchReplyAndReplayUseTheRealHttpAndSseBoundary",
+    "expectedTurnEvidenceCount": 2,
+    "actualTurnEvidenceCount": 0,
+    "moduleTests": 61,
+    "moduleFailed": 1,
+    "issue": 169
+  },
+  "backupLintPassed": true,
+  "fullSucceeded": false,
+  "privateDataIncluded": false
+}

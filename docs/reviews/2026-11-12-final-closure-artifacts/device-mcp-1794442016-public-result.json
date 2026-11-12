@@ -1,0 +1,14 @@
+{
+  "transport": "mcp",
+  "androidUser": 10,
+  "syntheticAccountOnly": true,
+  "operationsSubmitted": 1,
+  "schemaDiscoveredAndMatched": true,
+  "temporaryCredentialRevoked": true,
+  "passed": false,
+  "terminalState": "failed",
+  "failureCode": "SCREEN_CHANGED",
+  "observedBy": "user10-OaiDeviceRequest-tag",
+  "failureSafety": "snapshot_generation_changed_during_capture",
+  "autoRetryPerformed": false
+}

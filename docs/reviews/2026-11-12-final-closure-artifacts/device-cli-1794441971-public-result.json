@@ -1,0 +1,33 @@
+{
+  "transport": "cli",
+  "androidUser": 10,
+  "syntheticAccountOnly": true,
+  "operationsSubmitted": 1,
+  "schemaDiscoveredAndMatched": true,
+  "states": [
+    {
+      "state": "pending",
+      "localAuthorizationState": null
+    },
+    {
+      "state": "claimed",
+      "localAuthorizationState": "awaiting_confirmation"
+    },
+    {
+      "state": "succeeded",
+      "localAuthorizationState": null
+    }
+  ],
+  "display": {
+    "widthPixels": 1080,
+    "heightPixels": 2400,
+    "rotation": 0
+  },
+  "nodesEmpty": true,
+  "resultDigestVerified": true,
+  "acknowledged": true,
+  "resultPayloadReleased": true,
+  "requestIdSha256": "8c24bfd528619941f57a04ecc32ce47e1532808842930e2d745634434fe481ae",
+  "passed": true,
+  "temporaryCredentialRevoked": true
+}
