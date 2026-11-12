@@ -12,18 +12,18 @@
 | --- | --- |
 | 原八项及新增规模、历史、重附缺陷 | 双仓已合并并部署；源码摘要和分层证据见下文。局部测试不扩展为任意故障保证。 |
 | OAI #158/#159/#164 | PR162/163已修复备份Lint、历史Hermes验证边界和测试夹具假阳性；原Full失败仍保留。 |
-| Full43094885415 | completed/failure，head02ad53e0；PR143合成merge105d9d5b与dev整tree相同。历史Hermes70/70和备份Lint通过，新失败交#169/#170；不能继续写正在执行。 |
+| Full43094885415 | completed/failure，head02ad53e0；PR143合成merge105d9d5b与dev整tree相同。历史Hermes70/70和备份Lint通过，#169/#170新增失败已分别修复并合并；最终dev Full43129391533仍在执行。 |
 | OAI #169 | PR171已合并7e4c5e82：固定日志被第二真实夹具截断，现按实例隔离，保留真实回复、执行次数和本会话/输入身份断言。受控同症状红绿、Debug/Release各5例、独立绿重放1例及PR门禁通过。 |
-| OAI #170 / OpenClaw | 旧固定插件仅22/26受管输入匹配，CORE不同会拒绝新客户端；外仓PR4已合并e73ddfe1同步4源/4runtime及实际manifest摘要，OAI PR172固定不可变SHA/锁行待审查。严格checker不弱化。 |
-| OAI #165 / PR168 | 确认旧保存通知、同值异源误清、失败writer后pending未重启、同源异常被外层误移交。最新候选1ae42b78含实际红绿、16聚焦绿与独立7绿；SQLite端口真实关闭重开1例独立报告，最终集成/CI/模拟器待完成。 |
-| OAI #142 | generation精确查询与能力门禁已修复，当前Core5+30聚焦通过；原用户10真实排队断线、重启、unknown仍须最终复测，首次现场异常不改写成正常。 |
+| OAI #170 / OpenClaw | 外仓PR4已合并e73ddfe1同步4源/4runtime及实际manifest摘要；OAI PR172固定不可变SHA/锁行已通过双轴审查，最终集成CI待完成。严格checker不弱化。 |
+| OAI #165 / PR168 | 已合并5ffc613f，修复checkpoint attempt、来源身份、失败writer后pending重启和同源传播；16聚焦绿、真实SQLite1、独立7绿及PR门禁通过。原始模拟器首次保存失败仍未定位。 |
+| OAI #142 | generation精确查询与能力门禁已修复，Core聚焦5+30通过；原用户10 Core重启队列复测两条输入/回复各1、历史稳定、最终UI稳定，但恢复过程中出现一次保存失败提示，因此继续开放。 |
 | OAI #166/#167 | 单次测试失败在固定提交的失败作业重跑后通过，按未稳定复现关闭；首次失败和证据边界保留。 |
 
 本机后续只读复核再次确认Core/DSH均active/running、NRestarts=0；54/54 Core Python源匹配02ad53e0；fresh HMAC、原实例与scope、全部既有会话能力、三组JS摘要和单活动Bundle通过。仅核验服务和桥认证，没有读取生产会话正文或发送消息。
 
 设备通路后续证据：CLI和官方MCP stdio在原隔离用户10发现同一设备及Schema；系统无障碍关闭时准确返回ANDROID_PERMISSION_REQUIRED，按系统确认恢复后发布READY。CLI一次state读取与MCP稳定屏幕上一次新state读取都完成单次本地确认、succeeded、摘要、ACK和正文释放。MCP首次SCREEN_CHANGED失败保留，不以一次成功抹去失败；只说明这一只读能力及所测通路，不宣称全部设备能力通过。
 
-**当前发布判定：尚未完成。** 最终Full、最终APK保留数据覆盖、队列重连/重启复测和报告独立复核仍是关闭总跟踪的条件；见[最终收口计划](../plans/2026-11-12-final-closure.zh-CN.md)。
+**当前发布判定：尚未完成。** 最终dev Full43129391533仍在执行；真实用户10 Core重启队列复测两条输入/回复各1、历史稳定、最终UI稳定但观察到一次保存失败提示，#142继续开放。最终APK保留数据覆盖、Full和报告闭环仍是关闭条件；见[最终收口计划](../plans/2026-11-12-final-closure.zh-CN.md)。
 ## A. 修复后总体结论
 
 | 六个主要问题 | 当前结论与直接证据 |
