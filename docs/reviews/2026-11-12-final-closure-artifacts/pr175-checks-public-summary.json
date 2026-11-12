@@ -1,0 +1,110 @@
+{
+  "headRefOid": "f57f8ae918134a271aba0ca87feb7f00ffd379ae",
+  "observedAt": "2026-11-12T04:06:21.065928+00:00",
+  "totalChecks": 20,
+  "allSuccessful": true,
+  "checks": [
+    {
+      "name": "sign-plugin-packages",
+      "conclusion": "SUCCESS",
+      "workflowName": "Android APK Artifact"
+    },
+    {
+      "name": "Change Impact Analysis",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    },
+    {
+      "name": "apk",
+      "conclusion": "SUCCESS",
+      "workflowName": "Android APK Artifact"
+    },
+    {
+      "name": "Fast Gate",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    },
+    {
+      "name": "Dependency Lock Evidence",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    },
+    {
+      "name": "Core (Python 3.11)",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    },
+    {
+      "name": "Core (Python 3.12)",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    },
+    {
+      "name": "Hermes Native Adapter",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    },
+    {
+      "name": "DSH Adapter",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    },
+    {
+      "name": "Android Fixtures",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    },
+    {
+      "name": "Android Safety Gate",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    },
+    {
+      "name": "Android Device & Authorization",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    },
+    {
+      "name": "Android Platform Kernel",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    },
+    {
+      "name": "Android Settings & Notifications",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    },
+    {
+      "name": "Android Conversation",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    },
+    {
+      "name": "Android Gateway Client",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    },
+    {
+      "name": "Android Plugin Modules",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    },
+    {
+      "name": "Android App Regressions",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    },
+    {
+      "name": "Android Play Variant",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    },
+    {
+      "name": "CI Gate",
+      "conclusion": "SUCCESS",
+      "workflowName": "OAI Core and Session Adapters"
+    }
+  ],
+  "prStateAtSnapshot": "OPEN",
+  "currentMergeState": "见latest-stage-live-metadata.json；快照OPEN不代表当前未合并"
+}

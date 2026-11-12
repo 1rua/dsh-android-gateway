@@ -1,0 +1,18 @@
+{
+  "submittedOnce": true,
+  "clientMessageId": "p_2e5f4a778da24289a3daf3b9281a8e34",
+  "types": [
+    "generation",
+    "delta",
+    "delta",
+    "delta",
+    "delta",
+    "done"
+  ],
+  "codes": [],
+  "passed": true,
+  "httpStatus": 200,
+  "contentType": "text/event-stream",
+  "state": "completed",
+  "expectedShortMarkerMatched": true
+}

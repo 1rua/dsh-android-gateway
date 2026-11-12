@@ -1,0 +1,406 @@
+{
+  "scenario": "dsh",
+  "androidUser": 10,
+  "emulator": "emulator-5556",
+  "uiSubmissionCount": 2,
+  "twoUiSubmissionsOnly": true,
+  "passed": false,
+  "firstRunningWhenSecondQueued": true,
+  "secondHostInputCountBeforeFault": 0,
+  "firstInputCount": 1,
+  "secondInputCount": 0,
+  "firstReplyCount": 1,
+  "secondReplyCount": 0,
+  "firstNativeState": "cancelled",
+  "historyPreviousIdsPreserved": true,
+  "uiObservations": [
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    }
+  ],
+  "persistencePhaseEvents": [],
+  "transientStorageFailureObserved": false,
+  "finalUiStable": false,
+  "clientMessageIdsStable": true,
+  "temporaryApiCredentialRevoked": true,
+  "run": "1794460431",
+  "sourceCommit": "2caabfb1206fd93cd0232171f0bf287fdfeea498",
+  "scenarioUsesActualModelAndNativeHost": true,
+  "authoritativeFirstState": "cancelled",
+  "authoritativeCode": "CANCELLED",
+  "authoritativeQuery": "原client身份只读查询；没有新提交",
+  "postRecoveryShape": {
+    "platformConnection": "LIVE",
+    "repositoryStreamHealth": "FAILED",
+    "targetQueuedSends": 1,
+    "targetUnknownBarrier": true,
+    "targetRecoveryJobs": 0,
+    "targetPendingDeliveryDrainJob": false
+  },
+  "diagnosis": "已复现队列未收敛；恢复触发根因待受控红环验证"
+}

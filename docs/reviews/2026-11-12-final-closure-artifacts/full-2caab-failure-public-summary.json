@@ -1,0 +1,23 @@
+{
+  "run": 43153380070,
+  "headSha": "2caabfb1206fd93cd0232171f0bf287fdfeea498",
+  "status": "completed",
+  "conclusion": "failure",
+  "nodeJob": "success",
+  "androidJob": "failure",
+  "testTask": ":app:testFullDebugUnitTest",
+  "testCount": 1868,
+  "passed": 1866,
+  "failed": 1,
+  "skipped": 1,
+  "failureMethod": "NativeAgentBackgroundWorkTest.mainWorkbenchCompletionPublishesTheExistingReplyNotification[34]",
+  "reportedSourceLine": 632,
+  "bytecodeMappedSourceLine": 237,
+  "exception": "IllegalArgumentException",
+  "message": "Array contains more than one matching element.",
+  "confirmedFailureMechanism": "回复channel筛选得到多条通知，single失败",
+  "rootCause": "额外通知的来源尚未稳定复现，不能认定为生产重复发布或fixture迟到",
+  "relatedIssue": 177,
+  "draftPullRequest": 178,
+  "sourceEvidence": "GitHub最终终态及已保存失败作业的固定失败行；只归档白名单"
+}

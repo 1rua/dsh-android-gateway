@@ -1,0 +1,39 @@
+{
+  "transport": "cli",
+  "androidUser": 10,
+  "syntheticAccountOnly": true,
+  "operationsSubmitted": 1,
+  "schemaDiscoveredAndMatched": true,
+  "states": [
+    {
+      "state": "pending",
+      "localAuthorizationState": null
+    },
+    {
+      "state": "claimed",
+      "localAuthorizationState": "awaiting_confirmation"
+    },
+    {
+      "state": "claimed",
+      "localAuthorizationState": "executing"
+    },
+    {
+      "state": "succeeded",
+      "localAuthorizationState": null
+    }
+  ],
+  "display": {
+    "widthPixels": 1080,
+    "heightPixels": 2400,
+    "rotation": 0
+  },
+  "nodesEmpty": true,
+  "resultDigestVerified": true,
+  "acknowledged": true,
+  "resultPayloadReleased": true,
+  "requestIdSha256": "2ead35e0ea9b9d87897fbfe3412329f8ee4dfa8005250e1680cf3103787b0eff",
+  "passed": true,
+  "temporaryCredentialRevoked": true,
+  "sourceCommit": "2caabfb1206fd93cd0232171f0bf287fdfeea498",
+  "emulator": "emulator-5556"
+}

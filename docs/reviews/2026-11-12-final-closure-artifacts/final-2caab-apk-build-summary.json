@@ -1,0 +1,17 @@
+{
+  "sourceCommit": "2caabfb1206fd93cd0232171f0bf287fdfeea498",
+  "firstAttempt": {
+    "completed": false,
+    "failureClass": "默认512MiB堆导致GC失败"
+  },
+  "recoveredAttempt": {
+    "result": "BUILD SUCCESSFUL",
+    "elapsed": "2m 2s",
+    "existingHeapConfigurationRestored": "3GiB"
+  },
+  "sourceLogsReviewed": [
+    "final-2caab-apk-build.txt",
+    "final-2caab-apk-build-recovered.txt"
+  ],
+  "fullCiNotSubstituted": true
+}

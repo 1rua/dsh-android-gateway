@@ -1,0 +1,42 @@
+{
+  "freshCoreHmacVerified": true,
+  "existingInstanceAndScopeRetained": true,
+  "allExistingSessionCapabilitiesReady": true,
+  "runtimeSourceFilesAllMatch": true,
+  "activeAdapterBundles": [
+    "dsh-android-gateway"
+  ],
+  "sourceSha256": {
+    "core-distribution/index.js": "54bec1dd68ae8fd5f0beeea064d05a5fc16a80e6e40cf5e9373d03aaa2153caa",
+    "profile-builtin/index.js": "54bec1dd68ae8fd5f0beeea064d05a5fc16a80e6e40cf5e9373d03aaa2153caa",
+    "profile-standalone/index.js": "4feb77fbd23ff9a00a65cfffe8ade90acf67fa0727454382a6797adb7863cebe",
+    "core-distribution/generation.js": "b930781fff17d9c6370e9a290658648fd61c6909edf5294dfc632f3d1774e195",
+    "profile-builtin/generation.js": "b930781fff17d9c6370e9a290658648fd61c6909edf5294dfc632f3d1774e195",
+    "profile-standalone/generation.js": "b930781fff17d9c6370e9a290658648fd61c6909edf5294dfc632f3d1774e195",
+    "core-distribution/diagnostics.js": "f6b3e17b9d9fc539b10ef94ae53728b87318ae4e9b39a3f88aef8f55356a1c8f",
+    "profile-builtin/diagnostics.js": "f6b3e17b9d9fc539b10ef94ae53728b87318ae4e9b39a3f88aef8f55356a1c8f",
+    "profile-standalone/diagnostics.js": "e8b75dad9ede772415c12960ae9ce6018803e1b890e368c038b0dea13253c364"
+  },
+  "privateSessionBodiesRead": false,
+  "realMessagesSubmitted": 0,
+  "services": {
+    "oai-core.service": {
+      "ActiveState": "active",
+      "SubState": "running",
+      "NRestarts": "0"
+    },
+    "dsh-web.service": {
+      "ActiveState": "active",
+      "SubState": "running",
+      "NRestarts": "0"
+    }
+  },
+  "pythonSources": {
+    "candidate": "f57f8ae918134a271aba0ca87feb7f00ffd379ae",
+    "sourceCount": 54,
+    "matchingCount": 54,
+    "allMatch": true,
+    "sessionDataRead": false
+  },
+  "pythonEvidenceScope": "54个Core Python文件逐项匹配f57f阶段源；2caab其他任务增量在Android流式展示，不以此伪称重验全部私有会话"
+}

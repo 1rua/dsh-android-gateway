@@ -1,0 +1,18 @@
+{
+  "dedicatedCurrentModel": true,
+  "submittedOnce": true,
+  "sessionId": "1889aeae-dad5-40a2-ad6e-232d7932c831",
+  "clientMessageId": "probe_277c0f38e8f14b09bd29e06030dcbdfb",
+  "types": [],
+  "passed": true,
+  "errorClass": "JSONDecodeError",
+  "queriedWithoutResubmission": true,
+  "receipt": {
+    "state": "completed",
+    "code": null,
+    "generationId": "dsh:1889aeae-dad5-40a2-ad6e-232d7932c831:message:d7aa9951-b126-4377-9622-c4be465b3885",
+    "userMessageId": "d7aa9951-b126-4377-9622-c4be465b3885",
+    "clientMessageId": "probe_277c0f38e8f14b09bd29e06030dcbdfb"
+  },
+  "expectedShortMarkerMatched": true
+}

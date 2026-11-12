@@ -1,0 +1,17 @@
+{
+  "originalAvdRetained": true,
+  "copyCreated": true,
+  "snapshotSavedBeforeCopy": true,
+  "originalVmPausedDuringCopy": true,
+  "copiedEncryptionMetadataWithoutInspection": true,
+  "destination": "dsh_capacity_copy",
+  "dataPartitionRequestedGiB": 12,
+  "booted": true,
+  "actualFilesystemKiB": 6082144,
+  "existingFilesystemExpanded": false,
+  "freeKiBAfterColdBoot": 489664,
+  "originalUser0And10Retained": true,
+  "candidateInstalled": true,
+  "originalAppUser10StoppedToAvoidConcurrentIdentity": true,
+  "userConfirmedPreserveOriginalUseFullCopy": true
+}

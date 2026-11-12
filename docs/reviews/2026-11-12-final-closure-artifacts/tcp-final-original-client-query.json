@@ -1,0 +1,27 @@
+{
+  "queriedOriginalClientWithoutResubmitting": true,
+  "generation": null,
+  "matchingHistoryUserCount": 0,
+  "lastUserRows": [
+    {
+      "id": "40ea164e-726e-444b-a2e1-44a903f521cd",
+      "clientMessageId": "cm_c052b539-04e4-41e3-b7e1-16e68ff52b2d",
+      "state": "completed"
+    },
+    {
+      "id": "352b73d6-7991-46a3-a9ae-08794cb53024",
+      "clientMessageId": "p_2e5f4a778da24289a3daf3b9281a8e34",
+      "state": "completed"
+    },
+    {
+      "id": "1fc78c25-27f3-4dde-ad97-c8d1d8aaf7da",
+      "clientMessageId": "cm_7318b7f7-7b95-4e9f-89f3-aed14b6614eb",
+      "state": "completed"
+    },
+    {
+      "id": "341d8446-197f-43c7-bee1-429cfac33557",
+      "clientMessageId": "cm_893861ff-3c59-4b2b-9d01-2b6a186f8ec1",
+      "state": "completed"
+    }
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "observedDate": "2026-11-12",
+  "source": "GitHub API当次回读固定字段",
+  "entries": [
+    {
+      "number": 142,
+      "title": "[P2][AUD-008] DSH队列恢复时同库镜像写入触发SQLite锁异常",
+      "state": "open",
+      "html_url": "https://github.com/1rua/open-android-intelligence/issues/142",
+      "updated_at": "2026-11-12T05:40:15Z",
+      "repository": "open-android-intelligence",
+      "kind": "issues",
+      "labels": [
+        "bug"
+      ]
+    },
+    {
+      "number": 173,
+      "title": "最终Full冷启动前台恢复测试失败",
+      "state": "open",
+      "html_url": "https://github.com/1rua/open-android-intelligence/issues/173",
+      "updated_at": "2026-11-12T05:40:17Z",
+      "repository": "open-android-intelligence",
+      "kind": "issues",
+      "labels": [
+        "bug"
+      ]
+    },
+    {
+      "number": 174,
+      "title": "[P2] 最终Full的PlayDebug缺刷新凭据通知断言失败",
+      "state": "closed",
+      "html_url": "https://github.com/1rua/open-android-intelligence/issues/174",
+      "updated_at": "2026-11-12T04:32:34Z",
+      "repository": "open-android-intelligence",
+      "kind": "issues",
+      "labels": [
+        "bug"
+      ]
+    },
+    {
+      "number": 177,
+      "title": "[P2] 最终Full原生工作台完成通知测试抛出参数异常",
+      "state": "open",
+      "html_url": "https://github.com/1rua/open-android-intelligence/issues/177",
+      "updated_at": "2026-11-12T05:36:06Z",
+      "repository": "open-android-intelligence",
+      "kind": "issues",
+      "labels": [
+        "bug"
+      ]
+    },
+    {
+      "number": 179,
+      "title": "[P2] DSH重启后权威取消已确认但未投递队列未恢复",
+      "state": "open",
+      "html_url": "https://github.com/1rua/open-android-intelligence/issues/179",
+      "updated_at": "2026-11-12T05:39:21Z",
+      "repository": "open-android-intelligence",
+      "kind": "issues",
+      "labels": [
+        "bug"
+      ]
+    },
+    {
+      "number": 180,
+      "title": "[P2] 平台已恢复但原生仓储流仍 FAILED 时排队投递未收敛",
+      "state": "open",
+      "html_url": "https://github.com/1rua/open-android-intelligence/issues/180",
+      "updated_at": "2026-11-12T05:46:58Z",
+      "repository": "open-android-intelligence",
+      "kind": "issues",
+      "labels": [
+        "bug"
+      ]
+    },
+    {
+      "number": 1,
+      "title": "跟踪: DSH 与 OAI Core 兼容性审计修复计划（8项问题）",
+      "state": "open",
+      "html_url": "https://github.com/1rua/dsh-android-gateway/issues/1",
+      "updated_at": "2026-11-12T02:50:41Z",
+      "repository": "dsh-android-gateway",
+      "kind": "issues",
+      "labels": [
+        "documentation",
+        "enhancement"
+      ]
+    },
+    {
+      "number": 175,
+      "title": "修复: 串行协调原生镜像同库事务",
+      "state": "closed",
+      "html_url": "https://github.com/1rua/open-android-intelligence/pull/175",
+      "updated_at": "2026-11-12T04:07:39Z",
+      "repository": "open-android-intelligence",
+      "kind": "pulls",
+      "labels": [],
+      "draft": false,
+      "merged": true,
+      "merge_commit_sha": "473fb735ebdc85814179375997b9193b0fccb25f",
+      "head": "f57f8ae918134a271aba0ca87feb7f00ffd379ae",
+      "base": "a400ee88b2bed7ed2dfd0cc9648353de657879b7"
+    },
+    {
+      "number": 176,
+      "title": "测试: 等待缺刷新凭据说明的实际完成",
+      "state": "closed",
+      "html_url": "https://github.com/1rua/open-android-intelligence/pull/176",
+      "updated_at": "2026-11-12T03:51:51Z",
+      "repository": "open-android-intelligence",
+      "kind": "pulls",
+      "labels": [],
+      "draft": false,
+      "merged": true,
+      "merge_commit_sha": "a400ee88b2bed7ed2dfd0cc9648353de657879b7",
+      "head": "d83d2cd4e588a82fc2f6b5c56c36c79020e74ee4",
+      "base": "83fbef075a494f0d4899cc22c08b4864c9edb3cd"
+    },
+    {
+      "number": 178,
+      "title": "测试: 定位原生完成通知的多通知门禁失败",
+      "state": "open",
+      "html_url": "https://github.com/1rua/open-android-intelligence/pull/178",
+      "updated_at": "2026-11-12T05:35:35Z",
+      "repository": "open-android-intelligence",
+      "kind": "pulls",
+      "labels": [],
+      "draft": true,
+      "merged": false,
+      "merge_commit_sha": "f828916a4900245184507126f5d6646755c1adf5",
+      "head": "2e1c0398abe00a6540bd515d1928f54c95bafbdc",
+      "base": "2caabfb1206fd93cd0232171f0bf287fdfeea498"
+    },
+    {
+      "number": 16,
+      "title": "文档: 完成DSH与OAI最终修复验收报告",
+      "state": "open",
+      "html_url": "https://github.com/1rua/dsh-android-gateway/pull/16",
+      "updated_at": "2026-11-12T04:41:46Z",
+      "repository": "dsh-android-gateway",
+      "kind": "pulls",
+      "labels": [],
+      "draft": true,
+      "merged": false,
+      "merge_commit_sha": "0086e46a4484356328235095c5a08a9ea3b92c0e",
+      "head": "bd8a2d0c705b1d461bf2d7f0ffe8310a31b03ff8",
+      "base": "21021eaa66df249443df1fdb5e81f26b2af6c690"
+    }
+  ]
+}

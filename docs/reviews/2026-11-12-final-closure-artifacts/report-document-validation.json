@@ -1,0 +1,31 @@
+{
+  "checkedDate": "2026-11-12",
+  "baseline": "21021eaa66df249443df1fdb5e81f26b2af6c690",
+  "auditOriginalMarkerAndSuffixByteEqual": true,
+  "auditOriginalSuffixSha256": "6adc1953c45126fa36c17326db56b5d50c979d66176e9ee3f17118076b8e60e1",
+  "originalMarkerCount": 1,
+  "checkedMarkdownFiles": [
+    "docs/reviews/DSH_OAI_CORE_COMPATIBILITY_AUDIT.md",
+    "docs/plans/DSH_OAI_CORE_REMEDIATION_PLAN.md",
+    "docs/plans/DSH_OAI_CORE_IMPLEMENTATION_STATUS.md",
+    "docs/plans/2026-11-12-final-closure.zh-CN.md"
+  ],
+  "localLinksChecked": 75,
+  "missingLocalLinks": [],
+  "absolutePathsInRewrittenFront": [],
+  "gitDiffCheck": {
+    "exitCode": 0,
+    "output": ""
+  },
+  "currentSnapshot": "2caab：Core1794458287通过；TCP1794460278通过；DSH1794460431失败；Full43153380070 completed/failure；#142/#173/#177/#179/#180与DSH#1开放",
+  "productionSourceChanged": false,
+  "devicesOrServicesOperatedByDocumentCheck": false,
+  "evidenceArtifactCount": 52,
+  "generatedArtifactCount": 3,
+  "documentSha256": {
+    "docs/reviews/DSH_OAI_CORE_COMPATIBILITY_AUDIT.md": "f0dcf8a7bd8a1bcac9341b0832f2a607d56764c0fb6bd6ed7a69d3623e7b7259",
+    "docs/plans/DSH_OAI_CORE_REMEDIATION_PLAN.md": "5fe6e8dd05e9a0ab2a09a5ae35b39cc3b40fa7560b6853a61ee3702f9f3a3961",
+    "docs/plans/DSH_OAI_CORE_IMPLEMENTATION_STATUS.md": "beedcf6ce852d952d3199f6dc07a05eae160e083c4bfae9a51bdd970fe352db2",
+    "docs/plans/2026-11-12-final-closure.zh-CN.md": "9b98e7ca9327994924291448aa0dadbcae24e405dc7060ff0aa23b6b39fb8e02"
+  }
+}

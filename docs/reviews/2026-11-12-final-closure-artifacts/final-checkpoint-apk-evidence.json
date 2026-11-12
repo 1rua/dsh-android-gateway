@@ -1,0 +1,24 @@
+{
+  "sourceCommit": "1ae42b78e4f1bb0790b2e41c0aa0c26d57b3413a",
+  "apkSha256": "0f7f3fd7b5853bf2c3ce9655294a40b89f263bfea307b8f0c14012a13374ee4d",
+  "signerSha256": "37d9445fab11d827b032b84b0739acb2c33aa8ace1f319ed20a4cc612624ce33",
+  "sixBundledPackagesVerified": true,
+  "sameSigningIdentity": true,
+  "buildElapsedSeconds": 195,
+  "buildResult": "success",
+  "builtAt": "2026-11-12T00:23:13.542605+00:00",
+  "installedYet": true,
+  "appProductionSourceNeedsFinalDevEquivalenceCheck": true,
+  "postUpgrade": {
+    "sameAndroidUser": 10,
+    "retainedLoggedInConnection": true,
+    "oldSyntheticQueueReplyVisible": false,
+    "historyConflict": false,
+    "localSaveFailure": false,
+    "editorPresent": true,
+    "installedWithoutUninstall": true,
+    "noAppDataCleared": true
+  },
+  "mergedDevSourceEquivalent": "5ffc613f4b4150ccfbde79ca2ca829e2246e5e58",
+  "androidAndBundledPluginsAndCoreSourcesByteEquivalent": true
+}

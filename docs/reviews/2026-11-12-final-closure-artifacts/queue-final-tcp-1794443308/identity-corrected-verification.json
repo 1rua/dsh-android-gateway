@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "originalHarnessResultRetainedAsFailed": true,
+  "harnessFailureCause": "FIRST_ADB_INPUT_TRUNCATED_BY_16_CHARACTERS",
+  "businessChecksUseActualPreSubmitUiTextAndAuthoritativeIds": true,
+  "samePhysicalRunNoResubmission": true,
+  "androidUser": 10,
+  "messages": [
+    {
+      "userMessageIdSha256": "eccb2143f3e92c5d8ca88335505443beb7896b1292c8bf494b2922e9bdd297d5",
+      "clientMessageIdSha256": "b61625e6560ffa2182e24a45578e6bd2aa7c252753fd9b74c1b72218564745e5",
+      "generationIdSha256": "22cbd9fe4c40f971bc7dec8c7ea57af6002f9420e624724d7ac1a46c4378f53e",
+      "uiSubmittedTextLength": 323,
+      "nativeTextSha256": "c9699c8736775fb4429fb597d7e8bcdd08507be2728bcc63cee47f9188af262d",
+      "exactUserCount": 1,
+      "replyCount": 1,
+      "receiptState": "completed",
+      "identityQueryStable": true
+    },
+    {
+      "userMessageIdSha256": "c937c26556c5caa9308387c3f22b36c78636fd805f0a9aba5c0507333bcb25cf",
+      "clientMessageIdSha256": "accbe9a3356f74a6d907bf5d96370610c105ef8492a64aa75f8f1ac1f35c2639",
+      "generationIdSha256": "9a09a56981569aa10816cda82b7f094e6827f134c6b88d41c75366621eed24dc",
+      "uiSubmittedTextLength": 61,
+      "nativeTextSha256": "0115555294636d3d2ee59bd1d0faaa20d9015250fcd84d523e4acd081607b392",
+      "exactUserCount": 1,
+      "replyCount": 1,
+      "receiptState": "completed",
+      "identityQueryStable": true
+    }
+  ],
+  "finalUiStable": true,
+  "transientStorageFailureObserved": false,
+  "closedExistingTcpConnections": 3,
+  "listenerUnreachableDuringFault": true,
+  "historyPreviousIdsPreserved": true
+}
