@@ -1,0 +1,51 @@
+[
+  {
+    "time": "1794444710.066",
+    "tag": "OaiLatency"
+  },
+  {
+    "time": "1794444722.741",
+    "tag": "OaiLatency"
+  },
+  {
+    "time": "1794444724.264",
+    "tag": "OaiLatency"
+  },
+  {
+    "time": "1794444725.450",
+    "tag": "OaiLatency",
+    "type": "AgentSessionException",
+    "code": "OUTCOME_UNKNOWN"
+  },
+  {
+    "time": "1794444730.623",
+    "tag": "OaiPersistence",
+    "phase": "CHECKPOINT_WRITE",
+    "result": "failed",
+    "kind": "IO",
+    "code": "LOCAL_PERSISTENCE_FAILED"
+  },
+  {
+    "time": "1794444733.043",
+    "tag": "OaiPersistence",
+    "phase": "CHECKPOINT_WRITE",
+    "result": "recovered",
+    "code": "LOCAL_PERSISTENCE_RECOVERED"
+  },
+  {
+    "time": "1794444907.795",
+    "tag": "OaiLatency"
+  },
+  {
+    "time": "1794444913.355",
+    "tag": "OaiLatency"
+  },
+  {
+    "time": "1794444913.487",
+    "tag": "OaiLatency"
+  },
+  {
+    "time": "1794444913.487",
+    "tag": "OaiLatency"
+  }
+]

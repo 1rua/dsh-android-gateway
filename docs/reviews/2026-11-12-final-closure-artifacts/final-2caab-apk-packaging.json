@@ -1,0 +1,15 @@
+{
+  "sourceApkSha256": "1d5a78aad29d2e2e9cad814a8011a6ff5e0e103fa1183b53e5b6305643add9dd",
+  "repackagedApkSha256": "a2a2ee3ed747aaa78a6f2db332e6af33918f7eb722fb417cc0e42ada1ca548e8",
+  "allPayloadEntriesByteIdentical": true,
+  "payloadEntryCount": 227,
+  "sixSignedPackagesByteEqual": true,
+  "onlyDexCompressionAndSigningMetadataChanged": true,
+  "sameSigner": true,
+  "sourceBytes": 71041136,
+  "compressedBytes": 20651624,
+  "installed": true,
+  "sourceCommit": "2caabfb1206fd93cd0232171f0bf287fdfeea498",
+  "emulator": "emulator-5556",
+  "androidUser": 10
+}

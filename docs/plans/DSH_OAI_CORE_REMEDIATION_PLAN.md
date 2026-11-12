@@ -1,124 +1,49 @@
-# DSH 与 OAI Core 兼容性审计修复计划
+# DSH 与 OAI Core 修复计划与验收门槛
 
-修复后状态索引（2026-11-12）：原8项及实施中新增问题已取得双仓交付和分层验收证据，见[修复后审计报告](../reviews/DSH_OAI_CORE_COMPATIBILITY_AUDIT.md)。
+制定日期：2026-11-11；实施状态更新：2026-11-12。总跟踪：[DSH #1](https://github.com/1rua/dsh-android-gateway/issues/1)。原始问题及修复前计划以[完整审计保留段](../reviews/DSH_OAI_CORE_COMPATIBILITY_AUDIT.md#原始审计完整保留)为历史基准。本文区分已经交付的修复、实际通过的场景和仍需完成的工作，**整体尚未完成**。
 
-追加收口（2026-11-12）：#158/#159/#164已修复；#169、#170、#165已合并；Full43094885415失败后最终dev Full43129391533又失败1项ColdStartConnectionTest，失败作业重跑中；#142真实队列断线/重启验收继续。根因、责任和证据见[最终收口计划](2026-11-12-final-closure.zh-CN.md)及[最新审计](../reviews/DSH_OAI_CORE_COMPATIBILITY_AUDIT.md)。原文待实施和未勾选进度为制定时记录，不代表当前实现；原始现场首次checkpoint异常根因未知，后续恢复或单测不构成已修复证明。
+## 目标与不变条件
 
-制定日期：2026-11-11。状态：Issue 已登记，修复待实施。本轮仅提交问题、制定计划和保存交付文档，没有修改生产代码、建立实现分支、提交 Commit 或 PR。
+保持 Android App ↔ OAI Core ↔ DSH Adapter ↔ DSH 架构，修复 AUD-001—008 及实施中发现的兼容性与恢复问题，保留账号、密钥、实例、配置、原生会话、历史和现有能力。未知结果屏障用于防止重复执行，不能删除屏障、换 `clientMessageId` 重投或把 `cancelled` 改成 `completed` 来取得通过结果。附件、原生命令、工具/审批、归档删除和 eventSync 不在本轮新增范围。
 
-## 目标、范围与固定基准
+## 已交付与最新验收事实
 
-目标是在保持 `Android App ↔ OAI Core ↔ DSH Adapter ↔ DSH` 架构、原生会话数据和既有账号/密钥的前提下，关闭审计 AUD-001 至 AUD-008，并以隔离真实链路验证发布条件。
+| 阶段 | 已交付或实际结果 | 验收边界 |
+| --- | --- | --- |
+| 基线与注册 | 对齐独立 dev，有选择地引入现有握手与测试 | 不以同名本地分支代替远端基线，不整体覆盖 main 的无关配置 |
+| 原 P1 与双桥可靠性 | 精确取消、受理/观察分离、宿主 signal、所选 Profile 重启 | 双桥真实宿主与非目标活跃任务有证据；双 systemd unit 仍未验证 |
+| 身份、资源、规模 | 稳定 native/client 身份、背压、长历史、305 会话查询、内部来源过滤、Android 历史占位升级 | 受控验证与 Android 原数据验证分别记录，不扩展为任意正文或插件规模 |
+| 权威恢复与重附 | current/generation 能力门禁、未知结果屏障、运行中观察重附 | 完整 Core 与真实模型双桥各 28 项；不承诺任意故障下普遍精确一次 |
+| 后续修复 | PR168 通知来源、PR171 夹具日志、PR172 契约 pin、PR175 同库锁协调、PR176 通知测试完成信号均已合并 | 独立两轴审查无遗留问题；PR175 仅覆盖同进程、同 canonical 数据库路径，PR176 生产源码零变更 |
+| 最终 APK 与设备通路 | 固定 `2caabfb1206fd93cd0232171f0bf287fdfeea498`；同签名、六包、227 项有效载荷校验；完整 AVD 副本用户10保留数据覆盖；CLI/MCP 各一项只读 state 全链通过 | 原模拟器保留快照并正常停止；副本文件系统未扩容；设备结果不代表全部能力通过 |
+| 最终 Core 重启与 TCP | Core run `1794458287`、TCP run `1794460278` 均通过；两输入/回复各 1 次，身份和历史稳定，全过程未观察到保存失败 | 两场景均先确认首轮 running、第二条在 App 排队且宿主输入数为 0；TCP 实际关闭 3 条既有连接并确认监听不可达 |
+| 最终 DSH 重启 | run `1794460431` 未通过：首轮权威状态为 `cancelled/CANCELLED`，平台恢复 LIVE，但第二条仍排队、仓储流为 FAILED、目标 drain job 缺失 | 全过程无本地 SQLite 保存失败；不能归为 PR175 的锁异常复发，也不能用 Core/TCP 成功替代 |
+| 最终 Full | run `43153380070`、固定 `2caabfb1` 为 completed/failure；Android 1868 项、1 失败、1 跳过；Node 成功 | `NativeAgentBackgroundWorkTest.mainWorkbenchCompletionPublishesTheExistingReplyNotification[34]` 因回复 channel 多条匹配通知使 `single` 抛异常；本机单项通过不能替代 Full |
 
-- 审计报告：[DSH_OAI_CORE_COMPATIBILITY_AUDIT.md](../reviews/DSH_OAI_CORE_COMPATIBILITY_AUDIT.md)。
-- 总跟踪 Issue：[dsh-android-gateway #1](https://github.com/1rua/dsh-android-gateway/issues/1)。
-- 独立插件审计基准：`main@325a48058dafbfdb0686dc060e08674d8810b4c1`。
-- DSH 远端开发基线：`dev@59aad2b0559a950c7b687914eb9089ddf9c8269c`。
-- OAI 开发基线：`dev@24172841f9a564c53416f7d066f3450d4feb2bfe`。
-- 宿主契约基准：实际 DSH `0.2.2-rc.1`。实施开始时重新核对提交和宿主版本，不假定这些快照永远最新。
+具体计数、固定源码与白名单证据见[审计 D](../reviews/DSH_OAI_CORE_COMPATIBILITY_AUDIT.md#d-分层验证真实失败与数据保留)。旧 503/504/403、UNKNOWN_MODEL、输入工具错误、前提不成立和各轮 Full 失败继续保留。
 
-审计已确认 4 项 P1、4 项 P2。既有测试去重 294 项通过及 15 项风险复现，是**修复前证据**；它们不代表修复已经实现或发布门槛已满足。
+## 剩余阶段、依赖与验收
 
-未支持的附件、原生命令、工具/审批事件、持续事件同步、多 Profile 全自动部署等保留为单独的后续能力规划。本计划不以修复 Bug 为名扩展这些功能，也不新增账号系统、Gateway 或设备权限实现。精确取消的功能建设与当前危险取消能力的安全降级分开。
+#177、#179、#180 按现有记录作为 P2 跟踪；#173 沿用其现行记录，不因最终验收未通过而擅自升级。阶段一与阶段二可在独立工作区并行；最终全链复验和 Full 必须使用两项必要修复合并后的同一固定提交及对应 APK。
 
-## Issue 与责任矩阵
+| 阶段与关联 | 责任与执行范围 | 可执行步骤与依赖 | 验收及关闭条件 |
+| --- | --- | --- | --- |
+| 一：DSH 重启后的队列收敛，[OAI #179](https://github.com/1rua/open-android-intelligence/issues/179)、[#180](https://github.com/1rua/open-android-intelligence/issues/180)，归入 [#142](https://github.com/1rua/open-android-intelligence/issues/142) 的跨层恢复验收 | Android 的 `CoreAgentConversationRepository` 与 `WorkbenchController` 负责恢复驱动、队列及观察状态；Core/双桥继续提供真实活动/终态事实 | 先建立真实 Workbench＋CoreRepo 受控红环：预置未投递后继条目，首轮恢复为权威 cancelled，令 repository streamHealth 保持 FAILED，而 Runtime 平台恢复 LIVE；不导航、不点重试，观察队列是否停留。对照 repository LIVE 过渡或显式 retry，确认相同条目各发送一次。再排除一次 currentGeneration probe 失败、已完成 Job 槽、会话/Agent 隔离及恢复代次的影响；根因成立后才做最小修复 | 同一目标会话权威终态可读且连接恢复后，未交付后继条目自动继续且各执行一次；原未知已发送条目不重投，取消终态保留；相关断线、取消竞态、多会话、资源释放回归和原 user10 DSH 重启复验通过。#179 是现场缺陷，#180 是恢复触发假设；若同根因，用同一 PR 关联两项，不重复实施独立补丁，不在根因未证实时直接关闭 |
+| 二：最终 Full 的回复通知失败，[OAI #177](https://github.com/1rua/open-android-intelligence/issues/177)、[Draft PR #178](https://github.com/1rua/open-android-intelligence/pull/178) | OAI Android 通知发布和测试夹具生命周期；不归因于 DSH 桥 | 固定 `2caabfb1` 与 FullDebug/SDK34 原失败方法，记录匹配通知的数量与目标身份；受控证明额外通知来自旧 fixture 的迟到任务、不同目标混入或产品重复发布。根据红环分别修产品或测试清理/等待边界；保留原生 Agent、会话、代次、bubble 和非 ongoing 等原断言 | 可定位根因、受控红绿、原方法及相关整类回归、独立 Standards/Spec 审查、对应门禁通过；不把 `single` 改成宽松断言来掩盖多通知。PR178 目前只有计划，未完成修复，最终 Full 通过前不关闭 #177 |
+| 三：独立保留冷启动门禁，[OAI #173](https://github.com/1rua/open-android-intelligence/issues/173) | OAI Android 前台连接恢复及其测试时序 | 继续固定旧 `83fbef07` 失败与单方法 4012ms 成功的各自来源；若可稳定复现，记录连接数、平台 LIVE 终值和测试完成信号，区分产品与夹具根因，再最小修复 | 当前 #177 的失败不是 #173 重现。不得放宽 10 秒联合等待或其他预算；#173 关闭须有独立根因/稳定性证据和后续固定提交 Full 对应测试实际执行成功，不能由本机单项绿代替 |
+| 四：固定提交的真实恢复与发布门禁 | 主任务整合；Android/Core/双桥各自负责现有接口，不扩展 Adapter 职责 | 依赖阶段一、二所需修复及独立评审完成；更新保留数据的 AVD 副本 APK，再执行严格排队前提的 DSH 重启，回读原 client 身份、原生输入/回复次数及全过程保存日志；关联回归确认 Core 重启与 TCP 已通过行为保留。随后后台触发并取得同一提交 Full 终态 | DSH 重启首轮准确 cancelled，未投递后继条目各执行/回复一次，UI/队列收敛，无保存失败、无重复投递；Full 实际 completed/success，保留此前失败和跳过计数。只在相应条件满足后更新 #142；#173、#177、#179、#180 各按自己的关闭条件处理 |
+| 五：报告与总跟踪收口，[DSH #1](https://github.com/1rua/dsh-android-gateway/issues/1)、文档 PR16 | DSH 文档与证据纳管，生产源码不在本次文档提交内 | 补录实际结果，重新回读 Issues/PR/CI；四份文档、白名单清单、相对链接、原始审计逐字保留均经独立 Standards/Spec 审查；修复计划与报告状态一致 | 先闭合必要产品与门禁条件，再关闭总跟踪；不能从已合并 PR 推导整个目标完成。若仍有失败或未验证项，文档可以按真实状态交付，总跟踪继续 open |
 
-| 审计项 | 等级 | 已提交 Issue | 实施责任与关闭条件 |
-|---|---|---|---|
-| AUD-001 取消丢弃生成轮次 | P1 | [dsh-android-gateway #2](https://github.com/1rua/dsh-android-gateway/issues/2) | 独立插件先关闭不安全取消；精确取消需未来宿主原子匹配能力，不能以先查后取消替代 |
-| AUD-002 受理挂起后永久 Busy | P1 | [dsh-android-gateway #3](https://github.com/1rua/dsh-android-gateway/issues/3) | 独立插件分离受理与观察生命周期；结合 AUD-007 验证真实宿主签名 |
-| AUD-003 客户端与原生消息身份断裂 | P2 | [dsh-android-gateway #4](https://github.com/1rua/dsh-android-gateway/issues/4) | 独立插件补齐请求、终态、历史关联；OAI 内置历史来源关联同步补齐，两侧验收后关闭 |
-| AUD-004 缺少背压及缓冲上限 | P2 | [dsh-android-gateway #5](https://github.com/1rua/dsh-android-gateway/issues/5) | 独立插件有界观察队列、drain 与清理；复用内置逻辑时保留正确宿主参数 |
-| AUD-005 超长会话导致全列表失败 | P2 | [dsh-android-gateway #6](https://github.com/1rua/dsh-android-gateway/issues/6) | 独立与内置两侧修复摘要算法；至少两份 PR 或等价双侧交付，单侧完成不得关闭 |
-| AUD-006 安装重启未绑定目标 Profile | P1 | [open-android-intelligence #140](https://github.com/1rua/open-android-intelligence/issues/140) | OAI Core 安装管理；只操作经核实属于所选 Home/Profile 的服务，保留原启动信息 |
-| AUD-007 内置 prompt 遗漏必需参数 | P1 | [open-android-intelligence #141](https://github.com/1rua/open-android-intelligence/issues/141) | OAI 内置适配器；按真实宿主契约提供独立生命周期信号，保持观察断连不取消已受理任务 |
-| AUD-008 活动生成与队列恢复契约缺失 | P2 | [open-android-intelligence #142](https://github.com/1rua/open-android-intelligence/issues/142) | OAI Core/Android 与两侧桥协作；先确认权威数据及门禁，再闭合恢复。不得伪造空闲或自动重发 |
+首轮源码与回归范围以下列 OAI 仓库相对路径为入口；扩展范围须由新证据说明，不能先整模块重构：
 
-Issue 正文已包含关键源码位置、复现条件、观测、修复方向、边界及验收清单。完整审计与复现文件目前保存在本地仓库、尚未提交远端；Issue 未使用不存在的远端报告链接。后续实现 PR 应将必要的可重跑回归材料随代码纳入目标仓库。
+- 队列恢复：`apps/android/app/src/main/kotlin/com/openandroidintelligence/mobile/conversations/CoreAgentConversationRepository.kt`、`apps/android/conversation-ui/src/main/kotlin/com/openandroidintelligence/conversation/state/WorkbenchController.kt` 及 `apps/android/app/src/test/kotlin/com/openandroidintelligence/mobile/conversations/CoreAgentConversationRepositoryTest.kt`。先覆盖“平台恢复 LIVE、仓储仍 FAILED”的反馈环，再决定生产改动位置。
+- 完成通知：`apps/android/app/src/main/kotlin/com/openandroidintelligence/mobile/NativeConversationNotifications.kt`、`apps/android/app/src/test/kotlin/com/openandroidintelligence/mobile/NativeAgentBackgroundWorkTest.kt`、`apps/android/app/src/test/kotlin/com/openandroidintelligence/mobile/NativeConversationNotificationsTest.kt`。通知目标、数量和 fixture 退出后的异步任务应分别断言。
+- 冷启动：`apps/android/app/src/test/kotlin/com/openandroidintelligence/mobile/ColdStartConnectionTest.kt`；只有证据指向生产前台连接路径时才扩展生产修改。聚焦验证复用现有依赖、JDK21/SDK36 与 Gradle 缓存，随后执行相应 `npm run test:fast`、`npm run test:pr` 门禁；最终 `npm run test:full` 作为独立整体验收。
 
-## 步骤 0：对齐远端开发基线
+## 提交、数据保留与职责边界
 
-DSH **远端** `dev@59aad2b...` 尚未包含 `de69f871...` 的握手修复；`main@325a480...` 已包含。两者差异涉及 `.npmrc`、README、适配器源码和测试。本机同名 `dev` 已指向 `de69f871...`，不能将本地分支当作远端基线。
+当前文档提交只改 docs；后续产品修复已获授权，仍须先关联 Issue，从最新 dev 建独立 worktree/任务分支与 Draft PR，按中文提交规范仅暂存本次文件。提交前完成必要聚焦测试与独立 Standards/Spec 审查，再转正式 PR 并跟进远端门禁。远端 CI 使用后台或单次状态读取，不执行阻塞 watch。
 
-由总跟踪 Issue 承载一个独立的基线对齐 PR，任务分支建议为 `feature/dsh-audit-baseline`，目标为远端 `dev`：
+#142、#173、#177、#179、#180 与 DSH #1 继续开放；#174 已关闭，不重复列为待修。#142 的 SQLite 修复已交付，但跨故障队列恢复仍有未完成验收，不能清除历史失败或未知结果屏障来关闭。设备发现、认证、调度属于 Core，设备本地授权与执行属于 Android；桥只映射宿主会话和生成事实，不新增账号、Gateway 或设备权限系统。
 
-1. 在独立 worktree 中固定远端 SHA，检查工作区状态及仓库规范。
-2. 明确引入 `main` 已验证的握手修复和配套测试；逐项说明其他基线差异是否需要纳入，避免把非协议配置变动混作缺陷修复。
-3. 不重写现有分支历史、不替换身份/Token、不回退 `main` 已有的会话功能。
-4. 运行独立插件测试、握手契约和真实宿主加载/注册探针，证明目标 `dev` 包含已审计的注册行为。
-5. 基线 PR 合并后，独立插件后续实现分支从**重新取得的最新远端 dev** 创建。此步骤是交付前置条件，不另计一项审计 Bug。
-
-OAI 使用最新远端 `dev`；若其间已有变动，只复核受影响链路，不把旧 SHA 的通过证据自动搬到新代码。
-
-## 分阶段执行与依赖
-
-### 阶段一：处理 P1，并验证宿主受理契约
-
-可并行启动三个明确分工的任务：
-
-- **独立插件安全任务**：完成 AUD-001 的能力降级，校验无条件拒绝不会调用宿主取消原语。建议分支 `feature/dsh-safe-cancel`。
-- **OAI 宿主契约任务**：完成 AUD-007，真实 `SessionController.prompt` 必需参数与观察者生命周期一起验证。建议分支 `feature/dsh-prompt-contract`。
-- **OAI 安装管理任务**：完成 AUD-006，贯穿选择、升级、重启、健康检查和注册的目标身份。建议分支 `feature/dsh-profile-restart`。
-
-AUD-007 的真实签名结论确定后，实施独立插件 AUD-002。可与 AUD-004 放在同一实现分支 `feature/dsh-stream-reliability`，因为受理、观察、出站队列和资源清理属于同一生命周期；一个 PR 可关联两个独立 Issue，但验收逐项记录，不能只勾一个总测试。
-
-即使受理未知，也必须消费晚到的成功/拒绝回执。观察断开、期限和慢消费只能结束观察；除非另有明确、可核实的宿主执行取消语义，不应取消已受理任务。期限不能证明宿主未执行，不得把未知结果错误地表示为确定失败。
-
-### 阶段二：消息身份、长历史与资源边界
-
-1. **AUD-003**：建议分支 `feature/dsh-message-identity`。协商并传递稳定客户端 ID；只有取得真实原生 ID 后才回传；两版历史保留可验证的来源关联。OAI 配套历史变更在独立分支实现，两个仓库的 PR 在同一 Issue 中登记。既有宿主 rpcId 去重只作为已验证范围内的依据，不自动宣称跨重启精确一次执行。
-2. **AUD-004**：若未随阶段一完成，补齐有界队列、写入 drain、期限与清理。缓冲预算使用现有已验证实现或独立规格确认，不擅自添加产品数量上限。
-3. **AUD-005**：建议两仓库分别使用 `feature/dsh-history-summary`。通过迭代或权威摘要计算时间，禁止将全部事件作为函数参数。不能通过隐藏失败会话或吞掉异常让列表看似成功。
-
-阶段一和二可在**不同文件、不同 worktree**的范围内并行。独立仓库的 AUD-001/002/003/004/005 都涉及 `src/index.js`，由同一源码负责人串行实施与整合；内置 `index.js` 的 AUD-007/003配套/005/008 同样串行。禁止多个子 Agent 并发修改同一文件。安装管理任务与对应源码任务可独立推进。
-
-### 阶段三：活动生成查询与队列恢复
-
-AUD-008 建议分支 `feature/dsh-generation-recovery`，以 AUD-003 的稳定身份作为完整恢复的前置条件：
-
-1. 先核对宿主能否提供权威活动 turn、提交与生成关联，以及重启后的可查询终态。列清有证据支持的数据与不可获得的事实。
-2. 分别定义只读活动生成查询、持久生成恢复、幂等发送的能力及错误语义，不能以 `send=true` 推断所有恢复路由可用，也不能把这些不同能力合并声明。
-3. Core、Android 和两版适配器同步能力门禁、请求/响应及降级行为；保留现有 UI 文案，涉及新交互或文案时先明确规格。
-4. 支持权威恢复时，验证同一身份能找到已提交请求、运行中不重复投递、结束后队列各投递一次。
-5. 无法取得权威事实时保留明确未知状态，禁止返回虚假 idle、吞掉404、无限重试或自动重发。若只能交付降级，Issue 记录为部分完成，不能标记完整恢复已验证或达到发布标准。
-
-### 阶段四：隔离真实链路与发布验收
-
-在专用 DSH_HOME、Core 身份库、测试模型配置及隔离 Android 设备中执行。缺少条件时将对应项保持未验证，不借用真实用户账号或私人会话。
-
-| 验收组 | 必须覆盖的行为 | 关闭依据 |
-|---|---|---|
-| 基础连接 | DSH启动、Bundle加载、Core注册、握手、能力与健康 | 真实宿主与当前Core接口，不能只看200 |
-| 会话 | 终端已有与新增会话、App创建、重命名、历史顺序/原生ID、宿主重启后回读 | 双端可见性与持久记录均有证据 |
-| 成功消息 | 实际模型增量、最终回复、错误终态、历史同步 | 完整Android→Core→DSH→模型链路；无凭据AGENT_FAILED不算成功 |
-| 未知结果与恢复 | 受理延迟/回执丢失、断网、Core重启、DSH重启、同身份重试 | 执行次数与稳定身份可核验；运行中不重复投递 |
-| 取消与并发 | 旧轮次取消、新轮次竞争、多会话并发、观察断开 | 非目标执行零副作用；不支持精确取消时正确禁用 |
-| 资源 | 2000帧突发、永久/恢复drain、15万及更多事件、反复断连 | 资源有界、监听器归零、其他会话仍可用 |
-| 安装与安全 | 首装/升级、仅重启所选Profile、失败回滚、Token正确重载、重启恢复 | 会话/账号/密钥/配置保留，其他实例不受影响 |
-| Android设备能力 | 经Core CLI/MCP/API调用隔离设备并验证Android本地授权 | 归Core/Android，不将桥Token当设备授权 |
-
-发布前至少满足：所有 P1 关闭；AUD-003/004/005 完成；AUD-008 的权威恢复与客户端路径闭环，或明确维持不具备完整发布条件；两仓库所需配套 PR 都合并；真实成功链路与故障恢复有可回读证据。任何“因环境不可用而跳过”均须保留在验收表，不得填写为通过。
-
-## 实现 PR、测试与评审要求
-
-- 认领对应 Issue 后在独立 worktree 建 `feature/*` 分支，先建立 Draft PR 并关联 Issue；本计划本身不启动这些实现动作。
-- 建议拆分：基线对齐、危险取消降级、内置prompt契约、Profile重启、独立流式可靠性（002+004）、稳定消息身份及内置配套、两版长历史摘要、跨层恢复。一个分支仅包含对应范围，不整文件盲同步内置/独立版本。
-- 提交使用中文 `<类型>: <简要描述>`；仅暂存本次文件，不包含凭据、数据库、构建物或真实会话。
-- 按当前仓库门禁运行相关轻量测试；OAI 发起正式 PR 前执行 `npm run test:pr`，发布前执行要求的 Full 门禁。原有临时复现断言描述的是缺陷，应转成修复后的行为回归测试，不能继续以“成功复现缺陷”冒充修复通过。
-- 共享问题 AUD-003/005/008 各自保留“独立仓库 / OAI / 跨层测试”检查项；所有必要配套完成前保持 Issue open，跨仓库未完成时不用单侧 `Closes` 提前关闭。
-- 集成前同步最新基线，按仓库要求 rebase；汇总后由无开发上下文的独立 Agent 审查固定基线及关联 Issue 需求覆盖。
-- 转正式 PR 后报告链接与改动摘要；CI及评审按后台方式跟进，不使用同步watch。最多三轮未收敛则报告实质阻碍。
-- 合并后更新 Issue 和跟踪表；worktree及临时文件仅按工作区回收规范归档，最终永久清理由用户执行。
-
-## 当前进度与下一入口
-
-- [x] 审计、责任分配及证据边界完成。
-- [x] 8 个问题 Issue 与总跟踪 Issue 已提交，并完成回读核对。
-- [x] 本修复计划已保存至独立插件仓库。
-- [ ] 步骤0的 DSH 远端基线对齐。
-- [ ] 阶段一的 P1 实施与验收。
-- [ ] 阶段二的消息身份、资源和长历史修复。
-- [ ] 阶段三的恢复契约与跨层实现。
-- [ ] 阶段四的隔离成功E2E及发布验收。
-
-下一位开发 Agent 从总跟踪 Issue 认领步骤0，先核对远端dev与main差异及本地工作区；并行任务可认领 OAI AUD-006、AUD-007。未经后续实施授权，本轮不继续修改生产代码或建立 PR。
+证据只纳管类型、状态、计数、摘要和相对源码引用。账号、Token、密钥、数据库、原始正文/屏幕、APK、完整 CI 日志不入库；实际配置仅引用现有专用测试配置。原模拟器及原生数据保持保留，测试使用已授权完整副本和隔离合成会话。

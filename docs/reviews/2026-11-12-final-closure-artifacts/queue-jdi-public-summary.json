@@ -1,0 +1,10 @@
+{
+  "exceptionPath": "SqliteConversationRecords.transaction:116",
+  "causeChain": [
+    "java.io.IOException",
+    "android.database.sqlite.SQLiteDatabaseLockedException"
+  ],
+  "invokesTargetMethods": false,
+  "readsDetailMessage": false,
+  "capturedAndDisposed": true
+}

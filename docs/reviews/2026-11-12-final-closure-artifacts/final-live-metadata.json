@@ -1,0 +1,87 @@
+{
+  "observedAt": "2026-11-12T02:31:59.235026+00:00",
+  "prs": [
+    {
+      "headRefOid": "1ae42b78e4f1bb0790b2e41c0aa0c26d57b3413a",
+      "mergeCommit": {
+        "oid": "5ffc613f4b4150ccfbde79ca2ca829e2246e5e58"
+      },
+      "mergedAt": "2026-11-12T00:29:04Z",
+      "number": 168,
+      "state": "MERGED",
+      "url": "https://github.com/1rua/open-android-intelligence/pull/168",
+      "repository": "1rua/open-android-intelligence"
+    },
+    {
+      "headRefOid": "b524835634a348f9b94fa0b1119ea52db38ee8e9",
+      "mergeCommit": {
+        "oid": "7e4c5e820ae1ca0476a78c032d3aa1792bfa6226"
+      },
+      "mergedAt": "2026-11-11T23:55:32Z",
+      "number": 171,
+      "state": "MERGED",
+      "url": "https://github.com/1rua/open-android-intelligence/pull/171",
+      "repository": "1rua/open-android-intelligence"
+    },
+    {
+      "headRefOid": "6abe4e19d83fe8f0bc90fcf419885e23459a8b40",
+      "mergeCommit": {
+        "oid": "83fbef075a494f0d4899cc22c08b4864c9edb3cd"
+      },
+      "mergedAt": "2026-11-12T00:43:34Z",
+      "number": 172,
+      "state": "MERGED",
+      "url": "https://github.com/1rua/open-android-intelligence/pull/172",
+      "repository": "1rua/open-android-intelligence"
+    },
+    {
+      "headRefOid": "3fafc92a148e83b8b47a0876029c94dbd51ff20b",
+      "mergeCommit": {
+        "oid": "e73ddfe1b333cfe0f69c4ea519db3553b056381a"
+      },
+      "mergedAt": "2026-11-12T00:03:37Z",
+      "number": 4,
+      "state": "MERGED",
+      "url": "https://github.com/1rua/openclaw-android-gateway/pull/4",
+      "repository": "1rua/openclaw-android-gateway"
+    }
+  ],
+  "issues": [
+    {
+      "number": 173,
+      "state": "OPEN",
+      "title": "最终Full冷启动前台恢复测试失败",
+      "url": "https://github.com/1rua/open-android-intelligence/issues/173",
+      "repository": "1rua/open-android-intelligence"
+    },
+    {
+      "number": 1,
+      "state": "OPEN",
+      "title": "跟踪: DSH 与 OAI Core 兼容性审计修复计划（8项问题）",
+      "url": "https://github.com/1rua/dsh-android-gateway/issues/1",
+      "repository": "1rua/dsh-android-gateway"
+    },
+    {
+      "number": 142,
+      "state": "OPEN",
+      "title": "[P2][AUD-008] DSH队列恢复时同库镜像写入触发SQLite锁异常",
+      "url": "https://github.com/1rua/open-android-intelligence/issues/142",
+      "repository": "1rua/open-android-intelligence"
+    },
+    {
+      "number": 174,
+      "state": "OPEN",
+      "title": "[P2] 最终Full的PlayDebug缺刷新凭据通知断言失败",
+      "url": "https://github.com/1rua/open-android-intelligence/issues/174",
+      "repository": "1rua/open-android-intelligence"
+    }
+  ],
+  "full": {
+    "attempt": 2,
+    "conclusion": "failure",
+    "databaseId": 43129391533,
+    "headSha": "83fbef075a494f0d4899cc22c08b4864c9edb3cd",
+    "status": "completed",
+    "url": "https://github.com/1rua/open-android-intelligence/actions/runs/43129391533"
+  }
+}

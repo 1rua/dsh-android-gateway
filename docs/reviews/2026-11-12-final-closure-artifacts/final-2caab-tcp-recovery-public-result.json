@@ -1,0 +1,44 @@
+{
+  "scenario": "tcp",
+  "androidUser": 10,
+  "emulator": "emulator-5556",
+  "uiSubmissionCount": 2,
+  "twoUiSubmissionsOnly": true,
+  "passed": true,
+  "firstRunningWhenSecondQueued": true,
+  "secondHostInputCountBeforeFault": 0,
+  "closedExistingTcpConnections": 3,
+  "listenerUnreachableDuringFault": true,
+  "firstInputCount": 1,
+  "secondInputCount": 1,
+  "firstReplyCount": 1,
+  "secondReplyCount": 1,
+  "firstNativeState": "completed",
+  "historyPreviousIdsPreserved": true,
+  "uiObservations": [
+    {
+      "connected": true,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": true,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    }
+  ],
+  "persistencePhaseEvents": [],
+  "transientStorageFailureObserved": false,
+  "finalUiStable": true,
+  "clientMessageIdsStable": true,
+  "temporaryApiCredentialRevoked": true,
+  "sourceCommit": "2caabfb1206fd93cd0232171f0bf287fdfeea498",
+  "scenarioUsesActualModelAndNativeHost": true,
+  "firstTask": "模型在隔离工作区执行bash sleep60后回复标记"
+}

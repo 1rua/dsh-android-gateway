@@ -1,0 +1,22 @@
+[
+  {
+    "turn": 1,
+    "kind": "completed",
+    "httpWhitelist": [],
+    "timeoutMention": false
+  },
+  {
+    "turn": 2,
+    "kind": "error",
+    "httpWhitelist": [
+      "504"
+    ],
+    "timeoutMention": false
+  },
+  {
+    "turn": 3,
+    "kind": "completed",
+    "httpWhitelist": [],
+    "timeoutMention": false
+  }
+]

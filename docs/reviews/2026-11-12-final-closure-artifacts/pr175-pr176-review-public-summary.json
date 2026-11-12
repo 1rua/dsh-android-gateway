@@ -1,0 +1,35 @@
+{
+  "pr175": {
+    "merged": "473fb735ebdc85814179375997b9193b0fccb25f",
+    "finalHead": "f57f8ae918134a271aba0ca87feb7f00ffd379ae",
+    "finalStandardsUnresolved": 0,
+    "finalSpecUnresolved": 0,
+    "planningPassed": 78,
+    "nativeMirrorPassed": 19,
+    "scopePassed": 6,
+    "firstHeadFailuresRetained": [
+      "Fast新增测试未登记清单",
+      "NativeConversationMirrorTest第83行异步重试时序失败"
+    ],
+    "threeCommitRangeDiffAllEqual": true,
+    "finalDocumentEvidenceIncrement": true,
+    "scope": "同Android进程同canonical数据库路径；不宣称跨进程或任意故障精确一次"
+  },
+  "pr176": {
+    "merged": "a400ee88b2bed7ed2dfd0cc9648353de657879b7",
+    "finalStandardsUnresolved": 0,
+    "finalSpecUnresolved": 0,
+    "focusedPassed": 2,
+    "wholeClassPassed": 51,
+    "productionSourceChanged": false,
+    "scope": "测试等待初始化结束后的缺刷新凭据通知，保留零续期HTTP及账号授权密钥断言"
+  },
+  "sources": [
+    "pr175-second-independent-review.md",
+    "pr175-spec-review.md",
+    "pr176-independent-review.md",
+    "pr176-spec-review.md",
+    "pr175-followup-evidence/summary.json"
+  ],
+  "reviewAndLocalGreenDoNotReplaceRealE2EOrFull": true
+}

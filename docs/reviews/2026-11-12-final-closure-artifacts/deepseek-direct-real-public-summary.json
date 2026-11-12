@@ -1,0 +1,18 @@
+{
+  "submittedOnce": true,
+  "types": [
+    "generation",
+    "delta",
+    "delta",
+    "delta",
+    "delta",
+    "done"
+  ],
+  "codes": [],
+  "passed": true,
+  "httpStatus": 200,
+  "contentType": "text/event-stream",
+  "state": "completed",
+  "expectedShortMarkerMatched": true,
+  "originalClientReceiptQueriedWithoutResubmission": true
+}

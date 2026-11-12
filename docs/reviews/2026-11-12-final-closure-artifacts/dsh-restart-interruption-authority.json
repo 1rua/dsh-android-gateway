@@ -1,0 +1,22 @@
+{
+  "samePhysicalRun": "1794460431",
+  "submittedNewMessages": 0,
+  "users": [
+    {
+      "id": "6e6bd197-a11f-4d4f-a23e-75c799751c48",
+      "clientMessageId": "cm_584df540-9322-4270-968d-537d2f914a35",
+      "state": "cancelled"
+    }
+  ],
+  "receipts": [
+    {
+      "state": "cancelled",
+      "code": "CANCELLED",
+      "generationId": "dsh:7ac2cf8c-865c-4f97-afd1-2fe01d40c186:message:6e6bd197-a11f-4d4f-a23e-75c799751c48",
+      "clientMessageId": "cm_584df540-9322-4270-968d-537d2f914a35",
+      "userMessageId": "6e6bd197-a11f-4d4f-a23e-75c799751c48",
+      "revision": 86
+    }
+  ],
+  "secondAssistantMarkerCount": 0
+}

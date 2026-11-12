@@ -21,13 +21,11 @@
     "oai-core.service": {
       "ActiveState": "active",
       "SubState": "running",
-      "MainPID": "323489",
       "NRestarts": "0"
     },
     "dsh-web.service": {
       "ActiveState": "active",
       "SubState": "running",
-      "MainPID": "270112",
       "NRestarts": "0"
     }
   },

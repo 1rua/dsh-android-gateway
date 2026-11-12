@@ -1,0 +1,36 @@
+{
+  "runId": 43129391533,
+  "headSha": "83fbef075a494f0d4899cc22c08b4864c9edb3cd",
+  "attempt1": {
+    "status": "completed",
+    "conclusion": "failure",
+    "task": ":app:testFullReleaseUnitTest",
+    "tests": 1855,
+    "failures": 1,
+    "skipped": 1,
+    "test": "ColdStartConnectionTest.returningToForegroundReplacesASilentPlatformConnectionWithoutChangingTheConversation",
+    "sourceLine": 197,
+    "assertion": "十秒内新SSE连接数增加且连接为LIVE；未到第201行独立耗时预算断言"
+  },
+  "attempt2": {
+    "status": "completed",
+    "conclusion": "failure",
+    "task": ":app:testPlayDebugUnitTest",
+    "tests": 1855,
+    "failures": 1,
+    "skipped": 94,
+    "test": "GatewaySessionRefreshTest.withoutARefreshCredentialThePathSaysSoInsteadOfPretending",
+    "sourceLine": 959,
+    "fullReleaseTaskExecuted": true,
+    "coldStartFailureLinePresent": false,
+    "sameFailureAsAttempt1": false
+  },
+  "fixedHeadFocusedRelease": {
+    "tests": 1,
+    "failures": 0,
+    "skipped": 0,
+    "recoveryMillis": 4012,
+    "doesNotReplaceFull": true
+  },
+  "source": "full-release-coldstart-diagnosis.md 及 final-full-attempt2-failed.txt；日志仅提取固定字段，不归档整个原始控制台"
+}

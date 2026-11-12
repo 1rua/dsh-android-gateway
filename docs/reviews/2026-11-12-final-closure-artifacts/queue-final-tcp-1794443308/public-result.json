@@ -1,0 +1,70 @@
+{
+  "scenario": "tcp",
+  "androidUser": 10,
+  "twoUiSubmissionsOnly": true,
+  "passed": false,
+  "firstRunningWhenSecondQueued": true,
+  "secondHostInputCountBeforeFault": 0,
+  "closedExistingTcpConnections": 3,
+  "listenerUnreachableDuringFault": true,
+  "firstInputCount": 0,
+  "secondInputCount": 1,
+  "firstReplyCount": 1,
+  "secondReplyCount": 1,
+  "firstNativeState": "completed",
+  "historyPreviousIdsPreserved": true,
+  "uiObservations": [
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": false,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": true,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    },
+    {
+      "connected": true,
+      "storageFailure": false,
+      "historyConflict": false,
+      "stopStillVisible": false,
+      "queuedStillVisible": false,
+      "secondMarkerVisible": true
+    }
+  ],
+  "transientStorageFailureObserved": false,
+  "finalUiStable": true,
+  "clientMessageIdsStable": true,
+  "temporaryApiCredentialRevoked": true
+}

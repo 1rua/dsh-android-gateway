@@ -1,0 +1,53 @@
+{
+  "reviews": [
+    {
+      "pr": 168,
+      "axis": "standards",
+      "source": ".worktrees/dsh-remediation-state/pr168-final-standards-review.md",
+      "sha256": "d9acb8bd40bebc3a0de6895e84067ded965d44bfa62fc87ff6f23a3ea0818e9b",
+      "unresolvedFindings": 0,
+      "scope": "采用报告末尾最终候选结论；中段旧红结果及旧head不覆盖成绿"
+    },
+    {
+      "pr": 168,
+      "axis": "spec",
+      "source": ".worktrees/dsh-remediation-state/pr168-final-spec-review.md",
+      "sha256": "325f20db977c3d4840a6e478342d3831588081f0aebe0314c1ba711383c221de",
+      "unresolvedFindings": 0,
+      "scope": "采用报告末尾最终候选结论；中段旧红结果及旧head不覆盖成绿"
+    },
+    {
+      "pr": 171,
+      "axis": "standards",
+      "source": ".worktrees/dsh-remediation-state/pr171-standards-review.md",
+      "sha256": "c5b5f81a2fb7eaad3dd4f30e3ee41b5095a8970105547df8b0d75349075d7a77",
+      "unresolvedFindings": 0,
+      "scope": "采用报告末尾最终候选结论；中段旧红结果及旧head不覆盖成绿"
+    },
+    {
+      "pr": 171,
+      "axis": "spec",
+      "source": ".worktrees/dsh-remediation-state/pr171-spec-review.md",
+      "sha256": "7369d79bce943a635a5b6a8bcd9789af611c9f35f9ab4a038c1b7dfdddcc8608",
+      "unresolvedFindings": 0,
+      "scope": "采用报告末尾最终候选结论；中段旧红结果及旧head不覆盖成绿"
+    },
+    {
+      "pr": 172,
+      "axis": "standards",
+      "source": ".worktrees/dsh-remediation-state/pr172-standards-review.md",
+      "sha256": "266d531f4818d1f654eeda1370a3cd28c0fdaf5575dbd402321bd0e151be8f94",
+      "unresolvedFindings": 0,
+      "scope": "采用报告末尾最终候选结论；中段旧红结果及旧head不覆盖成绿"
+    },
+    {
+      "pr": 172,
+      "axis": "spec",
+      "source": ".worktrees/dsh-remediation-state/pr172-spec-review.md",
+      "sha256": "3882239026da8b6f1b62e3af5571865ee94b0d71b533edd43427f2072a3d0766",
+      "unresolvedFindings": 0,
+      "scope": "采用报告末尾最终候选结论；中段旧红结果及旧head不覆盖成绿"
+    }
+  ],
+  "remoteCiAndDeviceAcceptanceNotSubstituted": true
+}
